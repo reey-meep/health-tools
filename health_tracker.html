@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Health Log">
+<title>Health Log</title>
+<link rel="manifest" id="manifest-placeholder">
+<script>
+const MANIFEST = {
+  name: "Health Log",
+  short_name: "Health Log",
+  start_url: ".",
+  display: "standalone",
+  background_color: "#faf9f6",
+  theme_color: "#534ab7",
+  icons: [{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%23534ab7'/%3E%3Ctext x='96' y='130' font-size='100' text-anchor='middle' fill='white'%3E♥%3C/text%3E%3C/svg%3E",sizes:"192x192",type:"image/svg+xml"}]
+};
+const blob = new Blob([JSON.stringify(MANIFEST)], {type:'application/json'});
+document.getElementById('manifest-placeholder').href = URL.createObjectURL(blob);
+</script>
+<style>
+:root {
+  --bg: #faf9f6;
+  --bg2: #f1efe8;
+  --bg3: #e8e6de;
+  --card: #ffffff;
+  --text: #2c2c2a;
+  --text2: #5f5e5a;
+  --text3: #888780;
+  --border: rgba(44,44,42,0.12);
+  --border2: rgba(44,44,42,0.22);
+  --purple: #534ab7;
+  --purple-bg: #eeedfe;
+  --purple-text: #3c3489;
+  --teal: #0f6e56;
+  --teal-bg: #e1f5ee;
+  --teal-text: #085041;
+  --amber: #ba7517;
+  --amber-bg: #faeeda;
+  --amber-text: #633806;
+  --red: #a32d2d;
+  --red-bg: #fcebeb;
+  --red-text: #791f1f;
+  --green: #3b6d11;
+  --green-bg: #eaf3de;
+  --green-text: #27500a;
+  --r: 10px;
+  --rl: 16px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1a18; --bg2: #222220; --bg3: #2a2a27;
+    --card: #252523; --text: #e8e6de; --text2: #b4b2a9;
+    --text3: #888780; --border: rgba(232,230,222,0.1); --border2: rgba(232,230,222,0.2);
+    --purple: #afa9ec; --purple-bg: #26215c; --purple-text: #cecbf6;
+    --teal: #5dcaa5; --teal-bg: #04342c; --teal-text: #9fe1cb;
+    --amber: #ef9f27; --amber-bg: #412402; --amber-text: #fac775;
+    --red: #f09595; --red-bg: #501313; --red-text: #f7c1c1;
+    --green: #97c459; --green-bg: #173404; --green-text: #c0dd97;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+
+/* NAV */
+.nav{display:flex;background:var(--card);border-bottom:0.5px solid var(--border);padding:0;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{flex:1;min-width:60px;padding:12px 8px 10px;font-size:11px;font-weight:500;color:var(--text3);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;letter-spacing:0.02em}
+.nav-btn.active{color:var(--purple);border-bottom-color:var(--purple)}
+
+/* PAGES */
+.pages{flex:1;overflow:hidden;position:relative}
+.page{position:absolute;inset:0;overflow-y:auto;padding:1rem;display:none;flex-direction:column}
+.page.active{display:flex}
+
+/* HOME */
+.home-greeting{font-size:22px;font-weight:600;margin-bottom:4px}
+.home-date{font-size:13px;color:var(--text3);margin-bottom:1.25rem}
+.checkin-cards{display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem}
+.checkin-card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--rl);padding:1rem 1.25rem;cursor:pointer;transition:background .15s}
+.checkin-card:hover{background:var(--bg2)}
+.checkin-card.done{opacity:.6;pointer-events:none}
+.checkin-card.locked{opacity:.45;pointer-events:none}
+.cc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.cc-title{font-size:15px;font-weight:600}
+.cc-badge{font-size:11px;font-weight:500;padding:3px 8px;border-radius:99px}
+.badge-open{background:var(--green-bg);color:var(--green-text)}
+.badge-done{background:var(--bg3);color:var(--text3)}
+.badge-locked{background:var(--bg3);color:var(--text3)}
+.cc-sub{font-size:12px;color:var(--text2)}
+.action-row{display:flex;gap:8px}
+.action-card{flex:1;background:var(--card);border:0.5px solid var(--border);border-radius:var(--rl);padding:.875rem 1rem;cursor:pointer;transition:background .15s}
+.action-card:hover{background:var(--bg2)}
+.ac-title{font-size:14px;font-weight:600;margin-bottom:2px}
+.ac-sub{font-size:12px;color:var(--text2)}
+
+/* FLOW */
+.flow-wrap{display:flex;flex-direction:column;height:100%;max-width:540px;margin:0 auto;width:100%}
+.flow-header{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;flex-shrink:0}
+.flow-back{background:none;border:0.5px solid var(--border);border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--text2);flex-shrink:0}
+.flow-title{font-size:16px;font-weight:600}
+.progress-bar{height:3px;background:var(--bg3);border-radius:99px;margin-bottom:1.5rem;flex-shrink:0}
+.progress-fill{height:100%;background:var(--purple);border-radius:99px;transition:width .3s}
+.question-area{flex:1;display:flex;flex-direction:column;justify-content:flex-start}
+.q-label{font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.q-text{font-size:20px;font-weight:600;line-height:1.3;margin-bottom:1.5rem;color:var(--text)}
+.q-sub{font-size:13px;color:var(--text2);margin-top:-1rem;margin-bottom:1.25rem;line-height:1.5}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{padding:13px 16px;background:var(--card);border:0.5px solid var(--border2);border-radius:var(--r);font-size:15px;cursor:pointer;transition:all .15s;text-align:left;color:var(--text)}
+.opt:hover{background:var(--purple-bg);border-color:var(--purple)}
+.opt.selected{background:var(--purple-bg);border-color:var(--purple);color:var(--purple-text);font-weight:500}
+.opts-row{display:flex;flex-wrap:wrap;gap:8px}
+.opt-pill{padding:9px 16px;background:var(--card);border:0.5px solid var(--border2);border-radius:99px;font-size:14px;cursor:pointer;transition:all .15s;color:var(--text)}
+.opt-pill:hover{background:var(--purple-bg)}
+.opt-pill.selected{background:var(--purple-bg);border-color:var(--purple);color:var(--purple-text);font-weight:500}
+.scale-row{display:flex;gap:6px;flex-wrap:wrap}
+.scale-btn{flex:1;min-width:52px;padding:12px 6px;background:var(--card);border:0.5px solid var(--border2);border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;text-align:center;transition:all .15s;color:var(--text);line-height:1.2}
+.scale-btn:hover{background:var(--bg2)}
+.scale-btn.sel-none{background:var(--green-bg);border-color:var(--green);color:var(--green-text)}
+.scale-btn.sel-mild{background:var(--amber-bg);border-color:var(--amber);color:var(--amber-text)}
+.scale-btn.sel-mod{background:#faeeda;border-color:#ba7517;color:#633806}
+.scale-btn.sel-sig{background:var(--red-bg);border-color:var(--red);color:var(--red-text)}
+.text-input{width:100%;padding:13px 14px;background:var(--card);border:0.5px solid var(--border2);border-radius:var(--r);font-size:15px;color:var(--text);outline:none;font-family:inherit;line-height:1.5;resize:none}
+.text-input:focus{border-color:var(--purple);box-shadow:0 0 0 2px rgba(83,74,183,.12)}
+.next-btn{margin-top:1.5rem;padding:15px;background:var(--purple);color:#fff;border:none;border-radius:var(--r);font-size:16px;font-weight:600;cursor:pointer;width:100%;transition:opacity .15s;flex-shrink:0}
+.next-btn:disabled{opacity:.35;cursor:default}
+.next-btn:not(:disabled):hover{opacity:.88}
+.skip-btn{margin-top:10px;padding:10px;background:none;border:none;font-size:13px;color:var(--text3);cursor:pointer;width:100%}
+
+/* LOG PAGE */
+.log-day{margin-bottom:1.25rem}
+.log-day-label{font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.log-entry{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:.875rem 1rem;margin-bottom:6px}
+.le-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+.le-type{font-size:12px;font-weight:600;color:var(--purple)}
+.le-time{font-size:11px;color:var(--text3)}
+.le-content{font-size:13px;color:var(--text2);line-height:1.55}
+.le-pills{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.le-pill{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg2);color:var(--text2)}
+.le-pill.react{background:var(--red-bg);color:var(--red-text)}
+.le-pill.good{background:var(--green-bg);color:var(--green-text)}
+.le-pill.warn{background:var(--amber-bg);color:var(--amber-text)}
+.empty-log{font-size:14px;color:var(--text3);text-align:center;padding:2rem 0}
+
+/* EXPORT */
+.export-section{background:var(--card);border:0.5px solid var(--border);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:.75rem}
+.export-title{font-size:15px;font-weight:600;margin-bottom:6px}
+.export-sub{font-size:13px;color:var(--text2);margin-bottom:.875rem;line-height:1.5}
+.export-btn{width:100%;padding:12px;background:var(--purple-bg);color:var(--purple-text);border:0.5px solid var(--purple);border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer}
+.export-btn:hover{opacity:.85}
+.danger-btn{width:100%;padding:12px;background:var(--red-bg);color:var(--red-text);border:0.5px solid var(--red);border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer}
+
+/* COMPLETE SCREEN */
+.complete-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;flex:1}
+.complete-icon{font-size:48px;margin-bottom:1rem}
+.complete-title{font-size:22px;font-weight:600;margin-bottom:8px}
+.complete-sub{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:1.5rem}
+.complete-btn{padding:14px 32px;background:var(--purple);color:#fff;border:none;border-radius:var(--r);font-size:15px;font-weight:600;cursor:pointer}
+
+/* UTIL */
+.section-label{font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);margin:1.25rem 0 .5rem}
+.divider{height:0.5px;background:var(--border);margin:.75rem 0}
+
+.notif-section{background:var(--card);border:0.5px solid var(--border);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:.75rem}
+.notif-title{font-size:15px;font-weight:600;margin-bottom:6px}
+.notif-sub{font-size:13px;color:var(--text2);margin-bottom:.875rem;line-height:1.5}
+.notif-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border)}
+.notif-row:last-child{border-bottom:none}
+.notif-label{font-size:13px;color:var(--text)}
+.notif-time{font-size:13px;color:var(--text2)}
+.toggle-wrap{display:flex;align-items:center;gap:8px}
+.toggle{position:relative;width:44px;height:26px}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--bg3);border-radius:13px;transition:.2s;cursor:pointer}
+.toggle-slider:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:white;border-radius:50%;transition:.2s}
+.toggle input:checked + .toggle-slider{background:var(--purple)}
+.toggle input:checked + .toggle-slider:before{transform:translateX(18px)}
+.time-input{font-size:13px;padding:4px 8px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);outline:none}
+.time-input:focus{border-color:var(--purple)}
+.notif-status{font-size:12px;padding:6px 10px;border-radius:var(--r);margin-bottom:.75rem}
+.notif-granted{background:var(--green-bg);color:var(--green-text)}
+.notif-denied{background:var(--red-bg);color:var(--red-text)}
+.notif-default{background:var(--amber-bg);color:var(--amber-text)}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('home')">Home</button>
+  <button class="nav-btn" onclick="showPage('log')">Log</button>
+  <button class="nav-btn" onclick="showPage('data')">Export</button>
+</nav>
+
+<div class="pages">
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="home-greeting" id="greeting">Good morning</div>
+  <div class="home-date" id="home-date"></div>
+<div id="dev-banner" style="display:none;background:var(--amber-bg);border:0.5px solid var(--amber);border-radius:var(--r);padding:7px 12px;margin-bottom:1rem;display:none;align-items:center;justify-content:space-between">
+  <span style="font-size:12px;font-weight:600;color:var(--amber-text)">Dev mode on — all check-ins unlocked</span>
+  <button onclick="toggleDev()" style="font-size:11px;background:none;border:0.5px solid var(--amber);border-radius:99px;padding:3px 10px;color:var(--amber-text);cursor:pointer">Turn off</button>
+</div>
+  <div class="checkin-cards" id="checkin-cards"></div>
+  <div class="action-row">
+    <div class="action-card" onclick="startFlow('reaction')">
+      <div class="ac-title">Log reaction</div>
+      <div class="ac-sub">Episode or flare</div>
+    </div>
+    <div class="action-card" onclick="startFlow('exercise')">
+      <div class="ac-title">Log exercise</div>
+      <div class="ac-sub">Movement today</div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:1.25rem">
+    <button id="dev-toggle-btn" onclick="toggleDev()" style="font-size:11px;color:var(--text3);background:none;border:0.5px solid var(--border);border-radius:99px;padding:5px 14px;cursor:pointer">Dev mode</button>
+  </div>
+</div>
+
+<!-- FLOW -->
+<div class="page" id="page-flow">
+  <div class="flow-wrap">
+    <div class="flow-header">
+      <button class="flow-back" onclick="flowBack()">&#8592;</button>
+      <div class="flow-title" id="flow-title"></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="question-area" id="question-area"></div>
+  </div>
+</div>
+
+<!-- LOG -->
+<div class="page" id="page-log">
+  <div style="font-size:18px;font-weight:600;margin-bottom:1rem">Your log</div>
+  <div id="log-content"></div>
+</div>
+
+<!-- DATA -->
+<div class="page" id="page-data">
+  <div style="font-size:18px;font-weight:600;margin-bottom:1rem">Data and export</div>
+  <div class="export-section">
+    <div class="export-title">Export your data</div>
+    <div class="export-sub">Download all your logged data as a CSV file. Bring this to appointments or paste it into a new Claude conversation for pattern analysis.</div>
+    <button class="export-btn" onclick="exportCSV()">Download CSV</button>
+  </div>
+  <div class="export-section">
+    <div class="export-title">Copy for Claude</div>
+    <div class="export-sub">Copy a formatted summary and paste into Claude for pattern analysis. Choose how far back to include.</div>
+    <button class="export-btn" id="export-picker-btn" onclick="showExportPicker()">Choose timeframe and copy</button>
+    <div id="export-picker" style="display:none">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:8px;margin-top:4px">How far back?</div>
+      <div style="display:flex;flex-wrap:wrap;gap:7px">
+        <button class="export-btn" style="flex:1;min-width:80px;padding:9px 6px;font-size:13px" onclick="copyForClaude(3)">3 days</button>
+        <button class="export-btn" style="flex:1;min-width:80px;padding:9px 6px;font-size:13px" onclick="copyForClaude(7)">1 week</button>
+        <button class="export-btn" style="flex:1;min-width:80px;padding:9px 6px;font-size:13px" onclick="copyForClaude(14)">2 weeks</button>
+        <button class="export-btn" style="flex:1;min-width:80px;padding:9px 6px;font-size:13px" onclick="copyForClaude(30)">1 month</button>
+        <button class="export-btn" style="flex:1;min-width:80px;padding:9px 6px;font-size:13px" onclick="copyForClaude(90)">3 months</button>
+        <button class="export-btn" style="flex:1;min-width:80px;padding:9px 6px;font-size:13px" onclick="copyForClaude(180)">6 months</button>
+      </div>
+    </div>
+  </div>
+  <div class="notif-section">
+    <div class="notif-title">Reminder notifications</div>
+    <div id="notif-status-bar"></div>
+    <div class="notif-sub">Get reminded to complete each check-in. Set your preferred times below.</div>
+    <div id="notif-rows">
+      <div class="notif-row">
+        <div><div class="notif-label">Morning check-in</div><div class="notif-time" id="t-morning-label"></div></div>
+        <div class="toggle-wrap">
+          <input type="time" class="time-input" id="t-morning" value="08:00" onchange="saveNotifSettings()"/>
+          <label class="toggle"><input type="checkbox" id="n-morning" onchange="saveNotifSettings()"><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+      <div class="notif-row">
+        <div><div class="notif-label">Midday check-in</div><div class="notif-time" id="t-midday-label"></div></div>
+        <div class="toggle-wrap">
+          <input type="time" class="time-input" id="t-midday" value="12:00" onchange="saveNotifSettings()"/>
+          <label class="toggle"><input type="checkbox" id="n-midday" onchange="saveNotifSettings()"><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+      <div class="notif-row">
+        <div><div class="notif-label">Evening check-in</div><div class="notif-time" id="t-evening-label"></div></div>
+        <div class="toggle-wrap">
+          <input type="time" class="time-input" id="t-evening" value="19:30" onchange="saveNotifSettings()"/>
+          <label class="toggle"><input type="checkbox" id="n-evening" onchange="saveNotifSettings()"><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+    </div>
+    <button class="export-btn" style="margin-top:.875rem" onclick="requestNotifPermission()">Enable notifications</button>
+  </div>
+
+  <div class="export-section" style="border-color:var(--purple)">
+    <div class="export-title">Sync across devices</div>
+    <div class="export-sub" id="sync-status-text">Connect to Google Sheets to sync your data across phone and computer. See setup instructions below.</div>
+    <div id="sync-connected" style="display:none;margin-bottom:.75rem">
+      <div style="font-size:13px;color:var(--teal-text);background:var(--teal-bg);padding:8px 10px;border-radius:var(--r);margin-bottom:8px" id="sync-status-badge">Connected</div>
+    </div>
+    <div id="sync-url-input" style="margin-bottom:8px">
+      <input type="url" id="gsheet-url" class="text-input" style="font-size:13px;height:38px;margin-bottom:8px" placeholder="Paste your Google Script URL here..."/>
+      <button class="export-btn" onclick="saveSheetURL()">Save and connect</button>
+    </div>
+    <div id="sync-actions" style="display:none;gap:7px;flex-wrap:wrap">
+      <button class="export-btn" style="flex:1;font-size:13px;padding:9px" onclick="syncToSheet()">Sync now</button>
+      <button class="export-btn" style="flex:1;font-size:13px;padding:9px" onclick="pullFromSheet()">Pull from cloud</button>
+      <button class="export-btn" style="flex:1;font-size:13px;padding:9px;background:var(--red-bg);color:var(--red-text);border-color:var(--red)" onclick="disconnectSheet()">Disconnect</button>
+    </div>
+    <div style="margin-top:.875rem;padding-top:.875rem;border-top:0.5px solid var(--border)">
+      <div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Setup instructions</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.7">
+        1. Go to <strong>sheets.google.com</strong> and create a new blank spreadsheet<br>
+        2. Name it <strong>Health Log</strong><br>
+        3. Click <strong>Extensions → Apps Script</strong><br>
+        4. Delete any code in the editor and paste the script below<br>
+        5. Click <strong>Deploy → New deployment → Web app</strong><br>
+        6. Set "Who has access" to <strong>Anyone</strong>, click Deploy<br>
+        7. Copy the web app URL and paste it above
+      </div>
+      <div style="margin-top:.75rem">
+        <button class="export-btn" style="font-size:12px;padding:8px" onclick="copyGScript()">Copy Google Script code</button>
+        <div id="gscript-copied" style="display:none;font-size:12px;color:var(--teal-text);margin-top:4px">Copied! Paste into Apps Script editor.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="export-section" style="border-color:var(--red)">
+    <div class="export-title" style="color:var(--red-text)">Clear all data</div>
+    <div class="export-sub">Permanently deletes all logged entries. Export first if you want to keep a record.</div>
+    <button class="danger-btn" onclick="clearAllData()">Clear everything</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+const STORE_KEY = 'hl_entries_v1';
+const TODAY_KEY = 'hl_today_v1';
+
+function getEntries(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)||'[]'); }catch(e){ return []; } }
+function saveEntries(e){ localStorage.setItem(STORE_KEY, JSON.stringify(e)); }
+function getTodayFlags(){ try{ return JSON.parse(localStorage.getItem(TODAY_KEY+today())||'{}'); }catch(e){ return {}; } }
+function saveTodayFlags(f){ localStorage.setItem(TODAY_KEY+today(), JSON.stringify(f)); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function now(){ return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
+function hour(){ return new Date().getHours(); }
+
+function greeting(){
+  const h=hour();
+  if(h>=5&&h<12) return 'Good morning';
+  if(h>=12&&h<17) return 'Good afternoon';
+  return 'Good evening';
+}
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  const idx={home:0,log:1,data:2}[id];
+  document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+  if(id==='home') loadNotifSettings();
+if(getSheetURL()) autoPull();
+if(Notification.permission==='granted'){
+  scheduleNotifications(getNotifSettings());
+}
+renderHome();
+  if(id==='log') renderLog();
+}
+
+function renderHome(){
+  document.getElementById('greeting').textContent=greeting();
+  document.getElementById('home-date').textContent=new Date().toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'});
+  const flags=getTodayFlags();
+  const h=hour();
+  const morningOpen=h>=5&&h<11;
+  const midOpen=h>=11&&h<15;
+  const eveOpen=h>=15||h<5;
+
+  const dev=isDevMode();
+  const cards=[
+    {id:'morning',title:'Morning check-in',sub:'Sleep, supplements, cycle',open:morningOpen||dev,done:!!flags.morning},
+    {id:'midday',title:'Midday check-in',sub:'Food so far, stress, supplements',open:midOpen||dev,done:!!flags.midday},
+    {id:'evening',title:'Evening check-in',sub:'Food, symptoms, supplements',open:eveOpen||dev,done:!!flags.evening},
+  ];
+
+  const devBanner=document.getElementById('dev-banner');
+  if(devBanner) devBanner.style.display=dev?'flex':'none';
+  const devBtn=document.getElementById('dev-toggle-btn');
+  if(devBtn){ devBtn.textContent=dev?'Exit dev mode':'Dev mode'; devBtn.style.color=dev?'var(--amber)':'var(--text3)'; devBtn.style.borderColor=dev?'var(--amber)':'var(--border)'; }
+
+  document.getElementById('checkin-cards').innerHTML=cards.map(c=>{
+    const locked=!c.open&&!c.done;
+    const cls=c.done?'done':locked?'locked':'';
+    const badge=c.done?'<span class="cc-badge badge-done">Done</span>':locked?'<span class="cc-badge badge-locked">Not yet</span>':dev&&!morningOpen&&!midOpen&&!eveOpen?'<span class="cc-badge" style="background:var(--amber-bg);color:var(--amber-text)">Dev unlock</span>':'<span class="cc-badge badge-open">Open now</span>';
+    return `<div class="checkin-card ${cls}" onclick="startFlow('${c.id}')">
+      <div class="cc-top"><div class="cc-title">${c.title}</div>${badge}</div>
+      <div class="cc-sub">${c.sub}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── FLOWS ──────────────────────────────────────────────
+let currentFlow=null, currentStep=0, flowData={};
+
+const FLOWS={
+
+morning:[
+  {id:'bedtime',q:'What time did you go to sleep last night?',type:'pills',opts:['Before 9pm','9–10pm','10–11pm','11pm–midnight','After midnight','After 1am']},
+  {id:'waketime',q:'What time did you wake up?',type:'pills',opts:['Before 6am','6–7am','7–8am','8–9am','9–10am','After 10am']},
+  {id:'sleep_quality',q:'How was your sleep?',type:'opts',opts:['Restorative — woke up rested','Okay — not great but fine','Restless — woke up tired','Poor — barely slept']},
+  {id:'morning_feel',q:'How are you feeling right now?',type:'opts',opts:['Good baseline — calm and okay','A bit off — mild symptoms present','Symptomatic — already reacting','Rough — significant symptoms']},
+  {id:'morning_pills',q:'Have you taken your morning supplements?',type:'opts',opts:['Yes — all taken','Partially — some taken','Not yet']},
+  {id:'cycle',q:'Any menstrual symptoms today?',type:'opts',opts:['None','Period bleeding','Spotting or mid-cycle bleeding','Cramping only','Period bleeding and cramping','Spotting and cramping'],skip:true},
+  {id:'morning_notes',q:'Anything else to note this morning?',type:'text',placeholder:'Optional — stress, unusual symptoms, how you slept...',skip:true},
+],
+
+midday:[
+  {id:'mid_food',q:'What have you eaten and drunk since you woke up?',type:'text',placeholder:'Just list everything — oat latte, apple, edamame, sparkling water, skinny pop...',sub:'Include drinks. One line is fine.'},
+  {id:'mid_pills',q:'Have you taken your midday propranolol?',type:'opts',opts:['Yes','Not yet','Skipped']},
+  {id:'mid_stress',q:'How has your stress level been this morning?',type:'opts',opts:['Very calm — low demand day','Normal — managing fine','Elevated — some pressure','High — stressed or anxious','Very high — really struggling']},
+  {id:'mid_symptoms',q:'Any symptoms so far today?',type:'opts',opts:['None — feeling good','Mild — barely noticeable','Moderate — affecting me','Significant — hard to ignore'],skip:true},
+  {id:'mid_notes',q:'Anything worth noting at midday?',type:'text',placeholder:'Optional — reactions, triggers, how you feel...',skip:true},
+],
+
+evening:[
+  {id:'eve_food',q:'What have you eaten and drunk since midday?',type:'text',placeholder:'Just list everything — chicken, rice, grapes, water, chocolate...',sub:'Include all snacks and drinks.'},
+  {id:'naps',q:'Did you nap today?',type:'opts',opts:['No naps today','One nap','Multiple naps']},
+  {id:'nap_time',q:'Roughly when did you nap?',type:'pills',opts:['Late morning','Early afternoon (12–2pm)','Mid afternoon (2–4pm)','Late afternoon (4–6pm)','Early evening','Multiple times'],skip:true},
+  {id:'nap_duration',q:'How long did you nap for?',type:'pills',opts:['Under 20 min','20–30 min','30–45 min','45–60 min','1–1.5 hours','Over 1.5 hours'],skip:true},
+  {id:'nap_how',q:'How did you feel after napping?',type:'opts',opts:['Refreshed — really helped','Okay — some relief','Groggy — felt worse after','Mixed'],skip:true},
+  {id:'eve_pills',q:'Have you taken your evening propranolol and magnesium?',type:'opts',opts:['Both taken','Propranolol only','Magnesium only','Neither yet']},
+  {id:'eve_stress',q:'Overall stress level today?',type:'opts',opts:['Very calm','Low — easy day','Normal','Elevated','High — tough day','Very high']},
+  {id:'sym_dizziness',q:'Dizziness or floaty feeling today?',type:'scale',labels:['None','Mild','Moderate','Significant']},
+  {id:'sym_fatigue',q:'Fatigue level today?',type:'scale',labels:['None','Mild','Moderate','Significant']},
+  {id:'sym_nausea',q:'Nausea today?',type:'scale',labels:['None','Mild','Moderate','Significant']},
+  {id:'sym_gi',q:'GI comfort today?',type:'scale',labels:['Comfortable','Mild discomfort','Moderate discomfort','Significant discomfort']},
+  {id:'sym_heart',q:'Heart rate or blood pressure stability today?',type:'scale',labels:['Stable','Mildly unstable','Moderately unstable','Very unstable']},
+  {id:'sym_headache',q:'Headache today?',type:'scale',labels:['None','Mild','Moderate','Significant']},
+  {id:'sym_flushing',q:'Flushing or sweating today?',type:'scale',labels:['None','Mild','Moderate','Significant']},
+  {id:'reaction_today',q:'Did you have a reaction episode today?',type:'opts',opts:['No','Yes — mild','Yes — moderate','Yes — significant']},
+  {id:'eve_cycle',q:'Any menstrual symptoms today?',type:'opts',opts:['None','Period bleeding','Spotting or mid-cycle bleeding','Cramping only','Period bleeding and cramping','Spotting and cramping'],skip:true},
+  {id:'eve_notes',q:'Anything else to note about today?',type:'text',placeholder:'Optional — what helped, what made things worse, how you feel overall...',skip:true},
+],
+
+reaction:[
+  {id:'react_trigger',q:'What do you think triggered this reaction?',type:'opts',opts:['Food — known trigger','Food — uncertain what','Stress or anxiety','Exertion or exercise','Heat or temperature','Unknown','Multiple things combined']},
+  {id:'react_food',q:'What did you eat or drink before this reaction?',type:'text',placeholder:'List everything you consumed in the past 2 hours...',sub:'Even things that seem safe — detail helps.'},
+  {id:'react_symptoms',q:'Which symptoms are you experiencing?',type:'multi',opts:['Palpitations','Elevated heart rate','Elevated blood pressure','Headache','Flushing','Sweating','Nausea','GI discomfort','Dizziness or floaty feeling','Anxiety','Visual issues','Fatigue','Chills','Other']},
+  {id:'react_severity',q:'How severe is this reaction?',type:'opts',opts:['Mild — uncomfortable but manageable','Moderate — significantly affecting me','Severe — very difficult to manage']},
+  {id:'react_started',q:'When did symptoms start?',type:'pills',opts:['Just now','5–15 min ago','15–30 min ago','30–60 min ago','Over an hour ago']},
+  {id:'react_notes',q:'Anything else about this reaction?',type:'text',placeholder:'Optional — what helped, how you are managing, context...',skip:true},
+],
+
+exercise:[
+  {id:'ex_type',q:'What kind of movement did you do?',type:'opts',opts:['Flat walking','Walking with inclines','Gentle yoga or stretching','Swimming or water walking','Light cycling','Other']},
+  {id:'ex_duration',q:'How long?',type:'pills',opts:['Under 10 min','10–20 min','20–30 min','30–45 min','Over 45 min']},
+  {id:'ex_tolerance',q:'How did your body tolerate it?',type:'opts',opts:['Great — no symptoms at all','Good — very mild awareness, recovered quickly','Okay — some symptoms, managed fine','Difficult — significant symptoms during','Very hard — had to stop early']},
+  {id:'ex_after',q:'How do you feel now, after?',type:'opts',opts:['Normal — no residual effects','Mildly tired — expected fatigue','Symptomatic — some reaction','Significantly symptomatic']},
+  {id:'ex_notes',q:'Any notes about this movement?',type:'text',placeholder:'Optional — what helped, what made it harder, heart rate, conditions...',skip:true},
+],
+
+};
+
+function startFlow(type){
+  currentFlow=type;
+  currentStep=0;
+  flowData={type,date:today(),time:now()};
+  showPage('flow');
+  document.getElementById('page-flow').innerHTML='';
+  document.getElementById('page-flow').appendChild(buildFlowDOM());
+  renderStep();
+}
+
+function buildFlowDOM(){
+  const wrap=document.createElement('div');
+  wrap.className='flow-wrap';
+  wrap.innerHTML=`
+    <div class="flow-header">
+      <button class="flow-back" onclick="flowBack()">&#8592;</button>
+      <div class="flow-title" id="flow-title"></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="question-area" id="question-area"></div>`;
+  return wrap;
+}
+
+function flowTitles(){return{morning:'Morning check-in',midday:'Midday check-in',evening:'Evening check-in',reaction:'Log reaction',exercise:'Log exercise'};}
+
+function renderStep(){
+  const steps=FLOWS[currentFlow];
+  const step=steps[currentStep];
+  const pct=Math.round((currentStep/steps.length)*100);
+  document.getElementById('flow-title').textContent=flowTitles()[currentFlow];
+  document.getElementById('progress-fill').style.width=pct+'%';
+
+  const area=document.getElementById('question-area');
+  area.innerHTML='';
+
+  const lbl=document.createElement('div');
+  lbl.className='q-label';
+  lbl.textContent=`Question ${currentStep+1} of ${steps.length}`;
+  area.appendChild(lbl);
+
+  const qt=document.createElement('div');
+  qt.className='q-text';
+  qt.textContent=step.q;
+  area.appendChild(qt);
+
+  if(step.sub){
+    const qs=document.createElement('div');
+    qs.className='q-sub';
+    qs.textContent=step.sub;
+    area.appendChild(qs);
+  }
+
+  const saved=flowData[step.id];
+
+  if(step.type==='opts'){
+    const div=document.createElement('div');
+    div.className='opts';
+    step.opts.forEach(o=>{
+      const b=document.createElement('button');
+      b.className='opt'+(saved===o?' selected':'');
+      b.textContent=o;
+      b.onclick=()=>{
+        div.querySelectorAll('.opt').forEach(x=>x.classList.remove('selected'));
+        b.classList.add('selected');
+        flowData[step.id]=o;
+        setTimeout(()=>advanceStep(),280);
+      };
+      div.appendChild(b);
+    });
+    area.appendChild(div);
+  }
+
+  else if(step.type==='pills'){
+    const div=document.createElement('div');
+    div.className='opts-row';
+    step.opts.forEach(o=>{
+      const b=document.createElement('button');
+      b.className='opt-pill'+(saved===o?' selected':'');
+      b.textContent=o;
+      b.onclick=()=>{
+        div.querySelectorAll('.opt-pill').forEach(x=>x.classList.remove('selected'));
+        b.classList.add('selected');
+        flowData[step.id]=o;
+        setTimeout(()=>advanceStep(),280);
+      };
+      div.appendChild(b);
+    });
+    area.appendChild(div);
+  }
+
+  else if(step.type==='scale'){
+    const labels=step.labels||['None','Mild','Moderate','Significant'];
+    const selClasses=['sel-none','sel-mild','sel-mod','sel-sig'];
+    const div=document.createElement('div');
+    div.className='scale-row';
+    labels.forEach((l,i)=>{
+      const b=document.createElement('button');
+      const isSel=saved===l;
+      b.className='scale-btn'+(isSel?' '+selClasses[i]:'');
+      b.textContent=l;
+      b.onclick=()=>{
+        div.querySelectorAll('.scale-btn').forEach((x,j)=>{x.className='scale-btn'; });
+        b.classList.add(selClasses[i]);
+        flowData[step.id]=l;
+        setTimeout(()=>advanceStep(),280);
+      };
+      div.appendChild(b);
+    });
+    area.appendChild(div);
+  }
+
+  else if(step.type==='multi'){
+    const selected=saved?[...saved]:[];
+    const div=document.createElement('div');
+    div.className='opts';
+    step.opts.forEach(o=>{
+      const b=document.createElement('button');
+      b.className='opt'+(selected.includes(o)?' selected':'');
+      b.textContent=o;
+      b.onclick=()=>{
+        b.classList.toggle('selected');
+        const idx=selected.indexOf(o);
+        if(idx>-1) selected.splice(idx,1);
+        else selected.push(o);
+        flowData[step.id]=[...selected];
+        nextBtn.disabled=selected.length===0;
+      };
+      div.appendChild(b);
+    });
+    area.appendChild(div);
+    const nextBtn=document.createElement('button');
+    nextBtn.className='next-btn';
+    nextBtn.textContent='Continue';
+    nextBtn.disabled=selected.length===0;
+    nextBtn.onclick=advanceStep;
+    area.appendChild(nextBtn);
+    return;
+  }
+
+  else if(step.type==='text'){
+    const ta=document.createElement('textarea');
+    ta.className='text-input';
+    ta.rows=4;
+    ta.placeholder=step.placeholder||'';
+    ta.value=saved||'';
+    ta.oninput=()=>{ flowData[step.id]=ta.value; nextBtn.disabled=!ta.value.trim()&&!step.skip; };
+    area.appendChild(ta);
+    const nextBtn=document.createElement('button');
+    nextBtn.className='next-btn';
+    nextBtn.textContent='Continue';
+    nextBtn.disabled=!ta.value.trim()&&!step.skip;
+    nextBtn.onclick=advanceStep;
+    area.appendChild(nextBtn);
+    if(step.skip){
+      const skip=document.createElement('button');
+      skip.className='skip-btn';
+      skip.textContent='Skip this question';
+      skip.onclick=()=>{ flowData[step.id]=''; advanceStep(); };
+      area.appendChild(skip);
+    }
+    setTimeout(()=>ta.focus(),100);
+    return;
+  }
+
+  if(step.skip){
+    const skip=document.createElement('button');
+    skip.className='skip-btn';
+    skip.textContent='Skip';
+    skip.onclick=()=>{ flowData[step.id]=''; advanceStep(); };
+    area.appendChild(skip);
+  }
+}
+
+function advanceStep(){
+  const steps=FLOWS[currentFlow];
+  if(currentStep<steps.length-1){
+    currentStep++;
+    renderStep();
+  } else {
+    completeFlow();
+  }
+}
+
+function flowBack(){
+  if(currentStep>0){
+    currentStep--;
+    renderStep();
+  } else {
+    showPage('home');
+  }
+}
+
+function completeFlow(){
+  if(!isDevMode()){
+    const entries=getEntries();
+    entries.unshift(flowData);
+    saveEntries(entries);
+  }
+
+  if(['morning','midday','evening'].includes(currentFlow)){
+    if(!isDevMode()){
+      const flags=getTodayFlags();
+      flags[currentFlow]=true;
+      saveTodayFlags(flags);
+    }
+  }
+  if(!isDevMode()) autoSync();
+
+  const area=document.getElementById('question-area');
+  const msgs={
+    morning:'Morning logged. Have a good day.',
+    midday:'Midday check-in saved.',
+    evening:'Evening check-in complete. Rest well.',
+    reaction:'Reaction logged. Hope you feel better soon.',
+    exercise:'Movement logged.',
+  };
+
+  const sub={
+    morning:'Your sleep and morning baseline are saved.',
+    midday:'Your food and midday data are saved.',
+    evening:'All your symptom data for today is saved.',
+    reaction:'Details saved. Use these logs to spot patterns over time.',
+    exercise:'Your tolerance data is saved and will help track progress.',
+  };
+
+  document.getElementById('progress-fill').style.width='100%';
+  const devNote=isDevMode()?'<div style="font-size:12px;margin-top:8px;color:var(--amber-text);background:var(--amber-bg);padding:6px 12px;border-radius:8px">Dev mode — this was not saved to your log</div>':'';
+  area.innerHTML=`<div class="complete-screen">
+    <div class="complete-icon">&#10003;</div>
+    <div class="complete-title">${msgs[currentFlow]||'Saved.'}</div>
+    <div class="complete-sub">${sub[currentFlow]||''}</div>
+    ${devNote}
+    <button class="complete-btn" onclick="showPage('home')">Back to home</button>
+  </div>`;
+}
+
+// ── LOG RENDER ──────────────────────────────────────────
+function renderLog(){
+  const entries=getEntries();
+  const el=document.getElementById('log-content');
+  if(entries.length===0){
+    el.innerHTML='<div class="empty-log">No entries yet. Complete a check-in to see your log here.</div>';
+    return;
+  }
+  const byDay={};
+  entries.forEach(e=>{
+    const d=e.date||'Unknown';
+    if(!byDay[d]) byDay[d]=[];
+    byDay[d].push(e);
+  });
+
+  const typeLabels={morning:'Morning check-in',midday:'Midday check-in',evening:'Evening check-in',reaction:'Reaction episode',exercise:'Exercise'};
+
+  let html='';
+  Object.keys(byDay).sort((a,b)=>b.localeCompare(a)).forEach(d=>{
+    const label=d===today()?'Today':new Date(d+'T12:00:00').toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'});
+    html+=`<div class="log-day"><div class="log-day-label">${label}</div>`;
+    byDay[d].forEach(e=>{
+      const pills=[];
+      if(e.type==='morning'){
+        if(e.sleep_quality) pills.push({text:e.sleep_quality.split('—')[0].trim(),cls:e.sleep_quality.startsWith('Restorative')?'good':e.sleep_quality.startsWith('Poor')?'react':'warn'});
+        if(e.cycle&&e.cycle!=='None') pills.push({text:e.cycle,cls:'warn'});
+      }
+      if(e.type==='evening'){
+        if(e.naps&&e.naps!=='No naps today') pills.push({text:e.naps,cls:e.naps.includes('long')||e.naps.includes('Multiple')?'warn':''});
+        const syms=['sym_dizziness','sym_fatigue','sym_nausea','sym_gi','sym_heart','sym_headache','sym_flushing'];
+        const symLabels={sym_dizziness:'Dizzy',sym_fatigue:'Fatigue',sym_nausea:'Nausea',sym_gi:'GI',sym_heart:'HR/BP',sym_headache:'Headache',sym_flushing:'Flushing'};
+        syms.forEach(s=>{
+          if(e[s]&&e[s]!=='None'&&e[s]!=='Comfortable'&&e[s]!=='Stable'){
+            const sev=e[s].toLowerCase();
+            const cls=sev.includes('significant')?'react':sev.includes('moderate')?'warn':'';
+            pills.push({text:`${symLabels[s]}: ${e[s]}`,cls});
+          }
+        });
+        if(e.reaction_today&&e.reaction_today!=='No') pills.push({text:e.reaction_today,cls:'react'});
+      }
+      if(e.type==='reaction'){
+        if(e.react_severity) pills.push({text:e.react_severity.split('—')[0].trim(),cls:'react'});
+        if(e.react_trigger) pills.push({text:e.react_trigger,cls:'warn'});
+      }
+      if(e.type==='exercise'){
+        if(e.ex_tolerance) pills.push({text:e.ex_tolerance.split('—')[0].trim(),cls:e.ex_tolerance.startsWith('Great')||e.ex_tolerance.startsWith('Good')?'good':e.ex_tolerance.startsWith('Very')?'react':'warn'});
+      }
+
+      const keyContent={
+        morning:`Sleep: ${e.bedtime||'—'} → ${e.waketime||'—'} &nbsp;|&nbsp; ${e.sleep_quality||'—'}`,
+        evening_nap: e.naps && e.naps!=='No naps today' ? e.naps : '',
+        midday:`<b>Food:</b> ${e.mid_food||'—'}`,
+        evening:`<b>Food:</b> ${e.eve_food||'—'}`,
+        reaction:`<b>Trigger:</b> ${e.react_trigger||'—'}<br><b>Symptoms:</b> ${Array.isArray(e.react_symptoms)?e.react_symptoms.join(', '):'—'}<br><b>Food before:</b> ${e.react_food||'—'}`,
+        exercise:`${e.ex_type||'—'} &nbsp;|&nbsp; ${e.ex_duration||'—'} &nbsp;|&nbsp; ${e.ex_tolerance||'—'}`,
+      };
+
+      html+=`<div class="log-entry">
+        <div class="le-top">
+          <div class="le-type">${typeLabels[e.type]||e.type}</div>
+          <div class="le-time">${e.time||''}</div>
+        </div>
+        <div class="le-content">${keyContent[e.type]||''}</div>
+        ${pills.length?`<div class="le-pills">${pills.map(p=>`<span class="le-pill ${p.cls||''}">${p.text}</span>`).join('')}</div>`:''}
+      </div>`;
+    });
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
+// ── EXPORT ──────────────────────────────────────────────
+function exportCSV(){
+  const entries=getEntries();
+  if(entries.length===0){ alert('No data to export yet.'); return; }
+  const allKeys=new Set();
+  entries.forEach(e=>Object.keys(e).forEach(k=>allKeys.add(k)));
+  const keys=[...allKeys];
+  const rows=[keys.join(',')];
+  entries.forEach(e=>{
+    rows.push(keys.map(k=>{
+      const v=e[k];
+      if(v===undefined||v===null||v==='') return '';
+      const s=Array.isArray(v)?v.join('; '):String(v);
+      return '"'+s.replace(/"/g,'""')+'"';
+    }).join(','));
+  });
+  const blob=new Blob([rows.join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`health_log_${today()}.csv`;
+  a.click();
+}
+
+function copyForClaude(days){
+  const entries=getEntries();
+  if(entries.length===0){ alert('No data to copy yet.'); return; }
+  const cutoff=new Date();
+  cutoff.setDate(cutoff.getDate()-days);
+  const recent=entries.filter(e=>new Date(e.date+'T00:00:00')>=cutoff);
+  if(recent.length===0){ alert('No data in that time range yet.'); return; }
+
+  const rangeLabel={3:'3 days',7:'7 days',14:'14 days',30:'1 month',90:'3 months',180:'6 months'}[days]||days+' days';
+  let txt='HEALTH LOG SUMMARY — last '+rangeLabel+'\n';
+  txt+='Generated: '+new Date().toLocaleDateString()+'\n';
+  txt+='Entries: '+recent.length+'\n\n';
+
+  const byDay={};
+  recent.forEach(e=>{ const d=e.date; if(!byDay[d]) byDay[d]=[]; byDay[d].push(e); });
+
+  Object.keys(byDay).sort().forEach(d=>{
+    txt+='=== '+d+' ===\n';
+    byDay[d].forEach(e=>{
+      txt+='['+e.type.toUpperCase()+'] '+(e.time||'')+'\n';
+      Object.keys(e).filter(k=>!['type','date','time'].includes(k)).forEach(k=>{
+        const v=e[k];
+        if(v!==undefined&&v!==null&&v!==''){
+          txt+='  '+k+': '+(Array.isArray(v)?v.join(', '):v)+'\n';
+        }
+      });
+      txt+='\n';
+    });
+  });
+
+  navigator.clipboard.writeText(txt).then(()=>{
+    alert('Copied '+recent.length+' entries (last '+rangeLabel+'). Paste into Claude and ask: "Can you look for patterns in my health log and tell me what you notice?"');
+  }).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=txt; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('Copied!');
+  });
+}
+
+function showExportPicker(){
+  const entries=getEntries();
+  if(entries.length===0){ alert('No data to export yet.'); return; }
+  document.getElementById('export-picker').style.display='block';
+  document.getElementById('export-picker-btn').style.display='none';
+}
+
+function clearAllData(){
+  if(!confirm('This will permanently delete all your logged data. Are you sure?')) return;
+  const keys=Object.keys(localStorage).filter(k=>k.startsWith('hl_'));
+  keys.forEach(k=>localStorage.removeItem(k));
+  alert('All data cleared.');
+  renderHome();
+}
+
+
+// ── DEV MODE ─────────────────────────────────────────────
+function isDevMode(){ return localStorage.getItem('hl_dev')==='1'; }
+function toggleDev(){
+  const on=isDevMode();
+  localStorage.setItem('hl_dev', on?'0':'1');
+  if(!on){
+    // clear today flags so all check-ins show as available in dev mode
+    const msg='Dev mode on. All check-ins are unlocked. Completed check-ins are also reset so you can test them again.';
+    localStorage.removeItem(TODAY_KEY+today());
+    renderHome();
+    setTimeout(()=>alert(msg),100);
+  } else {
+    renderHome();
+  }
+}
+
+// ── GOOGLE SHEETS SYNC ──────────────────────────────────
+const SHEET_URL_KEY='hl_sheet_url';
+
+function getSheetURL(){ return localStorage.getItem(SHEET_URL_KEY)||''; }
+
+function saveSheetURL(){
+  const url=document.getElementById('gsheet-url').value.trim();
+  if(!url){ alert('Please paste a URL first.'); return; }
+  localStorage.setItem(SHEET_URL_KEY, url);
+  
+// ── NOTIFICATIONS ────────────────────────────────────────
+const NOTIF_KEY = 'hl_notif_v1';
+function getNotifSettings(){
+  try{ return JSON.parse(localStorage.getItem(NOTIF_KEY)||'{}'); }catch(e){ return {}; }
+}
+function saveNotifSettings(){
+  const s={
+    morning:{on:document.getElementById('n-morning').checked, time:document.getElementById('t-morning').value},
+    midday:{on:document.getElementById('n-midday').checked, time:document.getElementById('t-midday').value},
+    evening:{on:document.getElementById('n-evening').checked, time:document.getElementById('t-evening').value},
+  };
+  localStorage.setItem(NOTIF_KEY, JSON.stringify(s));
+  scheduleNotifications(s);
+}
+
+function loadNotifSettings(){
+  const s=getNotifSettings();
+  if(s.morning){ document.getElementById('n-morning').checked=s.morning.on||false; document.getElementById('t-morning').value=s.morning.time||'08:00'; }
+  if(s.midday){ document.getElementById('n-midday').checked=s.midday.on||false; document.getElementById('t-midday').value=s.midday.time||'12:00'; }
+  if(s.evening){ document.getElementById('n-evening').checked=s.evening.on||false; document.getElementById('t-evening').value=s.evening.time||'19:30'; }
+  updateNotifStatusBar();
+}
+
+function updateNotifStatusBar(){
+  const bar=document.getElementById('notif-status-bar');
+  if(!bar) return;
+  const p=Notification.permission;
+  if(p==='granted') bar.innerHTML='<div class="notif-status notif-granted">Notifications enabled</div>';
+  else if(p==='denied') bar.innerHTML='<div class="notif-status notif-denied">Notifications blocked — enable in your browser settings</div>';
+  else bar.innerHTML='<div class="notif-status notif-default">Tap Enable notifications to allow reminders</div>';
+}
+
+async function requestNotifPermission(){
+  if(!('Notification' in window)){ alert('Notifications are not supported in this browser. Open the app in Chrome on Android for full notification support.'); return; }
+  const result = await Notification.requestPermission();
+  updateNotifStatusBar();
+  if(result==='granted'){
+    const s=getNotifSettings();
+    scheduleNotifications(s);
+    showTestNotification();
+  } else {
+    alert('Notifications were blocked. To enable them, go to Chrome Settings > Site Settings > Notifications and allow this file.');
+  }
+}
+
+function showTestNotification(){
+  if(Notification.permission==='granted'){
+    new Notification('Health Log', {body:'Notifications are working! You will be reminded at your chosen times.', icon:''});
+  }
+}
+
+let notifTimers=[];
+function scheduleNotifications(s){
+  notifTimers.forEach(t=>clearTimeout(t));
+  notifTimers=[];
+  if(Notification.permission!=='granted') return;
+  const msgs={
+    morning:{title:'Morning check-in',body:'Log your sleep, supplements, and how you are feeling.'},
+    midday:{title:'Midday check-in',body:'Log your food, stress level, and midday pills.'},
+    evening:{title:'Evening check-in',body:'Log your symptoms and how today went.'},
+  };
+  Object.keys(s).forEach(key=>{
+    const cfg=s[key];
+    if(!cfg.on||!cfg.time) return;
+    const [hh,mm]=cfg.time.split(':').map(Number);
+    const now=new Date();
+    const target=new Date();
+    target.setHours(hh,mm,0,0);
+    if(target<=now) target.setDate(target.getDate()+1);
+    const delay=target-now;
+    const m=msgs[key];
+    const t=setTimeout(()=>{
+      const flags=getTodayFlags();
+      if(!flags[key]){
+        new Notification(m.title,{body:m.body,icon:'',tag:'hl-'+key});
+      }
+      scheduleNotifications(getNotifSettings());
+    }, delay);
+    notifTimers.push(t);
+  });
+}
+
+// ── AUTO SYNC ────────────────────────────────────────────
+let autoSyncQueued=false;
+async function autoSync(){
+  const url=getSheetURL();
+  if(!url) return;
+  if(autoSyncQueued) return;
+  autoSyncQueued=true;
+  setTimeout(async ()=>{
+    autoSyncQueued=false;
+    try{
+      const entries=getEntries();
+      await fetch(url,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'write',entries})
+      });
+    }catch(e){ console.log('Auto-sync failed silently',e); }
+  }, 1500);
+}
+
+async function autoPull(){
+  const url=getSheetURL();
+  if(!url) return;
+  try{
+    const resp=await fetch(url+'?action=read');
+    const result=await resp.json();
+    if(result.status==='ok'&&Array.isArray(result.entries)&&result.entries.length>0){
+      const local=getEntries();
+      const merged=mergeEntries(local,result.entries);
+      if(merged.length>local.length){
+        saveEntries(merged);
+        renderHome();
+      }
+    }
+  }catch(e){ console.log('Auto-pull failed silently',e); }
+}
+
+updateSyncUI();
+  syncToSheet();
+}
+
+function disconnectSheet(){
+  if(!confirm('Disconnect from Google Sheets? Your local data stays intact.')) return;
+  localStorage.removeItem(SHEET_URL_KEY);
+  updateSyncUI();
+}
+
+function updateSyncUI(){
+  const url=getSheetURL();
+  const connected=!!url;
+  document.getElementById('sync-url-input').style.display=connected?'none':'block';
+  document.getElementById('sync-actions').style.display=connected?'flex':'none';
+  document.getElementById('sync-connected').style.display=connected?'block':'none';
+  if(connected){
+    document.getElementById('sync-status-badge').textContent='Connected to Google Sheets';
+    document.getElementById('sync-status-text').textContent='Your data syncs to your personal Google Sheet. Use Sync now after logging on this device, and Pull from cloud when switching devices.';
+    document.getElementById('gsheet-url').value=url;
+  }
+}
+
+async function syncToSheet(){
+  const url=getSheetURL();
+  if(!url){ alert('Not connected to Google Sheets yet.'); return; }
+  const entries=getEntries();
+  if(entries.length===0){ alert('No data to sync.'); return; }
+  const btn=document.querySelector('#sync-actions button');
+  const origText=btn?btn.textContent:'';
+  if(btn) btn.textContent='Syncing...';
+  try{
+    const resp=await fetch(url,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'write',entries})
+    });
+    const result=await resp.json();
+    if(result.status==='ok'){
+      if(btn) btn.textContent='Synced!';
+      setTimeout(()=>{ if(btn) btn.textContent=origText; },2000);
+    } else {
+      throw new Error(result.message||'Sync failed');
+    }
+  } catch(e){
+    alert('Sync failed. Check your URL is correct and the script is deployed. Error: '+e.message);
+    if(btn) btn.textContent=origText;
+  }
+}
+
+async function pullFromSheet(){
+  const url=getSheetURL();
+  if(!url){ alert('Not connected yet.'); return; }
+  const btn=document.querySelectorAll('#sync-actions button')[1];
+  const origText=btn?btn.textContent:'';
+  if(btn) btn.textContent='Pulling...';
+  try{
+    const resp=await fetch(url+'?action=read');
+    const result=await resp.json();
+    if(result.status==='ok'&&Array.isArray(result.entries)){
+      const local=getEntries();
+      const merged=mergeEntries(local,result.entries);
+      saveEntries(merged);
+      if(btn) btn.textContent='Done — '+merged.length+' entries';
+      setTimeout(()=>{ if(btn) btn.textContent=origText; },2500);
+      renderLog();
+    } else {
+      throw new Error(result.message||'Pull failed');
+    }
+  } catch(e){
+    alert('Pull failed. Error: '+e.message);
+    if(btn) btn.textContent=origText;
+  }
+}
+
+function mergeEntries(local, remote){
+  const seen=new Set();
+  const all=[...local,...remote];
+  return all.filter(e=>{
+    const key=(e.date||'')+'|'+(e.type||'')+'|'+(e.time||'');
+    if(seen.has(key)) return false;
+    seen.add(key); return true;
+  }).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+}
+
+const GSCRIPT=`function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    if (data.action === 'write') {
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      var sheet = ss.getSheetByName('entries') || ss.insertSheet('entries');
+      sheet.clearContents();
+      var entries = data.entries;
+      if (entries.length > 0) {
+        var allKeys = [];
+        entries.forEach(function(en) { Object.keys(en).forEach(function(k){ if(allKeys.indexOf(k)===-1) allKeys.push(k); }); });
+        sheet.appendRow(allKeys);
+        entries.forEach(function(en) {
+          sheet.appendRow(allKeys.map(function(k){ var v=en[k]; return Array.isArray(v)?v.join('; '):(v||''); }));
+        });
+      }
+      return ContentService.createTextOutput(JSON.stringify({status:'ok',count:entries.length})).setMimeType(ContentService.MimeType.JSON);
+    }
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({status:'error',message:err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('entries');
+    if (!sheet || sheet.getLastRow() < 2) return ContentService.createTextOutput(JSON.stringify({status:'ok',entries:[]})).setMimeType(ContentService.MimeType.JSON);
+    var data = sheet.getDataRange().getValues();
+    var keys = data[0];
+    var entries = [];
+    for (var i = 1; i < data.length; i++) {
+      var row = {}; 
+      keys.forEach(function(k,j){ if(k) row[k]=data[i][j]||''; });
+      entries.push(row);
+    }
+    return ContentService.createTextOutput(JSON.stringify({status:'ok',entries:entries})).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({status:'error',message:err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
+
+function copyGScript(){
+  navigator.clipboard.writeText(GSCRIPT).then(()=>{
+    document.getElementById('gscript-copied').style.display='block';
+    setTimeout(()=>{ document.getElementById('gscript-copied').style.display='none'; },3000);
+  }).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=GSCRIPT; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    document.getElementById('gscript-copied').style.display='block';
+  });
+}
+
+updateSyncUI();
+renderHome();
+</script>
+</body>
+</html>

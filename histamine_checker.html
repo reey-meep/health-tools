@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Histamine food checker</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg2: #f8f7f4;
+    --bg3: #f1efe8;
+    --text: #2c2c2a;
+    --text2: #5f5e5a;
+    --text3: #888780;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.2);
+    --radius: 10px;
+    --radius-sm: 6px;
+    --safe-bg: #eaf3de; --safe-text: #27500a; --safe-border: #97c459;
+    --caution-bg: #faeeda; --caution-text: #633806; --caution-border: #ef9f27;
+    --avoid-bg: #fcebeb; --avoid-text: #791f1f; --avoid-border: #e24b4a;
+    --personal-bg: #eeedfe; --personal-text: #3c3489; --personal-border: #afa9ec;
+    --unknown-bg: #f1efe8; --unknown-text: #444441; --unknown-border: #b4b2a9;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1e1e1c; --bg2: #272725; --bg3: #2f2f2d;
+      --text: #e8e6de; --text2: #a8a69e; --text3: #6e6c66;
+      --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.18);
+      --safe-bg: #173404; --safe-text: #c0dd97; --safe-border: #3b6d11;
+      --caution-bg: #412402; --caution-text: #fac775; --caution-border: #854f0b;
+      --avoid-bg: #501313; --avoid-text: #f09595; --avoid-border: #a32d2d;
+      --personal-bg: #26215c; --personal-text: #cecbf6; --personal-border: #534ab7;
+      --unknown-bg: #2c2c2a; --unknown-text: #d3d1c7; --unknown-border: #5f5e5a;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .app { max-width: 680px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+  header { margin-bottom: 2rem; }
+  header h1 { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  header p { font-size: 14px; color: var(--text2); line-height: 1.5; }
+
+  .search-wrap {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .search-label { font-size: 12px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; display: block; }
+
+  .search-row { display: flex; gap: 8px; }
+
+  textarea {
+    flex: 1;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    resize: vertical;
+    min-height: 60px;
+    line-height: 1.5;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  textarea:focus { border-color: #7f77dd; box-shadow: 0 0 0 2px rgba(127,119,221,0.15); }
+  textarea::placeholder { color: var(--text3); }
+
+  .check-btn {
+    background: #534ab7;
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 0 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    align-self: flex-end;
+    height: 40px;
+    white-space: nowrap;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .check-btn:hover { background: #3c3489; }
+  .check-btn:active { transform: scale(0.97); }
+
+  .hint { font-size: 12px; color: var(--text3); margin-top: 6px; }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 1.25rem;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 12px; color: var(--text2);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-safe { background: #639922; }
+  .dot-caution { background: #ba7517; }
+  .dot-avoid { background: #e24b4a; }
+  .dot-personal { background: #534ab7; }
+  .dot-unknown { background: #888780; }
+
+  .results { display: flex; flex-direction: column; gap: 10px; }
+
+  .result-card {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    transition: border-color 0.15s;
+  }
+
+  .result-card.safe    { border-left: 3px solid var(--safe-border); }
+  .result-card.caution { border-left: 3px solid var(--caution-border); }
+  .result-card.avoid   { border-left: 3px solid var(--avoid-border); }
+  .result-card.personal { border-left: 3px solid var(--personal-border); }
+  .result-card.unknown { border-left: 3px solid var(--unknown-border); }
+
+  .result-name {
+    font-size: 17px; font-weight: 600; color: var(--text);
+    text-transform: capitalize; margin-bottom: 8px;
+  }
+
+  .verdict-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 600;
+    padding: 4px 10px; border-radius: 99px;
+    margin-bottom: 10px;
+  }
+  .verdict-badge.safe     { background: var(--safe-bg);     color: var(--safe-text); }
+  .verdict-badge.caution  { background: var(--caution-bg);  color: var(--caution-text); }
+  .verdict-badge.avoid    { background: var(--avoid-bg);    color: var(--avoid-text); }
+  .verdict-badge.personal { background: var(--personal-bg); color: var(--personal-text); }
+  .verdict-badge.unknown  { background: var(--unknown-bg);  color: var(--unknown-text); }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+  .tag {
+    font-size: 11px; font-weight: 500;
+    padding: 3px 8px; border-radius: 99px;
+    background: var(--bg3); color: var(--text2);
+    border: 0.5px solid var(--border);
+  }
+
+  .reason { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 8px; }
+
+  .bucket-note {
+    font-size: 12px; color: var(--text2);
+    background: var(--bg2); border-radius: var(--radius-sm);
+    padding: 8px 10px; line-height: 1.5;
+    border: 0.5px solid var(--border);
+  }
+  .bucket-note strong { color: var(--text); }
+
+  .multi-card {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+  }
+  .multi-card-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+
+  .multi-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .multi-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .multi-dot { margin-top: 4px; flex-shrink: 0; }
+  .multi-name { font-size: 13px; font-weight: 600; color: var(--text); text-transform: capitalize; }
+  .multi-verdict { font-size: 12px; font-weight: 500; margin: 2px 0; }
+  .multi-verdict.safe     { color: var(--safe-text); }
+  .multi-verdict.caution  { color: var(--caution-text); }
+  .multi-verdict.avoid    { color: var(--avoid-text); }
+  .multi-verdict.personal { color: var(--personal-text); }
+  .multi-verdict.unknown  { color: var(--unknown-text); }
+  .multi-sub { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+  .overall-banner {
+    padding: 10px 14px; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 500;
+    margin-top: 12px; line-height: 1.5;
+  }
+  .overall-safe     { background: var(--safe-bg);     color: var(--safe-text); }
+  .overall-caution  { background: var(--caution-bg);  color: var(--caution-text); }
+  .overall-avoid    { background: var(--avoid-bg);    color: var(--avoid-text); }
+
+  .empty-state {
+    text-align: center; padding: 2rem 1rem;
+    color: var(--text3); font-size: 14px; line-height: 1.7;
+  }
+
+  footer {
+    margin-top: 3rem; padding-top: 1rem;
+    border-top: 0.5px solid var(--border);
+    font-size: 12px; color: var(--text3); line-height: 1.6;
+  }
+
+  @media (max-width: 480px) {
+    .search-row { flex-direction: column; }
+    .check-btn { width: 100%; height: 44px; }
+    header h1 { font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <h1>Histamine food checker</h1>
+    <p>Check any food or ingredient against your personal low-histamine and MCAS protocol. Type one item or paste a full ingredient list separated by commas.</p>
+  </header>
+
+  <div class="search-wrap">
+    <label class="search-label" for="food-input">Food or ingredient</label>
+    <div class="search-row">
+      <textarea id="food-input" placeholder="e.g. avocado&#10;&#10;or paste a list: chicken, garlic, tomato, lime, rice"></textarea>
+      <button class="check-btn" onclick="check()">Check</button>
+    </div>
+    <p class="hint">Press Enter + Check, or separate multiple items with commas</p>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="dot dot-safe"></span>Safe to eat</div>
+    <div class="legend-item"><span class="dot dot-caution"></span>Caution</div>
+    <div class="legend-item"><span class="dot dot-avoid"></span>Avoid</div>
+    <div class="legend-item"><span class="dot dot-personal"></span>Personal trigger</div>
+    <div class="legend-item"><span class="dot dot-unknown"></span>Unknown</div>
+  </div>
+
+  <div id="results">
+    <div class="empty-state">
+      Enter a food above to check it against your protocol.<br>
+      You can check a single ingredient or an entire recipe list at once.
+    </div>
+  </div>
+
+  <footer>
+    Built for your personal MCAS and histamine intolerance management plan. Not a medical diagnosis — a practical self-management tool. When in doubt about an unknown food, test on a low-load day in a small amount and observe.
+  </footer>
+
+</div>
+
+<script>
+const DB = {
+  // HIGH HISTAMINE — ALWAYS AVOID
+  'tomato':       {v:'avoid',   tags:['very high histamine','mast cell liberator'], r:'One of the highest-histamine foods. Also a direct mast cell liberator. A strong trigger regardless of bucket level.', bucket:'Will fill your bucket significantly regardless of baseline. Avoid consistently.'},
+  'roma tomato':  {v:'avoid',   tags:['very high histamine','mast cell liberator'], r:'One of the highest-histamine foods. Also a direct mast cell liberator. Part of why that soup hit you hard today.', bucket:'Avoid consistently.'},
+  'tomato sauce': {v:'avoid',   tags:['very high histamine','concentrated'],         r:'Concentrated form — even higher histamine than fresh tomatoes. Avoid entirely.', bucket:'Avoid entirely.'},
+  'ketchup':      {v:'avoid',   tags:['very high histamine','vinegar'],               r:'Tomato plus vinegar — double histamine hit. Avoid.', bucket:'Avoid entirely.'},
+  'avocado':      {v:'avoid',   tags:['mast cell liberator','personal trigger'],      r:'A strong mast cell liberator. You have noted oral reactions to this. Avoid consistently.', bucket:'Personal trigger — avoid regardless of load.'},
+  'chocolate':    {v:'avoid',   tags:['very high histamine','mast cell liberator','personal trigger'], r:'One of the highest-histamine foods and a direct mast cell liberator. You eat this in your most reactive afternoon window. Remove entirely.', bucket:'Will overflow your bucket. Avoid consistently.'},
+  'cocoa':        {v:'avoid',   tags:['very high histamine','mast cell liberator'],   r:'Same as chocolate — both the histamine content and mast cell liberating properties make this a clear avoid.', bucket:'Avoid consistently.'},
+  'spinach':      {v:'avoid',   tags:['high histamine','mast cell liberator'],        r:'Despite being a vegetable, spinach is high in histamine and is a mast cell liberator. Swap for lettuce, rocket, or other mild greens.', bucket:'Avoid. Replace with lettuce or other mild leafy greens.'},
+  'eggplant':     {v:'avoid',   tags:['high histamine'],                              r:'High histamine content. Not safe on a low-histamine protocol.', bucket:'Avoid consistently.'},
+  'strawberry':   {v:'avoid',   tags:['mast cell liberator'],                         r:'A mast cell liberator — triggers mast cell release even without being high in histamine itself.', bucket:'Avoid even on low-load days.'},
+  'pineapple':    {v:'avoid',   tags:['mast cell liberator','acidic'],                r:'Mast cell liberator and highly acidic. Avoid.', bucket:'Avoid consistently.'},
+  'papaya':       {v:'avoid',   tags:['mast cell liberator'],                         r:'Mast cell liberator. Avoid.', bucket:'Avoid.'},
+  'lemon':        {v:'avoid',   tags:['citrus','mast cell liberator'],                r:'All citrus fruits are mast cell liberators. Avoid consistently.', bucket:'Avoid consistently.'},
+  'lime':         {v:'avoid',   tags:['citrus','mast cell liberator','personal trigger'], r:'A confirmed personal trigger. Mast cell liberator. Part of why the soup caused a reaction.', bucket:'Personal trigger — avoid regardless of load.'},
+  'orange':       {v:'avoid',   tags:['citrus','mast cell liberator'],                r:'All citrus fruits are mast cell liberators. Avoid.', bucket:'Avoid consistently.'},
+  'grapefruit':   {v:'avoid',   tags:['citrus','mast cell liberator'],                r:'Citrus mast cell liberator. Also interacts with many medications. Avoid.', bucket:'Avoid consistently.'},
+  'vinegar':      {v:'avoid',   tags:['fermented','very high histamine'],             r:'Fermented product, extremely high histamine. Avoid all types including apple cider vinegar.', bucket:'Avoid entirely.'},
+  'soy sauce':    {v:'avoid',   tags:['fermented','very high histamine'],             r:'Highly fermented, very high histamine. Avoid.', bucket:'Avoid entirely.'},
+  'fish sauce':   {v:'avoid',   tags:['fermented','very high histamine'],             r:'Extremely high histamine. Avoid entirely.', bucket:'Avoid entirely.'},
+  'alcohol':      {v:'avoid',   tags:['very high histamine','mast cell liberator','DAO blocker'], r:'Alcohol is both high in histamine AND blocks DAO enzyme — the enzyme that clears histamine. A double hit. Avoid entirely.', bucket:'Avoid entirely regardless of load.'},
+  'wine':         {v:'avoid',   tags:['very high histamine','fermented'],             r:'One of the highest-histamine beverages. Also fermented. Avoid.', bucket:'Avoid entirely.'},
+  'beer':         {v:'avoid',   tags:['high histamine','fermented'],                  r:'Fermented and high histamine. Avoid.', bucket:'Avoid entirely.'},
+  'kombucha':     {v:'avoid',   tags:['fermented','high histamine'],                  r:'Fermented beverage with high histamine. Despite its reputation as a health drink, this is not safe for your system.', bucket:'Avoid consistently.'},
+  'kefir':        {v:'avoid',   tags:['fermented','high histamine'],                  r:'Fermented dairy — high histamine. Avoid.', bucket:'Avoid.'},
+  'yogurt':       {v:'avoid',   tags:['fermented','high histamine'],                  r:'Fermented dairy product. High histamine. Avoid.', bucket:'Avoid.'},
+  'sauerkraut':   {v:'avoid',   tags:['fermented','very high histamine'],             r:'Fermented vegetable, extremely high histamine. Avoid.', bucket:'Avoid entirely.'},
+  'kimchi':       {v:'avoid',   tags:['fermented','very high histamine'],             r:'Fermented, spicy, and very high histamine. Triple trigger. Avoid.', bucket:'Avoid entirely.'},
+  'parmesan':     {v:'avoid',   tags:['aged cheese','very high histamine'],           r:'Highly aged — very high histamine. Avoid.', bucket:'Avoid consistently.'},
+  'cheddar':      {v:'avoid',   tags:['aged cheese','high histamine'],                r:'Aged cheese. High histamine. Avoid.', bucket:'Avoid.'},
+  'blue cheese':  {v:'avoid',   tags:['aged cheese','very high histamine'],           r:'One of the highest-histamine foods in existence. Avoid entirely.', bucket:'Avoid entirely.'},
+  'brie':         {v:'caution', tags:['semi-soft cheese','moderate histamine'],       r:'Lower histamine than aged cheeses but still moderate. Test in small amounts on a low-load day.', bucket:'Caution — fills bucket moderately.'},
+  'salami':       {v:'avoid',   tags:['cured meat','very high histamine'],            r:'Cured and fermented — extremely high histamine. Avoid all cured and processed meats.', bucket:'Avoid entirely.'},
+  'pepperoni':    {v:'avoid',   tags:['cured meat','very high histamine'],            r:'Cured processed meat, very high histamine. Avoid.', bucket:'Avoid entirely.'},
+  'bacon':        {v:'avoid',   tags:['cured meat','high histamine'],                 r:'Processed and cured. High histamine. Avoid.', bucket:'Avoid.'},
+  'ham':          {v:'avoid',   tags:['cured meat','high histamine'],                 r:'Cured processed meat. High histamine. Avoid. Fresh pork is safer.', bucket:'Avoid.'},
+  'smoked salmon':{v:'avoid',   tags:['smoked','high histamine'],                     r:'Smoked fish — histamine rises significantly with smoking and aging. Avoid.', bucket:'Avoid.'},
+  'tuna':         {v:'avoid',   tags:['canned fish','very high histamine'],           r:'Canned tuna is among the highest-histamine foods. Even fresh tuna degrades quickly. Avoid both.', bucket:'Avoid entirely.'},
+  'sardines':     {v:'avoid',   tags:['canned fish','very high histamine'],           r:'Very high histamine. Avoid.', bucket:'Avoid entirely.'},
+  'anchovies':    {v:'avoid',   tags:['canned fish','very high histamine'],           r:'Extremely high histamine. Avoid entirely.', bucket:'Avoid entirely.'},
+  'walnuts':      {v:'avoid',   tags:['high histamine nut'],                          r:'Walnuts are among the higher-histamine nuts. Avoid.', bucket:'Avoid.'},
+  'cashews':      {v:'avoid',   tags:['high histamine nut'],                          r:'Cashews are high histamine. Avoid.', bucket:'Avoid.'},
+  'peanuts':      {v:'avoid',   tags:['legume','moderate-high histamine'],            r:'Peanuts (technically legumes) have moderate-high histamine. Avoid.', bucket:'Avoid.'},
+  'peanut butter':{v:'avoid',   tags:['high histamine'],                              r:'Peanut butter concentrates the histamine of peanuts. Avoid.', bucket:'Avoid.'},
+  'bone broth':   {v:'avoid',   tags:['very high histamine','long-cooked'],           r:'Simmered for hours, which dramatically increases histamine. Avoid despite its health reputation.', bucket:'Avoid entirely.'},
+  'gum':          {v:'avoid',   tags:['sorbitol','xylitol','gut irritant'],           r:'Most gums contain sorbitol or xylitol — gut irritants and FODMAPs. Replaces with peppermint tea or a short walk.', bucket:'Remove from daily routine entirely.'},
+  'pepper':       {v:'avoid',   tags:['capsaicin','mast cell trigger'],               r:'Capsaicin directly triggers mast cell degranulation independently of histamine. Includes all bell, chili, jalapeño, and poblano peppers.', bucket:'Avoid all pepper varieties consistently.'},
+  'bell pepper':  {v:'avoid',   tags:['mast cell liberator','personal trigger'],      r:'Contains compounds that trigger mast cell degranulation. A confirmed part of your trigger foods.', bucket:'Avoid consistently.'},
+  'jalapeño':     {v:'avoid',   tags:['capsaicin','mast cell trigger','personal trigger'], r:'Direct mast cell trigger. Part of what made the soup a reaction today.', bucket:'Avoid entirely.'},
+  'poblano':      {v:'avoid',   tags:['capsaicin','mast cell trigger'],               r:'Capsaicin-containing pepper. Direct mast cell trigger. Avoid.', bucket:'Avoid.'},
+  'chili':        {v:'avoid',   tags:['capsaicin','very high mast cell trigger'],     r:'High capsaicin. Strong mast cell trigger. Avoid.', bucket:'Avoid.'},
+  'hot sauce':    {v:'avoid',   tags:['capsaicin','vinegar','very high histamine'],   r:'Contains both capsaicin (mast cell trigger) and vinegar (high histamine). Double trigger. Avoid.', bucket:'Avoid entirely.'},
+
+  // PERSONAL TRIGGERS
+  'gluten':       {v:'personal',tags:['personal trigger','immune trigger'],           r:'A confirmed consistent personal trigger — overflows your bucket regardless of baseline load. Avoid entirely.', bucket:'Always overflows threshold regardless of load. Avoid entirely.'},
+  'wheat':        {v:'personal',tags:['contains gluten','personal trigger'],          r:'Contains gluten, your confirmed personal trigger. Avoid all wheat products.', bucket:'Always triggers reaction. Avoid entirely.'},
+  'bread':        {v:'personal',tags:['contains gluten','personal trigger'],          r:'Contains gluten unless specifically labeled gluten-free. Avoid standard bread entirely.', bucket:'Avoid entirely unless certified gluten-free.'},
+  'pasta':        {v:'personal',tags:['contains gluten','personal trigger'],          r:'Contains gluten unless gluten-free variety. Avoid standard pasta.', bucket:'Avoid entirely unless certified gluten-free.'},
+  'flour':        {v:'personal',tags:['contains gluten','personal trigger'],          r:'Contains gluten. Avoid wheat flour. Use rice flour, tapioca flour, or other GF alternatives.', bucket:'Avoid wheat flour entirely.'},
+  'dairy':        {v:'personal',tags:['personal trigger','variable'],                 r:'A variable personal trigger for you. Some days fine, some days not. Worth avoiding during symptomatic or high-load periods.', bucket:'Avoid during symptomatic periods. Test carefully on low-load days.'},
+  'milk':         {v:'personal',tags:['personal trigger','dairy'],                    r:'Dairy is a variable personal trigger. Worth avoiding when your bucket is already elevated.', bucket:'Avoid during symptomatic periods.'},
+  'cream':        {v:'personal',tags:['dairy','personal trigger'],                    r:'Dairy product. Variable personal trigger. Avoid during reactive periods.', bucket:'Avoid when symptomatic.'},
+  'oat milk':     {v:'personal',tags:['personal trigger','gluten cross-contamination'], r:'High risk of gluten cross-contamination in commercial production. Likely a quiet daily trigger for you. Switch to coconut, rice, or hemp milk.', bucket:'Remove from daily routine — likely filling your bucket every morning.'},
+  'melon':        {v:'personal',tags:['personal trigger','oral reaction noted'],      r:'You have noted a mouth-burning reaction to melon — oral allergy syndrome response. A confirmed personal trigger.', bucket:'Personal trigger. Avoid consistently.'},
+  'cantaloupe':   {v:'personal',tags:['melon family','personal trigger'],             r:'Part of the melon family. Given your oral reaction to melon, avoid this entirely.', bucket:'Avoid.'},
+  'honeydew':     {v:'personal',tags:['melon family','personal trigger'],             r:'Part of the melon family. Given your oral reaction to melon, avoid this entirely.', bucket:'Avoid.'},
+  'sugar':        {v:'personal',tags:['personal trigger','blood sugar spike'],        r:'High sugar foods are a confirmed personal trigger. Blood glucose spikes trigger adrenaline, which activates mast cells. Avoid high-sugar foods consistently.', bucket:'Avoid high quantities. Small amounts may be tolerable on low-load days.'},
+
+  // CAUTION
+  'garlic':       {v:'caution', tags:['moderate liberator','test individually'],      r:'A moderate histamine liberator for some people. Many tolerate it well. Test on a low-load day to find your personal threshold.', bucket:'Fine on low-load days. May contribute to bucket when you are already elevated.'},
+  'onion':        {v:'caution', tags:['moderate liberator','test individually'],      r:'Moderate histamine liberator. Most people tolerate onion well. Test on a low-load day.', bucket:'Generally fine at low load. Moderate bucket filler.'},
+  'yellow onion': {v:'caution', tags:['moderate liberator'],                          r:'Moderate histamine liberator. Generally tolerated in cooking. Part of the soup ingredient list today.', bucket:'Moderate bucket contribution. Fine on low-load days.'},
+  'cheese':       {v:'caution', tags:['depends on type','fresh vs aged'],             r:'Fresh cheeses (mozzarella, ricotta) are much lower histamine than aged. Fresh mozzarella in small amounts is generally tolerable. Aged cheeses are a hard avoid.', bucket:'Fresh = low bucket impact. Aged = significant impact.'},
+  'mozzarella':   {v:'caution', tags:['fresh cheese','lower histamine'],              r:'Fresh mozzarella is one of the safest cheeses. Much lower histamine than aged. Small amounts on low-load days should be fine.', bucket:'Low bucket impact when fresh. Good cheese option for your protocol.'},
+  'ricotta':      {v:'caution', tags:['fresh cheese','test individually'],            r:'Generally lower histamine as a fresh cheese. Test individually — tolerated by most on low-histamine protocols.', bucket:'Low-moderate impact. Test carefully.'},
+  'almond milk':  {v:'caution', tags:['nuts moderate risk'],                          r:'Almonds have moderate histamine. Almond milk in small amounts may be fine but test on low-load days.', bucket:'Moderate bucket filler. Safer alternatives available (coconut, rice, hemp milk).'},
+  'almonds':      {v:'caution', tags:['moderate histamine','test individually'],      r:'Moderate histamine content. Some people tolerate well. Test individually in small amounts on a low-load day.', bucket:'Moderate bucket filler. Test carefully.'},
+  'macadamia':    {v:'caution', tags:['lower histamine nut'],                         r:'Lower histamine than most nuts. Generally better tolerated. Test individually.', bucket:'Lower bucket impact than other nuts.'},
+  'lentils':      {v:'caution', tags:['legume','moderate histamine'],                 r:'Moderate histamine content. Some tolerate well on low-load days. Test individually.', bucket:'Moderate filler. Test on low-load days.'},
+  'black beans':  {v:'caution', tags:['legume','moderate histamine'],                 r:'Moderate histamine. Black beans in the soup today likely contributed to your load. Test on low-load days in small amounts.', bucket:'Moderate bucket contribution. Avoid during high-load periods.'},
+  'chickpeas':    {v:'caution', tags:['legume','moderate histamine'],                 r:'Moderate histamine. Many people tolerate chickpeas on low-load days. Test individually.', bucket:'Moderate bucket filler.'},
+  'pork':         {v:'caution', tags:['fresh unprocessed only'],                      r:'Fresh unprocessed pork is generally okay. Avoid all cured forms (bacon, ham, salami) — those are high histamine.', bucket:'Fresh only: low-moderate impact. Cured pork: avoid entirely.'},
+  'coffee':       {v:'caution', tags:['caffeine','mast cell activator'],              r:'Caffeine activates mast cells. Safe after food — never on an empty stomach. Your current post-breakfast coffee is fine. Quantity matters.', bucket:'Always eat before coffee. Moderate bucket impact.'},
+  'green tea':    {v:'caution', tags:['some histamine','caffeine'],                   r:'Some histamine content and caffeine. Moderate amounts generally fine. Test on low-load days.', bucket:'Moderate filler. Herbal teas are safer options.'},
+  'black tea':    {v:'caution', tags:['some histamine','caffeine'],                   r:'Some histamine and caffeine. Moderate amounts generally tolerated. Test individually.', bucket:'Moderate filler. Herbal teas are safer.'},
+  'sparkling water':{v:'caution',tags:['trial elimination recommended'],              r:'Carbonic acid can be a low-grade mast cell irritant for sensitive individuals. Currently trialling elimination — switch to still water and observe if afternoons improve.', bucket:'Possible quiet daily bucket filler. Switch to still water.'},
+  'broth':        {v:'caution', tags:['check ingredients carefully'],                 r:'Store-bought broths often contain yeast extract or high-histamine vegetables. Read labels. Homemade from safe ingredients used fresh is safer.', bucket:'Variable — depends entirely on ingredients.'},
+  'vegetable broth':{v:'caution',tags:['check ingredients','often contains yeast extract'], r:'Commercial vegetable broth often contains tomatoes, yeast, or other triggers. Read labels carefully or make your own from safe vegetables.', bucket:'Variable. Homemade safer than commercial.'},
+  'honey':        {v:'caution', tags:['natural sugar','use sparingly'],               r:'Generally lower histamine than refined sugar. Small amounts may be fine as a sweetener. Avoid large quantities given your sugar sensitivity.', bucket:'Small amounts okay on low-load days.'},
+  'maple syrup':  {v:'caution', tags:['natural sweetener','use sparingly'],           r:'Generally safe in small amounts. Lower histamine than many sweeteners. Use sparingly.', bucket:'Small amounts okay. Do not overdo.'},
+  'watermelon':   {v:'caution', tags:['different family from melon','test carefully'],r:'Watermelon is in a different botanical family from cantaloupe and honeydew. May or may not cross-react with your melon sensitivity. Test very carefully in a small amount.', bucket:'Unknown for your personal picture. Test with extreme caution.'},
+  'grapes':       {v:'caution', tags:['test individually'],                           r:'Grapes are generally lower histamine but some people with mast cell issues react to them. Test individually on a low-load day.', bucket:'Test carefully. Avoid wine — that is a hard avoid.'},
+
+  // SAFE
+  'chicken':      {v:'safe',    tags:['must be fresh','cook and eat same day'],       r:'Fresh cooked chicken is one of your safest proteins. Critical rule: cook fresh and eat the same day. Histamine rises rapidly in stored cooked meat. Leftovers are not safe.', bucket:'Low bucket impact when fresh. An excellent safe protein.'},
+  'turkey':       {v:'safe',    tags:['must be fresh','cook and eat same day'],       r:'Fresh cooked turkey is safe. Same rule as chicken — cook fresh, eat same day, do not refrigerate and reheat.', bucket:'Low bucket impact. Good protein option.'},
+  'lamb':         {v:'safe',    tags:['must be fresh'],                               r:'Fresh lamb is generally well tolerated on low-histamine protocols. Cook and eat fresh.', bucket:'Low bucket impact when fresh.'},
+  'eggs':         {v:'safe',    tags:['test individually','most tolerate well'],      r:'Most people on low-histamine diets tolerate eggs well. Egg whites have slightly more histamine than yolks. Test individually — if tolerated, an excellent protein source.', bucket:'Low bucket impact for most. A safe staple.'},
+  'rice':         {v:'safe',    tags:['staple safe food'],                            r:'White rice is one of your safest staple foods. No histamine concerns. A reliable base for meals.', bucket:'Very low bucket impact. A great foundation food.'},
+  'white rice':   {v:'safe',    tags:['staple safe food'],                            r:'White rice is one of your safest staple foods. A reliable, safe base for meals.', bucket:'Very low bucket impact.'},
+  'quinoa':       {v:'safe',    tags:['safe grain'],                                  r:'Quinoa is well tolerated on low-histamine protocols. A good gluten-free protein-containing grain.', bucket:'Low bucket impact. Good staple grain.'},
+  'sweet potato': {v:'safe',    tags:['safe starchy vegetable'],                      r:'Sweet potato is safe and nutritious. A good staple for your eating plan.', bucket:'Very low bucket impact. A great staple food.'},
+  'potato':       {v:'safe',    tags:['safe starchy vegetable'],                      r:'White potato is generally safe. Avoid adding high-histamine toppings.', bucket:'Low bucket impact. Safe starchy option.'},
+  'broccoli':     {v:'safe',    tags:['safe vegetable'],                              r:'Broccoli is low histamine and safe. A nutritious vegetable for your protocol.', bucket:'Low bucket impact. A great choice.'},
+  'cauliflower':  {v:'safe',    tags:['safe vegetable'],                              r:'Low histamine. Safe and versatile vegetable.', bucket:'Low bucket impact.'},
+  'zucchini':     {v:'safe',    tags:['safe vegetable'],                              r:'One of the safest vegetables on a low-histamine protocol.', bucket:'Very low bucket impact.'},
+  'butternut squash':{v:'safe', tags:['safe vegetable'],                              r:'Low histamine. A great safe vegetable option.', bucket:'Low bucket impact.'},
+  'carrot':       {v:'safe',    tags:['safe vegetable'],                              r:'Carrots are low histamine and safe. A reliable vegetable for your protocol.', bucket:'Low bucket impact.'},
+  'cucumber':     {v:'safe',    tags:['safe vegetable'],                              r:'Low histamine and safe. Good for snacking.', bucket:'Very low bucket impact.'},
+  'lettuce':      {v:'safe',    tags:['safe leafy green'],                            r:'Lettuce and mild leafy greens are safe. A good spinach replacement.', bucket:'Very low bucket impact.'},
+  'asparagus':    {v:'safe',    tags:['safe vegetable'],                              r:'Generally well tolerated on low-histamine protocols.', bucket:'Low bucket impact.'},
+  'peas':         {v:'safe',    tags:['safe vegetable'],                              r:'Green peas are generally safe on low-histamine diets.', bucket:'Low bucket impact.'},
+  'leek':         {v:'safe',    tags:['safe vegetable'],                              r:'Leeks are generally safe and lower histamine than onions.', bucket:'Low bucket impact.'},
+  'celery':       {v:'safe',    tags:['safe vegetable'],                              r:'Celery is generally safe on low-histamine protocols.', bucket:'Low bucket impact.'},
+  'apple':        {v:'safe',    tags:['safe fruit'],                                  r:'Apples are low histamine and safe. One of the better fruit options for your system.', bucket:'Low bucket impact. A good daily snack.'},
+  'pear':         {v:'safe',    tags:['safe fruit'],                                  r:'Pears are low histamine and safe. A good snack option.', bucket:'Low bucket impact.'},
+  'mango':        {v:'safe',    tags:['safe fruit'],                                  r:'Mango is generally safe on low-histamine protocols. A good sweet option.', bucket:'Low bucket impact. A good treat.'},
+  'blueberry':    {v:'safe',    tags:['safe fruit'],                                  r:'Blueberries are much safer than strawberries. Generally well tolerated. A good antioxidant-rich option.', bucket:'Low bucket impact. Good choice.'},
+  'blueberries':  {v:'safe',    tags:['safe fruit'],                                  r:'Generally safe. Much better than strawberries or citrus.', bucket:'Low bucket impact.'},
+  'cherry':       {v:'safe',    tags:['safe fruit','test individually'],              r:'Cherries are generally lower histamine. Test individually to confirm tolerance.', bucket:'Low-moderate impact. Test carefully.'},
+  'coconut':      {v:'safe',    tags:['safe'],                                        r:'Coconut and coconut products are generally safe and low histamine. Good for cooking.', bucket:'Low bucket impact.'},
+  'coconut milk': {v:'safe',    tags:['safe milk alternative'],                       r:'A great dairy and oat milk alternative for your system. Low histamine, no cross-contamination risk.', bucket:'Low bucket impact. Recommended replacement for oat milk.'},
+  'rice milk':    {v:'safe',    tags:['safe milk alternative'],                       r:'Low histamine and gluten-free. A safe milk alternative.', bucket:'Low bucket impact.'},
+  'hemp milk':    {v:'safe',    tags:['safe milk alternative'],                       r:'Low histamine. A good dairy alternative.', bucket:'Low bucket impact.'},
+  'olive oil':    {v:'safe',    tags:['safe fat'],                                    r:'Olive oil is safe and low histamine. A good cooking fat for your protocol.', bucket:'Very low bucket impact.'},
+  'coconut oil':  {v:'safe',    tags:['safe fat'],                                    r:'Low histamine. A safe cooking fat.', bucket:'Very low bucket impact.'},
+  'sunflower seeds':{v:'safe',  tags:['safe seed'],                                   r:'Sunflower seeds are low histamine and safe. A good snack option.', bucket:'Low bucket impact.'},
+  'pumpkin seeds':{v:'safe',    tags:['safe seed'],                                   r:'Generally safe on low-histamine protocols. Low histamine content.', bucket:'Low bucket impact.'},
+  'hemp seeds':   {v:'safe',    tags:['safe seed'],                                   r:'Low histamine. Safe option for adding protein and healthy fats.', bucket:'Low bucket impact.'},
+  'edamame':      {v:'safe',    tags:['fresh soy','lower histamine than fermented'],  r:'Fresh edamame is much lower histamine than fermented soy. Generally safe. Your current morning snack is a good choice.', bucket:'Low bucket impact. Keep as a snack.'},
+  'ginger':       {v:'safe',    tags:['safe','mild anti-histamine'],                  r:'Not only safe but has mild anti-histamine and anti-nausea properties. Keep those ginger chews.', bucket:'Actually helps lower bucket. A beneficial food.'},
+  'still water':  {v:'safe',    tags:['hydration staple'],                            r:'Still water is your best hydration choice. No histamine concerns whatsoever.', bucket:'No bucket impact. Drink freely.'},
+  'popcorn':      {v:'safe',    tags:['plain only'],                                  r:'Plain popcorn is generally safe. Your Skinny Pop snack is fine as long as it stays plain — avoid flavored varieties.', bucket:'Low bucket impact when plain.'},
+  'skinny pop':   {v:'safe',    tags:['plain popcorn','current safe snack'],          r:'Plain popcorn with minimal ingredients is safe. Your current snack choice is a good one.', bucket:'Low bucket impact. A good snack.'},
+  'rice crackers':{v:'safe',    tags:['safe snack'],                                  r:'Rice crackers are low histamine and safe. A good snack option for your protocol.', bucket:'Low bucket impact. Good snack.'},
+  'peppermint tea':{v:'safe',   tags:['herbal','digestion aid'],                      r:'Peppermint tea is safe and helpful for digestion. A good replacement for your post-lunch gum.', bucket:'No bucket impact. A beneficial choice.'},
+  'chamomile tea':{v:'safe',    tags:['herbal','calming'],                            r:'Chamomile tea is safe and has mild calming properties.', bucket:'No bucket impact. Calming option.'},
+  'salt':         {v:'safe',    tags:['safe seasoning'],                              r:'Salt is safe. It is actually helpful for autonomic stability — adequate sodium helps blood volume and blood pressure regulation.', bucket:'No bucket impact.'},
+  'olive':        {v:'caution', tags:['brine-fermented','moderate histamine'],        r:'Olives are brine-fermented, which increases histamine. Test in small amounts on low-load days.', bucket:'Moderate bucket filler. Test carefully.'},
+  'tahini':       {v:'caution', tags:['sesame','test individually'],                  r:'Sesame and tahini can be moderate histamine. Test individually.', bucket:'Moderate filler. Test carefully.'},
+};
+
+function normalize(s){
+  return s.toLowerCase().trim()
+    .replace(/[^a-z\s]/g,'')
+    .replace(/\s+/g,' ')
+    .replace(/s$/, '')
+    .replace(/ies$/, 'y')
+    .replace(/oes$/, 'o');
+}
+
+function lookup(term){
+  const n = normalize(term);
+  if(DB[n]) return {name:term, ...DB[n]};
+  for(const k of Object.keys(DB)){
+    if(n === k || n.includes(k) || k.includes(n)){
+      return {name:term, ...DB[k]};
+    }
+  }
+  return null;
+}
+
+function verdictLabel(v){
+  const map = {safe:'Safe to eat', caution:'Eat with caution', avoid:'Avoid', personal:'Personal trigger — avoid'};
+  return map[v] || 'Unknown';
+}
+
+function overallVerdict(results){
+  if(results.some(r=>r&&(r.v==='personal'))) return 'personal';
+  if(results.some(r=>r&&(r.v==='avoid'))) return 'avoid';
+  if(results.some(r=>r&&(r.v==='caution'))) return 'caution';
+  if(results.every(r=>r&&r.v==='safe')) return 'safe';
+  return 'caution';
+}
+
+function overallMessage(v, avoidNames, cautionNames){
+  if(v==='safe') return 'All ingredients checked are safe for your protocol.';
+  if(v==='personal') return `Contains personal triggers (${avoidNames.join(', ')}). This meal will likely cause a reaction regardless of your current bucket level.`;
+  if(v==='avoid') return `Contains high-histamine or mast cell-triggering ingredients (${avoidNames.join(', ')}). Avoid this meal.`;
+  if(v==='caution') return `Contains caution ingredients (${cautionNames.join(', ')}). May be fine on a low-load day but risky when your bucket is already elevated.`;
+  return '';
+}
+
+function check(){
+  const raw = document.getElementById('food-input').value.trim();
+  if(!raw) return;
+
+  const terms = raw.split(/[,\n]+/).map(t=>t.trim()).filter(Boolean);
+  const el = document.getElementById('results');
+
+  if(terms.length === 1){
+    const r = lookup(terms[0]);
+    if(!r){
+      el.innerHTML = `<div class="result-card unknown">
+        <div class="result-name">${terms[0]}</div>
+        <span class="verdict-badge unknown">Not in database</span>
+        <p class="reason">This food is not in the database yet. Based on general low-histamine principles, ask: is it fermented, aged, canned, smoked, or a citrus/pepper/tomato product? If yes, treat it with caution or avoid. If it is a fresh, unprocessed whole food, it is likely lower risk. When in doubt, test in a small amount on a low-load day and observe your response over the following two hours.</p>
+        <div class="bucket-note"><strong>Rule of thumb:</strong> Fresh whole foods are generally safer. Fermented, aged, canned, or processed foods are generally higher risk.</div>
+      </div>`;
+      return;
+    }
+    el.innerHTML = `<div class="result-card ${r.v}">
+      <div class="result-name">${r.name}</div>
+      <span class="verdict-badge ${r.v}">${verdictLabel(r.v)}</span>
+      <div class="tags">${r.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+      <p class="reason">${r.r}</p>
+      <div class="bucket-note"><strong>Bucket impact:</strong> ${r.bucket}</div>
+    </div>`;
+
+  } else {
+    const results = terms.map(t => lookup(t));
+    const overall = overallVerdict(results.filter(Boolean));
+    const avoidNames = results.filter(r=>r&&(r.v==='avoid'||r.v==='personal')).map(r=>r.name);
+    const cautionNames = results.filter(r=>r&&r.v==='caution').map(r=>r.name);
+
+    let html = `<div class="multi-card">
+      <div class="multi-card-title">Ingredient breakdown — ${terms.length} item${terms.length>1?'s':''}</div>`;
+
+    terms.forEach((t,i)=>{
+      const r = results[i];
+      if(!r){
+        html += `<div class="multi-item">
+          <span class="dot dot-unknown multi-dot"></span>
+          <div>
+            <div class="multi-name">${t}</div>
+            <div class="multi-verdict unknown">Not in database</div>
+            <div class="multi-sub">Test individually on a low-load day. Fresh whole foods are lower risk than fermented or processed.</div>
+          </div>
+        </div>`;
+      } else {
+        const dotClass = r.v==='safe'?'dot-safe':r.v==='caution'?'dot-caution':(r.v==='avoid'||r.v==='personal')?'dot-avoid':'dot-unknown';
+        html += `<div class="multi-item">
+          <span class="dot ${dotClass} multi-dot"></span>
+          <div>
+            <div class="multi-name">${t}</div>
+            <div class="multi-verdict ${r.v}">${verdictLabel(r.v)}</div>
+            <div class="multi-sub">${r.r.split('.')[0]}.</div>
+          </div>
+        </div>`;
+      }
+    });
+
+    const bannerClass = overall==='safe'?'overall-safe':overall==='caution'?'overall-caution':'overall-avoid';
+    html += `<div class="overall-banner ${bannerClass}">${overallMessage(overall, avoidNames, cautionNames)}</div>`;
+    html += '</div>';
+    el.innerHTML = html;
+  }
+}
+
+document.getElementById('food-input').addEventListener('keydown', function(e){
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); check(); }
+});
+</script>
+</body>
+</html>
