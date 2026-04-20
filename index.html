@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Health Tools</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+:root{--bg:#0f0f0e;--card:#1e1e1b;--border:#2a2a26;--text:#e8e4d8;--text2:#9a9488;--text3:#5a5750;--purple:#c4b8f8;--purple-dim:#7b6fd4;--teal:#7dd4b8;--amber:#f0b84a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.25rem}
+.wrap{max-width:480px;width:100%}
+.eyebrow{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px}
+h1{font-size:28px;font-weight:500;color:var(--text);margin-bottom:6px}
+.sub{font-size:13px;color:var(--text3);margin-bottom:2.5rem;line-height:1.6}
+.tools{display:flex;flex-direction:column;gap:10px}
+.tool{display:block;background:var(--card);border:0.5px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;text-decoration:none;transition:border-color .15s}
+.tool:hover{border-color:#3a3a36}
+.tool-eyebrow{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px}
+.tool-name{font-size:16px;font-weight:500;color:var(--text);margin-bottom:3px}
+.tool-desc{font-size:12px;color:var(--text2);line-height:1.55}
+.t1 .tool-eyebrow{color:var(--purple)}
+.t2 .tool-eyebrow{color:var(--teal)}
+.t3 .tool-eyebrow{color:var(--amber)}
+.footer{margin-top:2rem;font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Your health tools</div>
+  <h1>Everything in one place</h1>
+  <p class="sub">All three tools live here. Bookmark this page on your phone and computer.</p>
+  <div class="tools">
+    <a class="tool t1" href="meal_guide.html">
+      <div class="tool-eyebrow">Meal plan</div>
+      <div class="tool-name">April 18–25 meal guide</div>
+      <div class="tool-desc">Step-by-step instructions with exact times, checkable steps, pantry tracker, and Claude-powered meal ideas.</div>
+    </a>
+    <a class="tool t2" href="health_tracker.html">
+      <div class="tool-eyebrow">Health tracker</div>
+      <div class="tool-name">Daily symptom log</div>
+      <div class="tool-desc">Morning, midday, and evening check-ins. Tracks sleep, food, symptoms, cycle, naps, reactions, and exercise.</div>
+    </a>
+    <a class="tool t3" href="histamine_checker.html">
+      <div class="tool-eyebrow">Food checker</div>
+      <div class="tool-name">Histamine food checker</div>
+      <div class="tool-desc">Check any food or paste a full ingredient list. Personalised for your triggers and the histamine bucket model.</div>
+    </a>
+  </div>
+  <div class="footer">Built for Ree &nbsp;·&nbsp; April 2026</div>
+</div>
+</body>
+</html>
