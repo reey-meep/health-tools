@@ -795,7 +795,13 @@ Keep it practical, specific, and genuinely enticing. Format clearly with each me
       })
     });
     const data = await response.json();
-    const text = data.content?.map(c => c.text || '').join('') || 'No response received.';
+    let text = 'No response received.';
+    if(data.content && Array.isArray(data.content)){
+      text = data.content.filter(c=>c.type==='text').map(c=>c.text||'').join('\n');
+    } else if(data.error){
+      text = 'API error: ' + (data.error.message || JSON.stringify(data.error));
+    }
+    if(!text.trim()) text = 'No response received. Check your API key is correct.';
     result.textContent = text;
     result.classList.add('show');
   } catch(e) {
