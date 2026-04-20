@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Meal Guide — April 18–25</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --bg: #0f0f0e;
+  --surface: #181816;
+  --card: #1e1e1b;
+  --border: #2a2a26;
+  --border2: #363630;
+  --text: #e8e4d8;
+  --text2: #9a9488;
+  --text3: #5a5750;
+  --purple: #c4b8f8;
+  --purple-dim: #7b6fd4;
+  --teal: #7dd4b8;
+  --amber: #f0b84a;
+  --red: #f4826a;
+  --green: #8ecf6a;
+  --mono: 'DM Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* HEADER */
+.header { padding: 2rem 1.25rem 1rem; border-bottom: 0.5px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+.header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+.header-title { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--purple); letter-spacing: 0.08em; text-transform: uppercase; }
+.header-sub { font-size: 11px; color: var(--text3); margin-top: 2px; font-family: var(--mono); }
+.progress-wrap { display: flex; align-items: center; gap: 8px; }
+.progress-bar { flex: 1; height: 2px; background: var(--border2); border-radius: 99px; }
+.progress-fill { height: 100%; background: var(--teal); border-radius: 99px; transition: width .4s ease; }
+.progress-label { font-family: var(--mono); font-size: 10px; color: var(--text3); min-width: 32px; text-align: right; }
+
+/* DAY NAVIGATION */
+.day-nav { display: flex; overflow-x: auto; gap: 6px; padding: 1rem 1.25rem; scrollbar-width: none; border-bottom: 0.5px solid var(--border); }
+.day-nav::-webkit-scrollbar { display: none; }
+.day-pill { flex-shrink: 0; font-family: var(--mono); font-size: 11px; padding: 6px 12px; border-radius: 99px; border: 0.5px solid var(--border2); color: var(--text3); cursor: pointer; transition: all .15s; white-space: nowrap; background: transparent; }
+.day-pill:hover { border-color: var(--purple-dim); color: var(--purple); }
+.day-pill.active { background: var(--purple-dim); border-color: var(--purple-dim); color: #fff; }
+.day-pill.complete { border-color: var(--teal); color: var(--teal); }
+
+/* CONTENT */
+.content { padding: 1.25rem; max-width: 680px; margin: 0 auto; }
+
+/* DAY SECTION */
+.day-section { display: none; }
+.day-section.active { display: block; }
+
+.day-header { margin-bottom: 1.25rem; }
+.day-date { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+.day-name { font-size: 20px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+.day-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.badge { font-family: var(--mono); font-size: 10px; padding: 3px 9px; border-radius: 99px; }
+.badge-cook { background: rgba(124,111,212,.15); color: var(--purple); border: 0.5px solid rgba(124,111,212,.3); }
+.badge-easy { background: rgba(142,207,106,.1); color: var(--green); border: 0.5px solid rgba(142,207,106,.25); }
+.badge-caution { background: rgba(240,184,74,.1); color: var(--amber); border: 0.5px solid rgba(240,184,74,.25); }
+.badge-eggs { background: rgba(125,212,184,.1); color: var(--teal); border: 0.5px solid rgba(125,212,184,.25); }
+
+/* THAW ALERT */
+.thaw-alert { display: flex; gap: 10px; align-items: flex-start; background: rgba(244,130,106,.08); border: 0.5px solid rgba(244,130,106,.3); border-radius: 8px; padding: 10px 12px; margin-bottom: 1rem; }
+.thaw-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); margin-top: 4px; flex-shrink: 0; }
+.thaw-text { font-size: 12px; color: var(--red); line-height: 1.55; font-family: var(--mono); }
+.thaw-label { font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px; }
+
+/* MEAL CARD */
+.meal-card { background: var(--card); border: 0.5px solid var(--border); border-radius: 12px; margin-bottom: 0.875rem; overflow: hidden; }
+.meal-card-header { padding: 1rem 1.25rem 0.75rem; }
+.meal-type-label { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+.meal-name { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+.start-time { display: inline-flex; align-items: center; gap: 6px; background: rgba(240,184,74,.1); border: 0.5px solid rgba(240,184,74,.25); border-radius: 6px; padding: 4px 10px; }
+.start-time-icon { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); flex-shrink: 0; }
+.start-time-text { font-family: var(--mono); font-size: 11px; color: var(--amber); }
+
+/* STEPS */
+.steps-list { padding: 0 1.25rem 1rem; }
+.step-item { display: flex; gap: 10px; padding: 7px 0; border-bottom: 0.5px solid var(--border); cursor: pointer; align-items: flex-start; }
+.step-item:last-child { border-bottom: none; }
+.step-check { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--border2); flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+.step-check svg { display: none; }
+.step-item.done .step-check { background: var(--teal); border-color: var(--teal); }
+.step-item.done .step-check svg { display: block; }
+.step-item.done .step-text { color: var(--text3); text-decoration: line-through; text-decoration-color: var(--text3); }
+.step-num { font-family: var(--mono); font-size: 10px; color: var(--text3); min-width: 16px; margin-top: 2px; flex-shrink: 0; }
+.step-text { font-size: 13px; color: var(--text2); line-height: 1.6; flex: 1; }
+.step-text strong { color: var(--text); font-weight: 500; }
+
+/* SAVE NOTE */
+.save-note { margin: 0 1.25rem 1rem; background: rgba(124,111,212,.08); border: 0.5px solid rgba(124,111,212,.25); border-radius: 8px; padding: 8px 12px; display: flex; gap: 8px; align-items: flex-start; }
+.save-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--purple); margin-top: 4px; flex-shrink: 0; }
+.save-text { font-family: var(--mono); font-size: 11px; color: var(--purple); line-height: 1.55; }
+
+/* COOK TIP */
+.cook-tip { margin: 0 1.25rem 1rem; display: flex; gap: 8px; align-items: flex-start; }
+.tip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); margin-top: 4px; flex-shrink: 0; }
+.tip-text { font-size: 11px; color: var(--text3); line-height: 1.55; font-style: italic; }
+
+/* RESET BTN */
+.meal-reset { margin: 0 1.25rem .75rem; }
+.reset-btn { font-family: var(--mono); font-size: 10px; color: var(--text3); background: none; border: 0.5px solid var(--border); border-radius: 99px; padding: 4px 12px; cursor: pointer; }
+.reset-btn:hover { color: var(--text2); border-color: var(--border2); }
+
+/* COMPLETE BANNER */
+.complete-banner { background: rgba(142,207,106,.08); border: 0.5px solid rgba(142,207,106,.3); border-radius: 10px; padding: 1rem 1.25rem; text-align: center; margin-bottom: 1rem; display: none; }
+.complete-banner.show { display: block; }
+.complete-banner p { font-family: var(--mono); font-size: 12px; color: var(--green); line-height: 1.6; }
+
+.pantry-section{display:none;padding-bottom:2rem}
+.pantry-section.active{display:block}
+.pantry-header{margin-bottom:1.25rem}
+.pantry-title{font-size:20px;font-weight:500;color:var(--text);margin-bottom:4px}
+.pantry-sub{font-size:12px;color:var(--text3);font-family:var(--mono)}
+.pantry-add-row{display:flex;gap:8px;margin-bottom:1.25rem}
+.pantry-input{flex:1;background:var(--card);border:0.5px solid var(--border2);border-radius:8px;padding:0 12px;height:40px;font-size:14px;color:var(--text);font-family:var(--sans);outline:none}
+.pantry-input:focus{border-color:var(--teal)}
+.pantry-input::placeholder{color:var(--text3)}
+.pantry-add-btn{height:40px;padding:0 16px;background:rgba(125,212,184,.1);border:0.5px solid rgba(125,212,184,.3);border-radius:8px;color:var(--teal);font-family:var(--mono);font-size:12px;cursor:pointer;white-space:nowrap}
+.pantry-add-btn:hover{background:rgba(125,212,184,.2)}
+.pantry-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.5rem;min-height:32px}
+.pantry-empty{font-size:12px;color:var(--text3);font-family:var(--mono);padding:8px 0}
+.pantry-chip{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:0.5px solid var(--border2);border-radius:99px;padding:5px 12px;font-size:12px;color:var(--text2)}
+.pantry-chip-remove{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;line-height:1;padding:0;margin-left:2px}
+.pantry-chip-remove:hover{color:var(--red)}
+.pantry-divider{height:0.5px;background:var(--border);margin:1.25rem 0}
+.ideas-section{}
+.ideas-title{font-size:15px;font-weight:500;color:var(--text);margin-bottom:4px}
+.ideas-sub{font-size:12px;color:var(--text3);margin-bottom:1rem;line-height:1.55}
+.ideas-options{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem}
+.idea-opt{background:var(--card);border:0.5px solid var(--border2);border-radius:99px;padding:5px 12px;font-size:12px;color:var(--text2);cursor:pointer;font-family:var(--mono)}
+.idea-opt:hover{border-color:var(--purple-dim);color:var(--purple)}
+.idea-opt.sel{background:rgba(124,111,212,.15);border-color:var(--purple-dim);color:var(--purple)}
+.idea-notes{width:100%;background:var(--card);border:0.5px solid var(--border2);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;resize:vertical;min-height:60px;margin-bottom:0.875rem}
+.idea-notes:focus{border-color:var(--purple-dim)}
+.idea-notes::placeholder{color:var(--text3)}
+.generate-btn{width:100%;padding:13px;background:var(--purple-dim);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);margin-bottom:1rem}
+.generate-btn:hover{opacity:.88}
+.generate-btn:disabled{opacity:.4;cursor:default}
+.ideas-result{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:1.25rem;white-space:pre-wrap;font-size:13px;color:var(--text2);line-height:1.7;display:none;font-family:var(--sans)}
+.ideas-result.show{display:block}
+.ideas-loading{text-align:center;padding:1.5rem;font-family:var(--mono);font-size:12px;color:var(--text3);display:none}
+.ideas-loading.show{display:block}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+.ideas-loading span{animation:pulse 1.4s ease infinite}
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="header-title">Meal Guide</div>
+      <div class="header-sub">April 18 – 25 &nbsp;·&nbsp; Lunch 11:45 &nbsp;·&nbsp; Dinner 5:15</div>
+    </div>
+    <div class="progress-wrap" style="width:120px">
+      <div class="progress-bar"><div class="progress-fill" id="global-progress" style="width:0%"></div></div>
+      <div class="progress-label" id="global-label">0%</div>
+    </div>
+  </div>
+  <div class="day-nav" id="day-nav"></div>
+</div>
+
+<div class="content" id="content"></div>
+
+
+<div class="pantry-section" id="sec-pantry">
+  <div class="pantry-header">
+    <div class="day-date">Living pantry</div>
+    <div class="pantry-title">What you have</div>
+    <div class="pantry-sub">Add items as you buy them. Remove as they run out.</div>
+  </div>
+
+  <div class="pantry-add-row">
+    <input class="pantry-input" id="pantry-input" placeholder="Add an item — chicken thighs, olive oil, rice..." onkeydown="if(event.key==='Enter')addPantryItem()"/>
+    <button class="pantry-add-btn" onclick="addPantryItem()">Add</button>
+  </div>
+  <div class="pantry-grid" id="pantry-grid"></div>
+
+  <div class="pantry-divider"></div>
+
+  <div class="ideas-section">
+    <div class="ideas-title">Generate meal ideas</div>
+    <div class="ideas-sub">Claude will suggest meals based on your pantry. You can also add things you are happy to buy — ideas are not limited to what you have.</div>
+
+    <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:6px;letter-spacing:.06em;text-transform:uppercase">What kind of meals?</div>
+    <div class="ideas-options">
+      <button class="idea-opt" onclick="toggleOpt(this)">quick weeknight</button>
+      <button class="idea-opt" onclick="toggleOpt(this)">air fryer</button>
+      <button class="idea-opt" onclick="toggleOpt(this)">rice cooker</button>
+      <button class="idea-opt" onclick="toggleOpt(this)">low histamine</button>
+      <button class="idea-opt" onclick="toggleOpt(this)">higher load day ok</button>
+      <button class="idea-opt" onclick="toggleOpt(this)">protein + veggie</button>
+      <button class="idea-opt" onclick="toggleOpt(this)">dinner for two</button>
+      <button class="idea-opt" onclick="toggleOpt(this)">solo serving</button>
+      <button class="idea-opt" onclick="toggleOpt(this)">something special</button>
+      <button class="idea-opt" onclick="toggleOpt(this)">use up what I have</button>
+    </div>
+
+    <textarea class="idea-notes" id="idea-notes" placeholder="Anything else Claude should know — how you feel today, what you are craving, what you want to avoid..."></textarea>
+
+    <div id="api-key-section" style="margin-bottom:.875rem">
+  <div style="font-size:11px;color:var(--text3);font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">Anthropic API key</div>
+  <div style="display:flex;gap:8px">
+    <input type="password" id="api-key-input" class="pantry-input" placeholder="sk-ant-..." style="font-family:var(--mono);font-size:12px"/>
+    <button class="pantry-add-btn" onclick="saveApiKey()">Save</button>
+  </div>
+  <div id="api-key-status" style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:5px"></div>
+</div>
+<button class="generate-btn" id="generate-btn" onclick="generateIdeas()">Generate meal ideas ↗</button>
+
+    <div class="ideas-loading" id="ideas-loading"><span>Thinking...</span></div>
+    <div class="ideas-result" id="ideas-result"></div>
+  </div>
+</div>
+
+<script>
+const DAYS = [
+  {
+    id:'sat1', date:'Saturday, April 18', name:'Eggs + beans + rice', short:'Sat 18',
+    badges:[{t:'No big cooking today',c:'badge-easy'},{t:'Eggs + pantry only',c:'badge-eggs'}],
+    thaw:{label:'Tonight before bed',text:'Move ribs from freezer to fridge right now if not already there — they are fresh so just keep refrigerated. Also check: are your chicken legs in the freezer? Leave them there for now.'},
+    meals:[
+      {
+        type:'Lunch', name:'Fried eggs over rice + black beans',
+        startTime:'Start rice at 10:45am', startLabel:'Start 10:45am — rice takes 60 min',
+        steps:[
+          {t:'<strong>10:45am</strong> — Add 1 cup rice + 1.5 cups water to rice cooker. Press cook. Walk away.'},
+          {t:'<strong>11:30am</strong> — Open and drain black beans. Warm in a small pan with a pinch of salt and garlic powder for 3 minutes.'},
+          {t:'<strong>11:40am</strong> — Crack 2 eggs into a pan with a drizzle of olive oil on medium heat. Fry until whites are set. Season with salt.'},
+          {t:'<strong>11:45am</strong> — Scoop rice into bowl. Eggs on top. Beans on the side. Done.'},
+        ],
+        save:null, tip:null
+      },
+      {
+        type:'Dinner', name:'Scrambled eggs + zucchini + leftover rice',
+        startTime:'Start at 5:05pm', startLabel:'Start 5:05pm — 10 min total',
+        steps:[
+          {t:'<strong>5:05pm</strong> — Slice half a zucchini into half-moons.'},
+          {t:'Heat olive oil in a pan on medium. Add zucchini + pinch of salt. Cook 4–5 minutes until lightly golden.'},
+          {t:'Crack 2–3 eggs into the pan right on top of the zucchini. Stir gently until just set.'},
+          {t:'<strong>5:15pm</strong> — Serve over leftover rice from lunch. Done.'},
+        ],
+        save:null, tip:'Rice stays warm in the cooker from lunch — no reheating needed.'
+      }
+    ]
+  },
+  {
+    id:'sun', date:'Sunday, April 19', name:'Eggs for lunch + BBQ ribs night', short:'Sun 19',
+    badges:[{t:'Cook ribs tonight',c:'badge-cook'},{t:'BBQ sauce — higher load',c:'badge-caution'}],
+    thaw:{label:'Tonight before bed',text:'Move 4 chicken legs from freezer to fridge. They need overnight to thaw for Tuesday dinner.'},
+    meals:[
+      {
+        type:'Lunch', name:'Fried eggs + black beans + rice',
+        startTime:'Start rice at 10:45am', startLabel:'Start 10:45am — rice takes 60 min',
+        steps:[
+          {t:'<strong>10:45am</strong> — Rice cooker: 1 cup rice + 1.5 cups water. Press cook.'},
+          {t:'<strong>11:30am</strong> — Warm black beans in a small pan with salt and garlic powder.'},
+          {t:'<strong>11:40am</strong> — Fry 2 eggs in olive oil. Season with salt.'},
+          {t:'<strong>11:45am</strong> — Bowl of rice, eggs on top, beans alongside.'},
+        ],
+        save:null, tip:null
+      },
+      {
+        type:'Dinner', name:'BBQ baby back ribs + potato wedges + zucchini',
+        startTime:'Start at 4:15pm', startLabel:'Start 4:15pm — 1 hour total',
+        steps:[
+          {t:'<strong>4:00pm</strong> — Take ribs out of fridge to come to room temp.'},
+          {t:'<strong>4:15pm</strong> — Rub ribs all over: olive oil + 1 tsp cumin + 1 tsp garlic powder + ½ tsp onion powder + ½ tsp dried oregano + salt. Both sides.'},
+          {t:'Cut rack in half. Stand both pieces upright in air fryer basket, meaty side facing out against the walls.'},
+          {t:'<strong>4:20pm</strong> — Air fryer 380°F for 25 minutes.'},
+          {t:'While ribs cook: cut 3 potatoes into wedges. Toss with olive oil and salt.'},
+          {t:'<strong>4:45pm</strong> — Flip ribs. Brush generously with BBQ sauce. 10 more minutes at 380°F.'},
+          {t:'<strong>4:55pm</strong> — Remove ribs, rest on plate. Add potato wedges to air fryer at 400°F for 18 min. Shake basket at 9 min.'},
+          {t:'While wedges cook: slice 1 zucchini into half-moons. Toss with olive oil and salt.'},
+          {t:'<strong>5:13pm</strong> — Remove wedges. Add zucchini at 400°F for 8 minutes.'},
+          {t:'<strong>5:15pm</strong> — Plate everything. Eat.'},
+        ],
+        save:'Put 2–3 ribs + half the wedges in a container in the fridge. Monday\'s lunch.',
+        tip:'Standing ribs upright with meaty side facing out is the trick that makes them cook evenly in a small basket.'
+      }
+    ]
+  },
+  {
+    id:'mon', date:'Monday, April 20', name:'Leftover ribs + chicken legs night', short:'Mon 20',
+    badges:[{t:'Cook 4 chicken legs',c:'badge-cook'},{t:'Paprika — moderate load',c:'badge-caution'}],
+    thaw:{label:'Tonight before bed',text:'Move 4 more chicken thighs from freezer to fridge. They need overnight to thaw for Wednesday dinner.'},
+    meals:[
+      {
+        type:'Lunch', name:'Leftover BBQ ribs + reheated wedges',
+        startTime:'Ready by 11:45am', startLabel:'Start 11:35am — 10 min',
+        steps:[
+          {t:'<strong>11:35am</strong> — Take ribs and wedges out of fridge.'},
+          {t:'Put everything in air fryer at 375°F for 6–8 minutes.'},
+          {t:'<strong>11:45am</strong> — Done. They come back perfectly crispy.'},
+        ],
+        save:null, tip:null
+      },
+      {
+        type:'Dinner', name:'Smoked paprika chicken legs + fries + fry sauce',
+        startTime:'Start at 4:20pm', startLabel:'Start 4:20pm — 55 min total',
+        steps:[
+          {t:'<strong>4:20pm</strong> — Make fry sauce: 3 tbsp mayo + 1½ tbsp ketchup + ½ tsp garlic powder + pinch of salt. Stir together. Put in fridge.'},
+          {t:'Cut 4 medium potatoes into fry shapes. Put in a bowl of cold water for 10 minutes. This makes them crispy.'},
+          {t:'Pat 4 chicken legs completely dry with paper towel. This is the key to crispy skin.'},
+          {t:'Rub chicken with: olive oil + 1 tsp smoked paprika + 1 tsp garlic powder + ½ tsp onion powder + ½ tsp dried rosemary + salt.'},
+          {t:'<strong>4:30pm</strong> — Drain potatoes. Pat completely dry. Toss with olive oil and salt.'},
+          {t:'Air fryer: fries at 380°F for 20 minutes. Shake at 10 minutes.'},
+          {t:'<strong>4:50pm</strong> — Remove fries. Add chicken legs at 400°F for 25 minutes. Flip at 12 minutes.'},
+          {t:'<strong>5:15pm</strong> — Plate fries with fry sauce. Chicken alongside. Eat.'},
+        ],
+        save:'Put 2 chicken legs + half the fries in a container. Tuesday\'s lunch.',
+        tip:'Completely dry chicken before seasoning. Moisture is the enemy of crispy skin.'
+      }
+    ]
+  },
+  {
+    id:'tue', date:'Tuesday, April 21', name:'Leftover legs + herb thighs night', short:'Tue 21',
+    badges:[{t:'Cook 4 thighs tonight',c:'badge-cook'},{t:'Lower histamine dinner',c:'badge-easy'}],
+    thaw:{label:'Tonight before bed',text:'Check that the 4 chicken thighs from Monday night are fully thawed. Move 2 chicken breasts from freezer to fridge — wait, breasts are fresh so they are fine. Nothing to move tonight.'},
+    meals:[
+      {
+        type:'Lunch', name:'Leftover chicken legs + reheated fries',
+        startTime:'Start 11:35am', startLabel:'Start 11:35am — 10 min',
+        steps:[
+          {t:'<strong>11:35am</strong> — Air fryer at 375°F for 6–8 minutes.'},
+          {t:'<strong>11:45am</strong> — Use leftover fry sauce if any remains.'},
+        ],
+        save:null, tip:null
+      },
+      {
+        type:'Dinner', name:'Herb chicken thighs + baked potato + zucchini',
+        startTime:'Start at 4:20pm', startLabel:'Start 4:20pm — 55 min total',
+        steps:[
+          {t:'<strong>4:20pm</strong> — Poke 2 large potatoes all over with a fork. Rub with olive oil and salt.'},
+          {t:'Air fryer: potatoes at 400°F for 40 minutes. Flip at 20 minutes.'},
+          {t:'While potatoes cook: pat 4 chicken thighs completely dry.'},
+          {t:'Rub chicken with: olive oil + 1 tsp dried thyme + ½ tsp dried sage + 1 tsp garlic powder + salt.'},
+          {t:'<strong>4:40pm</strong> — Pull potatoes out. Add chicken skin-side down at 400°F for 22 minutes. Flip at 12 min. Put potatoes back in alongside to stay warm.'},
+          {t:'<strong>5:02pm</strong> — Remove chicken and potatoes. Slice 1 zucchini, toss with olive oil and salt. Air fryer at 400°F for 8 minutes.'},
+          {t:'<strong>5:15pm</strong> — Plate everything. Split potato open, drizzle olive oil, pinch of salt.'},
+        ],
+        save:'Put 2 chicken thighs + 1 potato in a container. Wednesday\'s lunch.',
+        tip:'Thyme and sage together smells incredible while cooking. This is your gentlest dinner of the week.'
+      }
+    ]
+  },
+  {
+    id:'wed', date:'Wednesday, April 22', name:'Leftover thighs + chicken breast night', short:'Wed 22',
+    badges:[{t:'Fresh chicken breasts tonight',c:'badge-cook'},{t:'Lime zest — moderate',c:'badge-caution'}],
+    thaw:{label:'Nothing to thaw',text:'No freezer action needed tonight. You have everything you need for the rest of the week already thawing or fresh.'},
+    meals:[
+      {
+        type:'Lunch', name:'Leftover herb chicken thigh + baked potato',
+        startTime:'Start 11:35am', startLabel:'Start 11:35am — 10 min',
+        steps:[
+          {t:'<strong>11:35am</strong> — Air fryer at 375°F for 6 minutes.'},
+          {t:'<strong>11:45am</strong> — Split potato open. Drizzle olive oil and salt.'},
+        ],
+        save:null, tip:null
+      },
+      {
+        type:'Dinner', name:'Cumin-lime chicken breast + fries + broccoli + fry sauce',
+        startTime:'Start at 4:25pm', startLabel:'Start 4:25pm — 50 min total',
+        steps:[
+          {t:'<strong>4:25pm</strong> — Make fry sauce: 3 tbsp mayo + 1½ tbsp ketchup + ½ tsp garlic powder + pinch of salt. Fridge.'},
+          {t:'Cut 4 potatoes into fries. Cold water soak 10 minutes. Pat completely dry.'},
+          {t:'<strong>4:35pm</strong> — Toss fries with olive oil and salt. Air fryer 380°F for 20 minutes. Shake at 5, 10, 15 min.'},
+          {t:'While fries cook: pound both chicken breasts to even thickness with your fist or a heavy pan.'},
+          {t:'Zest 1 lime — grate just the green outside skin. Do not cut into the white part. Set zest aside.'},
+          {t:'Rub chicken with: olive oil + 1 tsp cumin + ½ tsp coriander + 1 tsp garlic powder + all the lime zest + salt.'},
+          {t:'<strong>4:55pm</strong> — Pull fries. Add chicken at 375°F for 16 minutes.'},
+          {t:'While chicken cooks: cut broccoli into florets. Toss with olive oil and salt.'},
+          {t:'<strong>5:07pm</strong> — Rest chicken 5 minutes. Add broccoli at 400°F for 8 minutes.'},
+          {t:'<strong>5:15pm</strong> — Slice chicken. Scatter fresh cilantro over everything.'},
+        ],
+        save:'Put 1 chicken breast + half the fries in a container. Thursday\'s lunch.',
+        tip:'Lime zest only — not juice. You get all the citrus brightness with far less histamine load.'
+      }
+    ]
+  },
+  {
+    id:'thu', date:'Thursday, April 23', name:'Leftover breast + smoky legs + mango salsa', short:'Thu 23',
+    badges:[{t:'Cook 4 more chicken legs',c:'badge-cook'},{t:'Mango salsa night',c:'badge-caution'}],
+    thaw:{label:'Nothing to thaw',text:'All proteins for the rest of the week are already thawed or fresh. No action needed.'},
+    meals:[
+      {
+        type:'Lunch', name:'Leftover cumin chicken breast + reheated fries',
+        startTime:'Start 11:35am', startLabel:'Start 11:35am — 10 min',
+        steps:[
+          {t:'<strong>11:35am</strong> — Fries: air fryer at 380°F for 5 minutes.'},
+          {t:'Chicken: reheat at 375°F for 5 min, or slice and eat cold — genuinely good both ways.'},
+          {t:'<strong>11:45am</strong> — Leftover fry sauce if any remains.'},
+        ],
+        save:null, tip:null
+      },
+      {
+        type:'Dinner', name:'Smoky chicken legs + mango salsa + zucchini + fries',
+        startTime:'Start at 4:20pm', startLabel:'Start 4:20pm — 55 min total',
+        steps:[
+          {t:'<strong>4:20pm</strong> — Make mango salsa now so flavours develop: dice 1 ripe mango into small pieces. Roughly chop a small handful of cilantro. Mix with 1 tbsp olive oil + pinch of salt. Set aside.'},
+          {t:'Cut 4 potatoes into fries. Cold water soak 10 minutes. Pat dry.'},
+          {t:'Pat 4 chicken legs completely dry.'},
+          {t:'Rub chicken with: olive oil + 1 tsp smoked paprika + ½ tsp cumin + ½ tsp dried oregano + 1 tsp garlic powder + salt.'},
+          {t:'<strong>4:30pm</strong> — Fries at 380°F for 20 minutes. Shake at 10 min.'},
+          {t:'<strong>4:50pm</strong> — Pull fries. Chicken at 400°F for 25 minutes. Flip at 12 min.'},
+          {t:'While chicken cooks: slice 1 zucchini, toss with olive oil and salt.'},
+          {t:'<strong>5:12pm</strong> — Rest chicken. Zucchini at 400°F for 8 minutes.'},
+          {t:'<strong>5:15pm</strong> — Plate chicken legs with mango salsa spooned generously on top. Fries and zucchini alongside.'},
+        ],
+        save:'Put 2 chicken legs + leftover fries in a container. Friday\'s lunch. Use ALL the mango salsa tonight — do not save it.',
+        tip:'Use all the mango salsa tonight. Cut mango does not keep well and the salsa is the star of this meal.'
+      }
+    ]
+  },
+  {
+    id:'fri', date:'Friday, April 24', name:'Leftover smoky legs + coconut rice thighs', short:'Fri 24',
+    badges:[{t:'Best dinner of the week',c:'badge-cook'},{t:'Lower histamine',c:'badge-easy'}],
+    thaw:{label:'Nothing to thaw',text:'No action needed. Enjoy the fact that you have made it to Friday with zero effort.'},
+    meals:[
+      {
+        type:'Lunch', name:'Leftover smoky chicken legs + reheated fries',
+        startTime:'Start 11:35am', startLabel:'Start 11:35am — 10 min',
+        steps:[
+          {t:'<strong>11:35am</strong> — Air fryer at 375°F for 6–8 minutes.'},
+          {t:'<strong>11:45am</strong> — Good cold too if you cannot be bothered.'},
+        ],
+        save:null, tip:null
+      },
+      {
+        type:'Dinner', name:'Crispy chicken thighs + coconut rice + broccoli',
+        startTime:'Start rice at 4:15pm', startLabel:'Start rice 4:15pm — rice takes 60 min',
+        steps:[
+          {t:'<strong>4:15pm</strong> — Rice cooker: 1 cup jasmine rice. Pour in 1 full can of coconut milk instead of water. Pinch of salt. Press cook. Walk away.'},
+          {t:'<strong>4:50pm</strong> — Pat 4 chicken thighs completely dry. Rub with: olive oil + 1 tsp garlic powder + ½ tsp ginger powder + salt.'},
+          {t:'<strong>4:53pm</strong> — Air fryer: chicken skin-side down at 400°F for 22 minutes. Flip at 12 min.'},
+          {t:'<strong>5:05pm</strong> — Cut broccoli into florets. Toss with olive oil and salt.'},
+          {t:'<strong>5:07pm</strong> — Rest chicken. Broccoli at 400°F for 8 minutes.'},
+          {t:'<strong>5:15pm</strong> — Plate: scoop coconut rice, chicken thighs on top, broccoli alongside. Scatter fresh cilantro over everything.'},
+        ],
+        save:'Put 2 chicken thighs + leftover coconut rice in containers. Saturday\'s lunch.',
+        tip:'Coconut rice is extraordinary for zero effort. The rice cooker does everything and the result tastes restaurant-quality.'
+      }
+    ]
+  },
+  {
+    id:'sat2', date:'Saturday, April 25', name:'Last leftovers + rice pudding treat', short:'Sat 25',
+    badges:[{t:'No cooking required',c:'badge-easy'},{t:'Dairy treat — lower load day',c:'badge-caution'}],
+    thaw:null,
+    meals:[
+      {
+        type:'Lunch', name:'Leftover coconut rice thighs',
+        startTime:'Start 11:35am', startLabel:'Start 11:35am — 10 min',
+        steps:[
+          {t:'<strong>11:35am</strong> — Air fryer at 375°F for 6 minutes for the chicken.'},
+          {t:'Rice: add a small splash of water to the container. Microwave 60 seconds, or warm in a small pan.'},
+          {t:'<strong>11:45am</strong> — Eat and feel good about yourself. You made it through the whole week.'},
+        ],
+        save:null, tip:null
+      },
+      {
+        type:'Treat — make any time', name:'Rice pudding',
+        startTime:'35 min hands-off', startLabel:'Start 35 min before you want it',
+        steps:[
+          {t:'Pour 2 cups whole milk into a medium pot.'},
+          {t:'Add ½ cup short grain rice + 2 tbsp brown sugar + pinch of salt. Stir everything together.'},
+          {t:'Turn heat to medium. Stir until it just starts to bubble, then turn to LOW.'},
+          {t:'Simmer on low for 25–30 minutes. Stir every few minutes so it does not stick to the bottom.'},
+          {t:'Ready when thick, creamy, and rice is completely soft. Taste and add more sugar if you want.'},
+          {t:'Take off heat. Stir in 1 tbsp butter + 1 tsp vanilla extract.'},
+          {t:'Spoon into a bowl. Dust with ground cinnamon. Eat one portion now, refrigerate the other.'},
+        ],
+        save:null,
+        tip:'Save this for a day when your histamine load has been low. Dairy is a variable trigger — this is a treat not an everyday food. You have earned it.'
+      }
+    ]
+  }
+];
+
+const STORAGE_KEY = 'meal_steps_v1';
+
+function getChecked(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'); }catch(e){ return {}; }
+}
+function saveChecked(obj){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+}
+
+function stepKey(dayId, mealIdx, stepIdx){
+  return `${dayId}_${mealIdx}_${stepIdx}`;
+}
+
+function totalSteps(){
+  return DAYS.reduce((a,d)=>a+d.meals.reduce((b,m)=>b+m.steps.length,0),0);
+}
+
+function doneSteps(){
+  const checked=getChecked();
+  return Object.values(checked).filter(Boolean).length;
+}
+
+function updateProgress(){
+  const pct=Math.round((doneSteps()/totalSteps())*100);
+  document.getElementById('global-progress').style.width=pct+'%';
+  document.getElementById('global-label').textContent=pct+'%';
+}
+
+function buildNav(){
+  const nav=document.getElementById('day-nav');
+  nav.innerHTML='';
+  DAYS.forEach((d,i)=>{
+    const btn=document.createElement('button');
+    btn.className='day-pill'+(i===0?' active':'');
+    btn.id='nav-'+d.id;
+    btn.textContent=d.short;
+    btn.onclick=()=>showDay(d.id);
+    nav.appendChild(btn);
+  });
+  // Add pantry tab
+  const pantryBtn=document.createElement('button');
+  pantryBtn.className='day-pill';
+  pantryBtn.id='nav-pantry';
+  pantryBtn.textContent='Pantry + Ideas';
+  pantryBtn.style.cssText='background:rgba(125,212,184,.1);border-color:rgba(125,212,184,.3);color:var(--teal)';
+  pantryBtn.onclick=showPantry;
+  nav.appendChild(pantryBtn);
+}
+
+function showDay(id){
+  document.querySelectorAll('.day-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.day-pill').forEach(b=>b.classList.remove('active'));
+  const sec=document.getElementById('sec-'+id);
+  if(sec) sec.classList.add('active');
+  const btn=document.getElementById('nav-'+id);
+  if(btn) btn.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function toggleStep(dayId, mealIdx, stepIdx, el){
+  const key=stepKey(dayId,mealIdx,stepIdx);
+  const checked=getChecked();
+  checked[key]=!checked[key];
+  saveChecked(checked);
+  if(checked[key]){
+    el.classList.add('done');
+  } else {
+    el.classList.remove('done');
+  }
+  updateProgress();
+  checkMealComplete(dayId, mealIdx);
+}
+
+function checkMealComplete(dayId, mealIdx){
+  const day=DAYS.find(d=>d.id===dayId);
+  if(!day) return;
+  const meal=day.meals[mealIdx];
+  const checked=getChecked();
+  const allDone=meal.steps.every((_,si)=>checked[stepKey(dayId,mealIdx,si)]);
+  const banner=document.getElementById(`banner-${dayId}-${mealIdx}`);
+  if(banner) banner.classList.toggle('show', allDone);
+}
+
+function resetMeal(dayId, mealIdx){
+  const day=DAYS.find(d=>d.id===dayId);
+  if(!day) return;
+  const meal=day.meals[mealIdx];
+  const checked=getChecked();
+  meal.steps.forEach((_,si)=>{ delete checked[stepKey(dayId,mealIdx,si)]; });
+  saveChecked(checked);
+  meal.steps.forEach((_,si)=>{
+    const el=document.getElementById(`step-${dayId}-${mealIdx}-${si}`);
+    if(el) el.classList.remove('done');
+  });
+  const banner=document.getElementById(`banner-${dayId}-${mealIdx}`);
+  if(banner) banner.classList.remove('show');
+  updateProgress();
+}
+
+function buildContent(){
+  const content=document.getElementById('content');
+  const checked=getChecked();
+
+  DAYS.forEach((day,di)=>{
+    const sec=document.createElement('div');
+    sec.className='day-section'+(di===0?' active':'');
+    sec.id='sec-'+day.id;
+
+    let html='';
+
+    // Day header
+    html+=`<div class="day-header">
+      <div class="day-date">${day.date}</div>
+      <div class="day-name">${day.name}</div>
+      <div class="day-badges">${day.badges.map(b=>`<span class="badge ${b.c}">${b.t}</span>`).join('')}</div>
+    </div>`;
+
+    // Thaw alert
+    if(day.thaw){
+      html+=`<div class="thaw-alert">
+        <div class="thaw-dot"></div>
+        <div class="thaw-text"><div class="thaw-label">${day.thaw.label}</div>${day.thaw.text}</div>
+      </div>`;
+    }
+
+    // Meals
+    day.meals.forEach((meal,mi)=>{
+      html+=`<div class="meal-card">
+        <div class="meal-card-header">
+          <div class="meal-type-label">${meal.type}</div>
+          <div class="meal-name">${meal.name}</div>
+          <div class="start-time"><div class="start-time-icon"></div><div class="start-time-text">${meal.startLabel}</div></div>
+        </div>
+        <div class="steps-list">`;
+
+      meal.steps.forEach((step,si)=>{
+        const key=stepKey(day.id,mi,si);
+        const done=checked[key]?'done':'';
+        html+=`<div class="step-item ${done}" id="step-${day.id}-${mi}-${si}" onclick="toggleStep('${day.id}',${mi},${si},this)">
+          <div class="step-check">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+              <path d="M1 4L3.5 6.5L9 1" stroke="#0f0f0e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="step-num">${si+1}</div>
+          <div class="step-text">${step.t}</div>
+        </div>`;
+      });
+
+      html+=`</div>`;
+
+      if(meal.tip){
+        html+=`<div class="cook-tip"><div class="tip-dot"></div><div class="tip-text">${meal.tip}</div></div>`;
+      }
+
+      if(meal.save){
+        html+=`<div class="save-note"><div class="save-dot"></div><div class="save-text">${meal.save}</div></div>`;
+      }
+
+      html+=`<div class="meal-reset"><button class="reset-btn" onclick="resetMeal('${day.id}',${mi});event.stopPropagation()">reset steps</button></div>`;
+      html+=`<div class="complete-banner" id="banner-${day.id}-${mi}"><p>Done! ${mi===0?'Lunch complete — enjoy.':'Dinner complete — well done.'}</p></div>`;
+      html+=`</div>`;
+    });
+
+    sec.innerHTML=html;
+    content.appendChild(sec);
+
+    // Check existing completion states
+    day.meals.forEach((_,mi)=>checkMealComplete(day.id,mi));
+  });
+}
+
+
+// ── PANTRY ────────────────────────────────────────────
+const PANTRY_KEY = 'hl_pantry_v1';
+
+function getPantry(){
+  try{ return JSON.parse(localStorage.getItem(PANTRY_KEY)||'[]'); }catch(e){ return []; }
+}
+function savePantry(items){
+  localStorage.setItem(PANTRY_KEY, JSON.stringify(items));
+}
+
+function renderPantry(){
+  const grid = document.getElementById('pantry-grid');
+  const items = getPantry();
+  if(items.length === 0){
+    grid.innerHTML = '<div class="pantry-empty">No items yet — add your first one above.</div>';
+    return;
+  }
+  grid.innerHTML = items.map((item, i) => `
+    <div class="pantry-chip">
+      ${item}
+      <button class="pantry-chip-remove" onclick="removePantryItem(${i})" title="Remove">&times;</button>
+    </div>
+  `).join('');
+}
+
+function addPantryItem(){
+  const input = document.getElementById('pantry-input');
+  const val = input.value.trim();
+  if(!val) return;
+  const items = getPantry();
+  const newItems = val.split(',').map(s=>s.trim()).filter(Boolean);
+  newItems.forEach(item => {
+    if(!items.includes(item)) items.push(item);
+  });
+  savePantry(items);
+  input.value = '';
+  renderPantry();
+}
+
+function removePantryItem(idx){
+  const items = getPantry();
+  items.splice(idx, 1);
+  savePantry(items);
+  renderPantry();
+}
+
+function toggleOpt(btn){
+  btn.classList.toggle('sel');
+}
+
+function showPantry(){
+  document.querySelectorAll('.day-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.day-pill').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-pantry').classList.add('active');
+  document.getElementById('nav-pantry').classList.add('active');
+  renderPantry();
+  window.scrollTo(0,0);
+}
+
+function saveApiKey(){
+  const val = document.getElementById('api-key-input').value.trim();
+  if(!val){ alert('Please paste your API key first.'); return; }
+  localStorage.setItem('hl_api_key', val);
+  document.getElementById('api-key-status').textContent = 'Key saved.';
+  document.getElementById('api-key-status').style.color = 'var(--teal)';
+  document.getElementById('api-key-input').value = '';
+  loadApiKeyStatus();
+}
+
+function loadApiKeyStatus(){
+  const key = localStorage.getItem('hl_api_key');
+  const status = document.getElementById('api-key-status');
+  const input = document.getElementById('api-key-input');
+  if(!status) return;
+  if(key){
+    status.textContent = 'API key saved — ready to generate.';
+    status.style.color = 'var(--teal)';
+    input.placeholder = 'Key saved — paste new key to update';
+  } else {
+    status.textContent = 'No key saved yet. Get one free at console.anthropic.com';
+    status.style.color = 'var(--text3)';
+  }
+}
+
+async function generateIdeas(){
+  const pantry = getPantry();
+  const opts = [...document.querySelectorAll('.idea-opt.sel')].map(b=>b.textContent).join(', ');
+  const notes = document.getElementById('idea-notes').value.trim();
+  const btn = document.getElementById('generate-btn');
+  const loading = document.getElementById('ideas-loading');
+  const result = document.getElementById('ideas-result');
+
+  btn.disabled = true;
+  loading.classList.add('show');
+  result.classList.remove('show');
+  result.textContent = '';
+
+  const pantryList = pantry.length > 0 ? pantry.join(', ') : 'No pantry items listed yet';
+  const optsList = opts || 'No specific preferences selected';
+
+  const prompt = `You are a meal planning assistant for someone managing MCAS (mast cell activation syndrome) and histamine intolerance. They eat gluten-free. Their confirmed personal triggers are: gluten, dairy (variable), high-sugar foods, chocolate, tomatoes, all peppers, citrus fruits (though lime ZEST is ok in small amounts), avocado, melon, oat milk, sparkling water, sorbitol/xylitol, alcohol, fermented foods, aged cheeses, canned fish, cured meats.
+
+Their current pantry contains: ${pantryList}
+
+Meal preferences for this request: ${optsList}
+
+Additional context: ${notes || 'None provided'}
+
+They cook with an air fryer and a rice cooker. They want low-lift meals that are genuinely delicious and make them happy. Protein plus veggie at every meal. Fresh proteins should be cooked same day.
+
+Please suggest 4-5 specific meal ideas. For each one:
+- Give it an appetizing name
+- List what they need (noting what they already have vs what to buy)
+- Give a one-sentence description of why it is delicious
+- Note if it is lower or higher histamine load
+
+Keep it practical, specific, and genuinely enticing. Format clearly with each meal separated.`;
+
+  try {
+    const apiKey = localStorage.getItem('hl_api_key');
+    if(!apiKey){
+      result.textContent = 'No API key saved. Paste your Anthropic API key above and click Save first.';
+      result.classList.add('show');
+      loading.classList.remove('show');
+      btn.disabled = false;
+      return;
+    }
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content?.map(c => c.text || '').join('') || 'No response received.';
+    result.textContent = text;
+    result.classList.add('show');
+  } catch(e) {
+    result.textContent = 'Could not connect to Claude. Make sure you are online and try again.';
+    result.classList.add('show');
+  }
+
+  loading.classList.remove('show');
+  btn.disabled = false;
+}
+
+
+buildNav();
+buildContent();
+updateProgress();
+renderPantry();
+loadApiKeyStatus();
+</script>
+</body>
+</html>
