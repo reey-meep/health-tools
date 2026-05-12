@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Daily Score">
+<title>Daily Self-Care Score</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+:root{
+  --bg:#0f0f0e;--surface:#161614;--card:#1e1e1b;--card2:#242421;
+  --border:#2a2a26;--border2:#363630;
+  --text:#e8e4d8;--text2:#9a9488;--text3:#5a5750;
+  --purple:#c4b8f8;--pdim:#7b6fd4;--pbg:#1e1a3a;
+  --teal:#7dd4b8;--tbg:#0a2420;
+  --amber:#f0b84a;--abg:#2a1e06;
+  --red:#f4826a;--rbg:#2a0f0a;
+  --green:#8ecf6a;--gbg:#152108;
+  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
+  --r:10px;--rl:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh}
+.nav{display:flex;background:var(--surface);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:100;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{flex:1;min-width:55px;padding:13px 4px 11px;font-size:10px;font-weight:500;color:var(--text3);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;font-family:var(--mono);letter-spacing:.04em}
+.nav-btn.active{color:var(--purple);border-bottom-color:var(--purple)}
+.page{display:none;padding:1rem;max-width:680px;margin:0 auto;padding-bottom:5rem}
+.page.active{display:block}
+
+/* RING */
+.ring-wrap{display:flex;flex-direction:column;align-items:center;padding:1.25rem 0 .5rem}
+.ring{position:relative;width:150px;height:150px}
+.ring svg{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--border2);stroke-width:10}
+.ring-fill{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .5s,stroke .3s}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-num{font-size:40px;font-weight:600;font-family:var(--mono);line-height:1}
+.ring-denom{font-size:11px;font-family:var(--mono);color:var(--text3)}
+.ring-grade{font-size:13px;font-weight:500;margin-top:.4rem;font-family:var(--mono)}
+.ring-sub{font-size:11px;color:var(--text3);margin-top:2px;text-align:center}
+.pace-badge{font-family:var(--mono);font-size:11px;padding:4px 12px;border-radius:99px;margin-top:.5rem;font-weight:500}
+.pace-green{background:rgba(142,207,106,.12);color:var(--green);border:0.5px solid rgba(142,207,106,.3)}
+.pace-yellow{background:rgba(240,184,74,.12);color:var(--amber);border:0.5px solid rgba(240,184,74,.3)}
+.pace-red{background:rgba(244,130,106,.12);color:var(--red);border:0.5px solid rgba(244,130,106,.3)}
+
+/* SECTIONS */
+.sec{font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin:1.1rem 0 .4rem;font-family:var(--mono);display:flex;align-items:center;gap:8px}
+.sec-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sec-pts{margin-left:auto;font-size:9px}
+
+/* CHECKBOXES */
+.tasks{display:flex;flex-direction:column;gap:5px}
+.task{display:flex;align-items:center;gap:9px;background:var(--card);border:0.5px solid var(--border);border-radius:8px;padding:9px 11px;cursor:pointer;user-select:none;transition:background .12s}
+.task.on{background:var(--card2)}
+.task.neg.on{background:var(--rbg);border-color:rgba(244,130,106,.35)}
+.task.neg{border-color:rgba(244,130,106,.15)}
+.chk{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.task.on .chk{background:var(--teal);border-color:var(--teal)}
+.task.neg.on .chk{background:var(--red);border-color:var(--red)}
+.chk svg{display:none}
+.task.on .chk svg,.task.neg.on .chk svg{display:block}
+.t-name{font-size:12.5px;line-height:1.4;flex:1;color:var(--text2)}
+.task.on .t-name{color:var(--text3)}
+.t-pts{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:99px;flex-shrink:0}
+.pp{background:rgba(142,207,106,.08);color:var(--green)}
+.np{background:rgba(244,130,106,.08);color:var(--red)}
+
+/* COLLAPSIBLE */
+.col-header{display:flex;align-items:center;gap:8px;background:var(--card);border:0.5px solid var(--border);border-radius:8px;padding:9px 11px;cursor:pointer;margin-bottom:4px}
+.col-title{font-size:12.5px;font-weight:500;color:var(--text);flex:1}
+.col-count{font-family:var(--mono);font-size:10px;color:var(--teal)}
+.col-arrow{font-size:10px;color:var(--text3);transition:transform .2s}
+.col-arrow.open{transform:rotate(180deg)}
+.col-body{display:none;padding:0 0 4px 8px}
+.col-body.open{display:block}
+.subsec{font-size:9px;color:var(--text3);font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;margin:.6rem 0 .3rem .5rem}
+
+/* FLOW CARDS */
+.flow-card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--rl);padding:.875rem 1rem;margin-bottom:6px;cursor:pointer;transition:border-color .15s}
+.flow-card:hover{border-color:var(--border2)}
+.flow-card.has-data{border-color:rgba(125,212,184,.3);background:rgba(125,212,184,.04)}
+.fc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
+.fc-title{font-size:13px;font-weight:500;color:var(--text)}
+.fc-pts{font-family:var(--mono);font-size:11px;color:var(--teal)}
+.fc-sub{font-size:12px;color:var(--text3)}
+.fc-flag{font-size:10px;font-family:var(--mono);color:var(--amber);margin-top:3px}
+.fc-add{font-size:11px;color:var(--pdim);font-family:var(--mono);margin-top:2px}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--surface);border:0.5px solid var(--border2);border-radius:20px 20px 0 0;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;padding:1.25rem;padding-bottom:2rem}
+.modal-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem}
+.modal-title{font-size:17px;font-weight:600}
+.modal-close{background:none;border:0.5px solid var(--border2);border-radius:50%;width:28px;height:28px;color:var(--text3);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.q-label{font-size:10px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.q-text{font-size:16px;font-weight:500;margin-bottom:1rem;line-height:1.35}
+.opts-col{display:flex;flex-direction:column;gap:6px;margin-bottom:1rem}
+.opt-btn{padding:11px 14px;background:var(--card);border:0.5px solid var(--border2);border-radius:8px;font-size:13px;cursor:pointer;text-align:left;color:var(--text2);transition:all .12s}
+.opt-btn:hover{border-color:var(--pdim);color:var(--text)}
+.opt-btn.sel{background:var(--pbg);border-color:var(--pdim);color:var(--purple);font-weight:500}
+.pills-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:1rem}
+.pill-btn{padding:7px 14px;background:var(--card);border:0.5px solid var(--border2);border-radius:99px;font-size:12px;cursor:pointer;color:var(--text2);transition:all .12s;font-family:var(--mono)}
+.pill-btn:hover{border-color:var(--pdim)}
+.pill-btn.sel{background:var(--pbg);border-color:var(--pdim);color:var(--purple)}
+.text-in{width:100%;background:var(--card);border:0.5px solid var(--border2);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--text);font-family:var(--sans);outline:none;resize:none;line-height:1.5;margin-bottom:1rem;min-height:70px}
+.text-in:focus{border-color:var(--pdim)}
+.next-btn{width:100%;padding:13px;background:var(--pdim);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:opacity .15s}
+.next-btn:hover{opacity:.88}
+.next-btn:disabled{opacity:.3;cursor:default}
+.back-btn{width:100%;padding:10px;background:none;border:none;font-size:13px;color:var(--text3);cursor:pointer;margin-top:6px}
+.flag-box{background:rgba(240,184,74,.08);border:0.5px solid rgba(240,184,74,.3);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--amber);font-family:var(--mono);margin-bottom:1rem;line-height:1.5}
+.pts-preview{background:rgba(125,212,184,.08);border:0.5px solid rgba(125,212,184,.2);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--teal);font-family:var(--mono);margin-bottom:.75rem;text-align:center}
+.done-msg{text-align:center;padding:1.5rem 0}
+.done-icon{font-size:36px;margin-bottom:.75rem}
+.done-title{font-size:18px;font-weight:500;margin-bottom:6px}
+.done-sub{font-size:13px;color:var(--text2);line-height:1.6}
+.done-pts{font-family:var(--mono);font-size:22px;color:var(--teal);margin-top:.75rem}
+
+/* DRINK LOG */
+.drink-entries{display:flex;flex-direction:column;gap:4px;margin-bottom:.5rem}
+.drink-entry{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--card);border:0.5px solid var(--border);border-radius:7px}
+.drink-name{font-size:12px;flex:1;color:var(--text2)}
+.drink-pts{font-family:var(--mono);font-size:10px;color:var(--teal)}
+.drink-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0 3px}
+.drink-del:hover{color:var(--red)}
+.drink-add-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:.5rem}
+.drink-type-btn{padding:6px 12px;background:var(--card);border:0.5px solid var(--border2);border-radius:99px;font-size:11px;color:var(--text2);cursor:pointer;font-family:var(--mono);transition:all .12s;white-space:nowrap}
+.drink-type-btn:hover{border-color:var(--teal);color:var(--teal)}
+
+/* CHECKIN FAB */
+.ci-fab{position:fixed;bottom:1.5rem;right:1.25rem;background:var(--pdim);border:none;border-radius:99px;padding:10px 16px;color:#fff;font-family:var(--mono);font-size:11px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.4);z-index:150;display:flex;align-items:center;gap:6px}
+.fab-dot{width:7px;height:7px;border-radius:50%;background:var(--amber)}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+.fab-dot.urgent{background:var(--red);animation:pulse 1.2s infinite}
+
+/* HISTORY */
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:.75rem}
+.stat-card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:.875rem 1rem}
+.stat-num{font-size:24px;font-weight:600;font-family:var(--mono)}
+.stat-lbl{font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px}
+.chart-wrap{background:var(--card);border:0.5px solid var(--border);border-radius:var(--rl);padding:1rem;margin-bottom:.75rem}
+.wbars{display:flex;gap:5px;align-items:flex-end;height:72px;margin-bottom:4px}
+.wbar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.wbar{width:100%;border-radius:3px 3px 0 0;min-height:3px}
+.wbar-lbl{font-size:9px;font-family:var(--mono);color:var(--text3)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:.75rem}
+.cal-dow{font-size:8px;font-family:var(--mono);color:var(--text3);text-align:center;padding-bottom:3px}
+.cal-day{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;font-family:var(--mono)}
+.flag-summary{background:rgba(240,184,74,.06);border:0.5px solid rgba(240,184,74,.25);border-radius:var(--r);padding:.875rem 1rem;margin-bottom:.5rem}
+.flag-title{font-size:12px;font-weight:500;color:var(--amber);margin-bottom:5px}
+.flag-item{font-size:11px;color:var(--text2);font-family:var(--mono);padding:3px 0;border-bottom:0.5px solid var(--border)}
+.flag-item:last-child{border-bottom:none}
+
+/* BADGES */
+.badge-grid{display:flex;flex-direction:column;gap:5px}
+.badge{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:.75rem 1rem;display:flex;align-items:center;gap:10px;opacity:.3}
+.badge.earned{opacity:1;border-color:rgba(240,184,74,.3);background:rgba(240,184,74,.03)}
+.badge-icon{font-size:20px;flex-shrink:0}
+.badge-name{font-size:13px;font-weight:500}
+.badge-desc{font-size:11px;color:var(--text3);margin-top:1px}
+
+/* SETTINGS */
+.settings-sec{font-size:10px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:1.25rem 0 .5rem}
+.setting-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border)}
+.setting-row:last-child{border-bottom:none}
+.setting-name{font-size:13px;flex:1;color:var(--text2)}
+.setting-pts-wrap{display:flex;align-items:center;gap:6px}
+.s-btn{background:none;border:0.5px solid var(--border2);border-radius:4px;width:24px;height:24px;cursor:pointer;font-size:14px;color:var(--text3);display:flex;align-items:center;justify-content:center}
+.s-btn:hover{border-color:var(--pdim);color:var(--purple)}
+.s-val{font-family:var(--mono);font-size:12px;font-weight:500;min-width:36px;text-align:center}
+.s-val.pos{color:var(--green)}
+.s-val.neg{color:var(--red)}
+.s-toggle{width:36px;height:20px;background:var(--border2);border-radius:99px;cursor:pointer;position:relative;transition:background .15s;border:none;flex-shrink:0}
+.s-toggle.on{background:var(--teal)}
+.s-toggle::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:white;top:3px;left:3px;transition:left .15s}
+.s-toggle.on::after{left:19px}
+.s-impact{font-size:9px;font-family:var(--mono);padding:2px 6px;border-radius:99px;flex-shrink:0}
+.ic{background:rgba(244,130,106,.08);color:var(--red)}
+.ih{background:rgba(240,184,74,.08);color:var(--amber)}
+.im{background:rgba(125,212,184,.08);color:var(--teal)}
+.il{background:rgba(90,87,80,.15);color:var(--text3)}
+
+.ci-q{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--card);border:0.5px solid var(--border);border-radius:8px;margin-bottom:5px}
+.ci-q-text{font-size:13px;color:var(--text2)}
+.ci-q-text strong{color:var(--text);font-weight:500}
+.ci-btns{display:flex;gap:5px}
+.ci-btn{font-family:var(--mono);font-size:11px;padding:5px 10px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;transition:all .12s}
+.ci-btn.yes-sel{background:rgba(244,130,106,.15);border-color:var(--red);color:var(--red)}
+.ci-btn.no-sel{background:rgba(142,207,106,.08);border-color:var(--green);color:var(--green)}
+.ci-action{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:var(--card);border:0.5px solid rgba(244,130,106,.2);border-radius:8px;margin-bottom:5px}
+.ci-action.done-action{opacity:.5;border-color:rgba(142,207,106,.2)}
+.ci-action-text{flex:1;font-size:12px;color:var(--text2);line-height:1.5}
+.ci-action-text strong{color:var(--red);font-weight:500;display:block;margin-bottom:2px}
+.ci-done-btn{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;white-space:nowrap}
+.ci-done-btn.done{background:rgba(142,207,106,.08);border-color:var(--green);color:var(--green)}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <button class="nav-btn active" onclick="goPage('today')">Today</button>
+  <button class="nav-btn" onclick="goPage('log')">Log</button>
+  <button class="nav-btn" onclick="goPage('history')">History</button>
+  <button class="nav-btn" onclick="goPage('badges')">Badges</button>
+  <button class="nav-btn" onclick="goPage('settings')">Settings</button>
+</nav>
+<div id="pg-today" class="page active"></div>
+<div id="pg-log" class="page"></div>
+<div id="pg-history" class="page"></div>
+<div id="pg-badges" class="page"></div>
+<div id="pg-settings" class="page"></div>
+
+<!-- MODAL -->
+<div id="modal-bg" class="modal-bg" style="display:none" onclick="closeMBG(event)">
+  <div class="modal" id="modal-inner"></div>
+</div>
+
+<!-- CI FAB -->
+<button class="ci-fab" id="ci-fab" onclick="openCI()">
+  <span class="fab-dot" id="fab-dot"></span>Check in
+</button>
+
+<script>
+// ── CONSTANTS ─────────────────────────────────────────────
+const SK='sc6_v1', FK='sc6_food_v1', CK='sc6_ci_v1', CFG='sc6_cfg_v1', LF='sc6_lf';
+const DAYS_START=7, DAYS_END=22;
+
+const HIGH_HISTAMINE_KEYWORDS=['tomato','pepper','chocolate','avocado','citrus','lemon','lime','vinegar','alcohol','wine','beer','soy sauce','aged cheese','smoked','canned fish','fermented','kimchi','sauerkraut','spinach','eggplant','strawberry','salami','pepperoni','bacon'];
+const FATTY_KEYWORDS=['butter','cream','fried','karaage','ribs','burger','cheese','curry','oil','fat','pork belly','duck'];
+
+// ── DEFAULT TASKS CONFIG ──────────────────────────────────
+const DEFAULT_CFG = {
+  tasks:{
+    // LAST NIGHT
+    mag:       {name:'Magnesium before bed',          pts:9,  impact:'c', active:true, sec:'lastnight'},
+    brush_n:   {name:'Brushed teeth last night',      pts:3,  impact:'m', active:true, sec:'lastnight'},
+    floss:     {name:'Flossed last night',             pts:3,  impact:'m', active:true, sec:'lastnight'},
+    wash_face: {name:'Washed face last night',         pts:2,  impact:'l', active:true, sec:'lastnight'},
+    skincare:  {name:'Skincare routine last night',    pts:3,  impact:'l', active:true, sec:'lastnight'},
+    no_phone:  {name:'No phone 30 min before bed',     pts:4,  impact:'h', active:true, sec:'lastnight'},
+    // MEDS
+    prop_am:   {name:'Propranolol — morning',          pts:10, impact:'c', active:true, sec:'meds'},
+    prop_mid:  {name:'Propranolol — midday',           pts:10, impact:'c', active:true, sec:'meds'},
+    prop_pm:   {name:'Propranolol — evening',          pts:10, impact:'c', active:true, sec:'meds'},
+    prozac:    {name:'Prozac 15mg',                    pts:10, impact:'c', active:true, sec:'meds'},
+    probiotic: {name:'Probiotic',                      pts:9,  impact:'c', active:true, sec:'meds'},
+    dmannose:  {name:'D-mannose',                      pts:8,  impact:'c', active:true, sec:'meds'},
+    vitd:      {name:'Vitamin D3',                     pts:6,  impact:'h', active:true, sec:'meds'},
+    iron_vitc: {name:'Iron + vitamin C (or vitC only)',pts:5,  impact:'h', active:true, sec:'meds'},
+    quercetin: {name:'Quercetin 500mg',                pts:4,  impact:'m', active:true, sec:'meds'},
+    b2:        {name:'Riboflavin B2 400mg',             pts:3,  impact:'m', active:true, sec:'meds'},
+    // SELF CARE
+    brush_am:  {name:'Brushed teeth this morning',     pts:2,  impact:'m', active:true, sec:'self'},
+    redlight:  {name:'Red light therapy',              pts:4,  impact:'m', active:true, sec:'self'},
+    wake_time: {name:'Consistent wake time',           pts:5,  impact:'h', active:true, sec:'self'},
+    // SOCIAL
+    solo_block:{name:'Intentional solo block',         pts:3,  impact:'h', active:true, sec:'social'},
+    commons:   {name:'The Commons',           pts:3,  impact:'m', active:true, sec:'social'},
+    meetup:    {name:'Meetup event',                   pts:3,  impact:'m', active:true, sec:'social'},
+  },
+  // NS practices - kept separate for collapsible
+  ns:{
+    ns_listen:     {name:'Listening (3 min)',           pts:2, active:true, sub:'Daily flow'},
+    ns_shake:      {name:'Shake and Twist (2 min)',     pts:2, active:true, sub:'Daily flow'},
+    ns_rhythm:     {name:'Find Rhythm (2 min)',         pts:2, active:true, sub:'Daily flow'},
+    ns_box:        {name:'Box breathing (4 min)',       pts:4, active:true, sub:'Daily flow'},
+    ns_hug:        {name:'Self-Containment Hug',        pts:2, active:true, sub:'Daily flow'},
+    sw_push:       {name:'Push (wall lean)',            pts:2, active:true, sub:'Switching'},
+    sw_thumb:      {name:'Thumb Circles',               pts:2, active:true, sub:'Switching'},
+    sw_nose:       {name:'Fingers to Nose',             pts:2, active:true, sub:'Switching'},
+    sw_feet:       {name:'Touch Feet',                  pts:2, active:true, sub:'Switching'},
+    sw_arms:       {name:'Touch Arms',                  pts:2, active:true, sub:'Switching'},
+    sw_sensory:    {name:'Sensory Experience',          pts:3, active:true, sub:'Switching'},
+    reg_box:       {name:'Box breathing (5 min)',       pts:3, active:true, sub:'Regulate'},
+    reg_eye:       {name:'Eye Relaxation',              pts:2, active:true, sub:'Regulate'},
+    reg_ooo:       {name:'Ooo Aaa Eee Tapping',        pts:2, active:true, sub:'Regulate'},
+    reg_tilt:      {name:'Head Tilt',                   pts:2, active:true, sub:'Regulate'},
+    down_stomp:    {name:'Stomp and Sigh',              pts:3, active:true, sub:'Downregulate'},
+    down_shake:    {name:'Shake and Twist extended',    pts:3, active:true, sub:'Downregulate'},
+    down_contract: {name:'Contract and Extend',         pts:2, active:true, sub:'Downregulate'},
+    down_fold:     {name:'Breathe and Fold',            pts:2, active:true, sub:'Downregulate'},
+    up_rhythm:     {name:'Find Rhythm (5 min)',         pts:3, active:true, sub:'Upregulate'},
+    up_flow:       {name:'Find Flow — figure-8',        pts:3, active:true, sub:'Upregulate'},
+    up_ears:       {name:'Regulating Ears',             pts:2, active:true, sub:'Upregulate'},
+    up_eyes:       {name:'Regulating Eyes',             pts:2, active:true, sub:'Upregulate'},
+    set_butterfly: {name:'Butterfly Hug',               pts:3, active:true, sub:'Settling'},
+    set_voo:       {name:'Voo Sound',                   pts:3, active:true, sub:'Settling'},
+    set_hug:       {name:'Self-Containment (reactive)', pts:2, active:true, sub:'Settling'},
+    set_distance:  {name:'Distancing practice',         pts:2, active:true, sub:'Settling'},
+  },
+  hobbies:{
+    hob_read:      {name:'Reading',                     pts:3, active:true},
+    hob_knit:      {name:'Knitting / crocheting',       pts:3, active:true},
+    hob_origami:   {name:'Origami / puzzles',           pts:3, active:true},
+    hob_game:      {name:'Solo gaming',                 pts:2, active:true},
+    hob_piano:     {name:'Piano',                       pts:4, active:true},
+    hob_watercolor:{name:'Watercolors / art',           pts:4, active:true},
+    hob_macrame:   {name:'Macrame',                     pts:3, active:true},
+    hob_cook:      {name:'Intentional cooking',         pts:4, active:true},
+    hob_guitar:    {name:'Guitar',                      pts:4, active:true},
+    hob_movie:     {name:'Movie alone (intentional)',   pts:2, active:true},
+    hob_poetry:   {name:'Poetry',                     pts:3, active:true},
+  },
+  // movement checkboxes
+  move:{
+    t2_chintuck:  {name:'Chin tucks',                  pts:2, active:true, sub:'Neck/chin'},
+    t2_necknod:   {name:'Resisted neck nods',           pts:2, active:true, sub:'Neck/chin'},
+    t2_tongue:    {name:'Tongue-to-palate swallow',     pts:1.5,active:true,sub:'Neck/chin'},
+    t2_cobrahead: {name:'Cobra head lifts',             pts:1.5,active:true,sub:'Neck/chin'},
+    t2_wallpush:  {name:'Wall pushups (2 rounds)',      pts:2, active:true, sub:'Strength'},
+    t2_scap:      {name:'Scapular wall slides',         pts:2, active:true, sub:'Strength'},
+    t2_superman:  {name:'Superman holds',               pts:2, active:true, sub:'Strength'},
+    t2_ytw:       {name:'Prone Y-T-W raises',           pts:2, active:true, sub:'Strength'},
+    t2_incline:   {name:'Incline pushups',              pts:2, active:true, sub:'Strength'},
+    t2_doorway:   {name:'Doorway chest stretch',        pts:1.5,active:true,sub:'Stretches'},
+    t2_catcow:    {name:'Cat-cow',                      pts:1.5,active:true,sub:'Stretches'},
+    t2_child:     {name:"Child's pose",                 pts:1.5,active:true,sub:'Stretches'},
+    t2_forward:   {name:'Seated forward fold',          pts:1.5,active:true,sub:'Stretches'},
+    t2_fig4:      {name:'Figure-4 stretch',             pts:1.5,active:true,sub:'Stretches'},
+    t2_thoracic:  {name:'Thoracic spine opener',        pts:2, active:true, sub:'Stretches'},
+    t3_chin:      {name:'Chin tucks lying down',        pts:1, active:true, sub:'Tier 3'},
+    t3_catcow:    {name:'Cat-cow gentle',               pts:1, active:true, sub:'Tier 3'},
+    t3_knees:     {name:'Knees to chest hug',           pts:1, active:true, sub:'Tier 3'},
+    t3_fig4:      {name:'Figure-4 stretch',             pts:1, active:true, sub:'Tier 3'},
+    t3_box:       {name:'Box breathing (2 min)',        pts:2, active:true, sub:'Tier 3'},
+  },
+  // point scales for flows
+  scales:{
+    sleep_9plus: 10, sleep_89: 7, sleep_78: 4, sleep_67: 1, sleep_under6: -3,
+    meal_base: 3, meal_fresh_protein: 4, walk_after_meal: 4,
+    dao_offset_high_hist: 7, oxbile_offset_gallbladder: 6,
+    gluten_no_dao: -10, gluten_with_dao: -3,
+    high_hist_no_dao: -6, high_hist_with_dao: -1,
+    gallbladder_no_ox: -6, gallbladder_with_ox: -1,
+    alcohol_none: 0, alcohol_one: -3, alcohol_two: -7, alcohol_heavy: -10,
+    t1_walk: 12, exercise_base: 6,
+    weed_helped_sleep: 2, weed_neutral: 0, weed_disrupted: -2,
+    water_still: 1.5, water_nuun: 3, water_sparkling: 0.5,
+    water_ginger_tea: 2.5, water_peppermint: 2, water_chamomile: 2, water_coffee_after: 0.5, water_coffee_before: -2,
+    ci_base: 2, ci_per_q: 0.2,
+    oz_per_16: 2, sparkling_per_16: 0.5, nuun_bonus: 2,
+  }
+};
+
+function getCfg(){
+  try{
+    const s=JSON.parse(localStorage.getItem(CFG)||'null');
+    return s||JSON.parse(JSON.stringify(DEFAULT_CFG));
+  }catch(e){return JSON.parse(JSON.stringify(DEFAULT_CFG));}
+}
+function saveCfg(c){localStorage.setItem(CFG,JSON.stringify(c));}
+
+function getStore(){try{return JSON.parse(localStorage.getItem(SK)||'{}')}catch(e){return{}}}
+function saveStore(d){localStorage.setItem(SK,JSON.stringify(d))}
+function getFood(){try{return JSON.parse(localStorage.getItem(FK)||'{}')}catch(e){return{}}}
+function saveFood(d){localStorage.setItem(FK,JSON.stringify(d))}
+function getCI(){try{return JSON.parse(localStorage.getItem(CK)||'{}')}catch(e){return{}}}
+function saveCI(d){localStorage.setItem(CK,JSON.stringify(d))}
+
+function today(){return new Date().toISOString().slice(0,10)}
+function nowTime(){return new Date().toTimeString().slice(0,5)}
+function hour(){return new Date().getHours()}
+
+function getChecked(date){return getStore()[date]?.checked||{}}
+function saveChecked(date,c){const d=getStore();if(!d[date])d[date]={};d[date].checked=c;saveStore(d);}
+function getFoodEntries(date){return getFood()[date]||[]}
+function saveFoodEntries(date,e){const d=getFood();d[date]=e;saveFood(d);}
+function getCIEntries(date){return getCI()[date]||[]}
+function saveCIEntry(date,e){const d=getCI();if(!d[date])d[date]=[];d[date].push(e);saveCI(d);}
+
+function getFlowData(date){return getStore()[date]?.flows||{}}
+function saveFlowData(date,flows){const d=getStore();if(!d[date])d[date]={};d[date].flows=flows;saveStore(d);}
+
+// ── SCORING ───────────────────────────────────────────────
+function calcScore(date){
+  const cfg=getCfg();
+  const checked=getChecked(date);
+  const food=getFoodEntries(date);
+  const flows=getFlowData(date);
+  const ciEntries=getCIEntries(date);
+  let pts=0;
+
+  // checkboxes
+  Object.entries({...cfg.tasks,...cfg.ns,...cfg.hobbies,...cfg.move}).forEach(([id,t])=>{
+    if(t.active && checked[id]) pts+=t.pts;
+  });
+
+  // food entries
+  food.forEach(e=>pts+=e.pts);
+
+  // flow scores
+  if(flows.sleep) pts+=flows.sleep.pts||0;
+  if(flows.exercise) pts+=flows.exercise.pts||0;
+  if(flows.weed) pts+=flows.weed.pts||0;
+
+  // CI pts
+  ciEntries.forEach(e=>pts+=(e.pts||0));
+
+  // max for scaling
+  const maxPts=calcMaxPts(cfg);
+  const scaled=Math.round((pts/maxPts)*100);
+  return Math.max(-20,Math.min(100,scaled));
+}
+
+function calcMaxPts(cfg){
+  let m=0;
+  Object.values({...cfg.tasks,...cfg.ns,...cfg.hobbies,...cfg.move}).forEach(t=>{if(t.active&&t.pts>0)m+=t.pts;});
+  // add flow maxes
+  const s=cfg.scales;
+  m+=s.sleep_9plus+s.meal_base*3+s.meal_fresh_protein*3+s.walk_after_meal*3+s.t1_walk+s.water_still*8+s.water_nuun;
+  return m;
+}
+
+function scoreColor(s){
+  if(s>=90)return'var(--teal)';if(s>=75)return'var(--green)';
+  if(s>=55)return'var(--amber)';if(s>=35)return'var(--purple)';
+  if(s>=0)return'var(--text3)';return'var(--red)';
+}
+function scoreGrade(s){
+  if(s>=95)return'Perfect 💎';if(s>=85)return'Excellent ⭐';if(s>=70)return'Great day 🌟';
+  if(s>=55)return'Good effort';if(s>=40)return'Getting there';if(s>=25)return'Rough day';
+  if(s>=0)return'Start somewhere';return'Below zero 😬';
+}
+function getPace(score){
+  const h=hour()+new Date().getMinutes()/60;
+  if(h<DAYS_START||h>DAYS_END)return'green';
+  const exp=Math.round(((h-DAYS_START)/(DAYS_END-DAYS_START))*100);
+  const diff=score-exp;
+  if(diff>=-5)return'green';if(diff>=-20)return'yellow';return'red';
+}
+function getPaceLabel(score){
+  const h=hour();
+  const part=h<12?'morning':h<17?'afternoon':'evening';
+  const p=getPace(score);
+  if(p==='green')return`On track for the ${part} ✓`;
+  if(p==='yellow')return`Slightly behind for ${part}`;
+  return`Behind pace for ${part}`;
+}
+
+// ── CHECK ICON SVG ────────────────────────────────────────
+const CHECK='<svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5L3 5.5L8 1" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+// ── TODAY PAGE ────────────────────────────────────────────
+function renderToday(){
+  const cfg=getCfg();
+  const checked=getChecked(today());
+  const score=calcScore(today());
+  const color=scoreColor(score);
+  const pace=getPace(score);
+  const ciEntries=getCIEntries(today());
+  const lastCI=ciEntries.length?ciEntries[ciEntries.length-1].time:null;
+  const minsAgo=lastCI?((hour()*60+new Date().getMinutes())-(parseInt(lastCI)*60+parseInt(lastCI.split(':')[1]))):999;
+
+  const circ=2*Math.PI*62;
+  const pct=Math.max(0,score/100);
+  const paceColor=pace==='green'?'var(--green)':pace==='yellow'?'var(--amber)':'var(--red)';
+
+  let html=`<div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:4px">${new Date().toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})}</div>
+  <div class="ring-wrap">
+    <div class="ring">
+      <svg viewBox="0 0 140 140" width="150" height="150">
+        <circle class="ring-bg" cx="70" cy="70" r="62"/>
+        <circle class="ring-fill" cx="70" cy="70" r="62" stroke="${paceColor}" stroke-dasharray="${circ}" stroke-dashoffset="${circ*(1-pct)}"/>
+      </svg>
+      <div class="ring-center">
+        <div class="ring-num" style="color:${paceColor}">${score}</div>
+        <div class="ring-denom">/ 100</div>
+      </div>
+    </div>
+    <div class="ring-grade" style="color:${paceColor}">${scoreGrade(score)}</div>
+    <div class="pace-badge pace-${pace}">${getPaceLabel(score)}</div>
+    <div class="ring-sub" style="margin-top:.4rem">${ciEntries.length} check-in${ciEntries.length!==1?'s':''} today${lastCI?` · last ${minsAgo<60?minsAgo+'m':'1h+'}  ago`:''}</div>
+  </div>`;
+
+  // ── LAST NIGHT (flow for sleep + checkboxes) ──
+  const sleepFlow=getFlowData(today()).sleep;
+  const sleepPts=sleepFlow?.pts||0;
+  const sleepSummary=sleepFlow?.summary||'Tap to log sleep & last night';
+  html+=`<div class="sec"><span class="sec-dot" style="background:var(--pdim)"></span>Last night<span class="sec-pts" style="color:var(--pdim)">${sleepPts>0?'+'+sleepPts:''}</span></div>`;
+  html+=`<div class="flow-card ${sleepFlow?'has-data':''}" onclick="openFlow('sleep')">
+    <div class="fc-top"><div class="fc-title">Sleep & last night log</div><div class="fc-pts">${sleepFlow?'+'+sleepPts+' pts':'tap to log →'}</div></div>
+    <div class="fc-sub">${sleepFlow?sleepSummary:'Hours slept, bedtime, weed, last night tasks'}</div>
+  </div>`;
+
+  // last night checkboxes
+  html+=`<div class="tasks">`;
+  Object.entries(cfg.tasks).filter(([,t])=>t.sec==='lastnight'&&t.active).forEach(([id,t])=>{
+    const on=checked[id];
+    html+=taskHTML(id,t.name,t.pts,on,false);
+  });
+  html+=`</div>`;
+
+  // ── MEDS ──
+  const medTasks=Object.entries(cfg.tasks).filter(([,t])=>t.sec==='meds'&&t.active);
+  const medDone=medTasks.filter(([id])=>checked[id]).length;
+  html+=`<div class="sec"><span class="sec-dot" style="background:var(--red)"></span>Medications & supplements<span class="sec-pts" style="color:var(--red)">${medDone}/${medTasks.length}</span></div>`;
+  html+=`<div class="tasks">`;
+  medTasks.forEach(([id,t])=>html+=taskHTML(id,t.name,t.pts,checked[id],false));
+  html+=`</div>`;
+
+  // ── MOVEMENT ──
+  const exFlow=getFlowData(today()).exercise;
+  html+=`<div class="sec"><span class="sec-dot" style="background:var(--green)"></span>Movement</div>`;
+  html+=`<div class="flow-card ${exFlow?'has-data':''}" onclick="openFlow('exercise')">
+    <div class="fc-top"><div class="fc-title">Exercise / movement</div><div class="fc-pts">${exFlow?'+'+exFlow.pts+' pts':'tap to log →'}</div></div>
+    <div class="fc-sub">${exFlow?exFlow.summary:'Tier 1 walk, Tier 2 workout, or Tier 3 rest day'}</div>
+  </div>`;
+  // movement checkboxes collapsible
+  const moveSubs=[...new Set(Object.values(cfg.move).map(t=>t.sub))];
+  const moveDone=Object.entries(cfg.move).filter(([id,t])=>t.active&&checked[id]).length;
+  const moveTotal=Object.values(cfg.move).filter(t=>t.active).length;
+  html+=`<div class="col-header" onclick="toggleCol('move-col')">
+    <div class="col-title">Exercises & stretches</div>
+    <div class="col-count">${moveDone}/${moveTotal}</div>
+    <div class="col-arrow" id="arr-move-col">▼</div>
+  </div>
+  <div class="col-body" id="move-col">`;
+  moveSubs.forEach(sub=>{
+    html+=`<div class="subsec">${sub}</div><div class="tasks">`;
+    Object.entries(cfg.move).filter(([,t])=>t.sub===sub&&t.active).forEach(([id,t])=>html+=taskHTML(id,t.name,t.pts,checked[id],false));
+    html+=`</div>`;
+  });
+  html+=`</div>`;
+
+  // ── NS ──
+  const nsSubs=[...new Set(Object.values(cfg.ns).map(t=>t.sub))];
+  const nsDone=Object.entries(cfg.ns).filter(([id,t])=>t.active&&checked[id]).length;
+  const nsTotal=Object.values(cfg.ns).filter(t=>t.active).length;
+  html+=`<div class="sec"><span class="sec-dot" style="background:var(--purple)"></span>Nervous system<span class="sec-pts" style="color:var(--purple)">${nsDone}/${nsTotal}</span></div>`;
+  html+=`<div class="col-header" onclick="toggleCol('ns-col')">
+    <div class="col-title">NS practices</div>
+    <div class="col-count">${nsDone}/${nsTotal}</div>
+    <div class="col-arrow" id="arr-ns-col">▼</div>
+  </div>
+  <div class="col-body" id="ns-col">`;
+  nsSubs.forEach(sub=>{
+    html+=`<div class="subsec">${sub}</div><div class="tasks">`;
+    Object.entries(cfg.ns).filter(([,t])=>t.sub===sub&&t.active).forEach(([id,t])=>html+=taskHTML(id,t.name,t.pts,checked[id],false));
+    html+=`</div>`;
+  });
+  html+=`</div>`;
+
+  // ── SELF CARE ──
+  const selfTasks=Object.entries(cfg.tasks).filter(([,t])=>t.sec==='self'&&t.active);
+  html+=`<div class="sec"><span class="sec-dot" style="background:var(--purple)"></span>Self care today</div>`;
+  html+=`<div class="tasks">`;
+  selfTasks.forEach(([id,t])=>html+=taskHTML(id,t.name,t.pts,checked[id],false));
+  html+=`</div>`;
+
+  // ── HOBBIES ──
+  const hobDone=Object.entries(cfg.hobbies).filter(([id,t])=>t.active&&checked[id]).length;
+  const hobTotal=Object.values(cfg.hobbies).filter(t=>t.active).length;
+  html+=`<div class="sec"><span class="sec-dot" style="background:var(--amber)"></span>Hobbies & enrichment<span class="sec-pts" style="color:var(--amber)">${hobDone}/${hobTotal}</span></div>`;
+  html+=`<div class="col-header" onclick="toggleCol('hob-col')">
+    <div class="col-title">Hobbies</div>
+    <div class="col-count">${hobDone}/${hobTotal}</div>
+    <div class="col-arrow" id="arr-hob-col">▼</div>
+  </div>
+  <div class="col-body" id="hob-col">
+  <div class="tasks">`;
+  Object.entries(cfg.hobbies).filter(([,t])=>t.active).forEach(([id,t])=>html+=taskHTML(id,t.name,t.pts,checked[id],false));
+  html+=`</div></div>`;
+
+  // ── SOCIAL ──
+  html+=`<div class="sec"><span class="sec-dot" style="background:var(--teal)"></span>Connection & wellbeing</div>`;
+  html+=`<div class="tasks">`;
+  Object.entries(cfg.tasks).filter(([,t])=>t.sec==='social'&&t.active).forEach(([id,t])=>html+=taskHTML(id,t.name,t.pts,checked[id]));
+  html+=`</div>`;
+
+  // ── WEED ──
+  const weedFlow=getFlowData(today()).weed;
+  html+=`<div class="sec"><span class="sec-dot" style="background:var(--green)"></span>Substances</div>`;
+  const alcFlow=flows.alcohol;
+  html+=`<div class="flow-card ${weedFlow?'has-data':''}" onclick="openFlow('weed')">
+    <div class="fc-top"><div class="fc-title">Cannabis</div><div class="fc-pts">${weedFlow?(weedFlow.pts>=0?'+':'')+weedFlow.pts+' pts':'optional →'}</div></div>
+    <div class="fc-sub">${weedFlow?weedFlow.summary:'Log if used — effect on sleep and wellbeing'}</div>
+  </div>
+  <div class="flow-card ${alcFlow?'has-data':''}" onclick="openFlow('alcohol')">
+    <div class="fc-top"><div class="fc-title">Alcohol</div><div class="fc-pts">${alcFlow?(alcFlow.pts>=0?'+':'')+alcFlow.pts+' pts':'optional →'}</div></div>
+    <div class="fc-sub">${alcFlow?alcFlow.summary:'Log if consumed — honest tracking'}</div>
+  </div>`;
+
+  document.getElementById('pg-today').innerHTML=html;
+}
+
+function taskHTML(id,name,pts,on,neg=false){
+  const onCls=on?'on':'';
+  const negCls=neg?'neg':'';
+  const sign=pts>0?'+':'';
+  const ptsClass=pts>=0?'pp':'np';
+  return `<div class="task ${onCls} ${negCls}" onclick="toggleTask('${id}')">
+    <div class="chk">${CHECK}</div>
+    <div class="t-name">${name}</div>
+    <div class="t-pts ${ptsClass}">${sign}${pts}</div>
+  </div>`;
+}
+
+function toggleTask(id){
+  const c=getChecked(today());
+  c[id]=!c[id]; if(!c[id])delete c[id];
+  saveChecked(today(),c);
+  renderToday();
+}
+function toggleCol(id){
+  const b=document.getElementById(id);
+  const a=document.getElementById('arr-'+id);
+  if(b){b.classList.toggle('open');a.classList.toggle('open');}
+}
+
+// ── FLOW ENGINE ───────────────────────────────────────────
+let activeFlow=null, flowStep=0, flowAnswers={};
+
+function openFlow(type){
+  activeFlow=type; flowStep=0; flowAnswers={};
+  const existing=getFlowData(today())[type];
+  if(existing) flowAnswers={...existing.rawAnswers||{}};
+  renderFlow();
+  document.getElementById('modal-bg').style.display='flex';
+}
+function closeModal(){document.getElementById('modal-bg').style.display='none';activeFlow=null;}
+function closeMBG(e){if(e.target===document.getElementById('modal-bg'))closeModal();}
+
+const FLOWS={
+  sleep:[
+    {id:'hours',type:'opts',q:'How many hours did you sleep?',
+     opts:['9+ hours','8–9 hours','7–8 hours','6–7 hours','Under 6 hours']},
+    {id:'quality',type:'opts',q:'How was the sleep quality?',
+     opts:['Restorative — woke up rested','Okay — not great but fine','Restless — woke up tired','Poor — barely slept']},
+    {id:'bedtime',type:'pills',q:'What time did you go to bed?',
+     opts:['Before 9pm','9–10pm','10–11pm','11pm–midnight','After midnight','After 1am']},
+    {id:'fell_asleep',type:'opts',q:'How easily did you fall asleep?',
+     opts:['Very easily','Took a while','Had trouble','Could not sleep well']},
+  ],
+  exercise:[
+    {id:'type',type:'opts',q:'What kind of movement today?',
+     opts:['Walk — flat terrain','Walk — with some hills','Bike ride — flat','Bike ride — with hills','No outdoor movement today']},
+    {id:'duration',type:'pills',q:'How long?',
+     opts:['Under 15 min','15–20 min','20–30 min','30–45 min','Over 45 min'],
+     condition:a=>!a.type?.startsWith('No')},
+    {id:'tolerance',type:'opts',q:'How did your body handle it?',
+     opts:['Great — no symptoms','Good — mild, recovered quickly','Okay — some symptoms managed','Difficult — significant symptoms'],
+     condition:a=>!a.type?.startsWith('No')},
+  ],
+  alcohol:[
+    {id:'drank',type:'opts',q:'Did you drink alcohol today?',
+     opts:['No — none','Yes — one drink','Yes — two drinks','Yes — more than two drinks']},
+    {id:'feel',type:'opts',q:'How do you feel?',condition:a=>a.drank!=='No — none',
+     opts:['Fine — no noticeable effect','Mildly affected','Significantly affected — symptomatic']},
+  ],
+  weed:[
+    {id:'used',type:'opts',q:'Did you use cannabis today / last night?',
+     opts:['Yes','No']},
+    {id:'effect',type:'opts',q:'How did it affect you overall?',
+     opts:['Really helped — better sleep and less anxiety','Somewhat helpful — mild positive effect','Neutral — no noticeable effect','Slightly negative — made me foggy or anxious','Negative — disrupted sleep or caused issues'],
+     condition:a=>a.used==='Yes'},
+    {id:'sleep_effect',type:'opts',q:'How did it affect your sleep?',
+     opts:['Helped me sleep much better','Helped a bit','No effect on sleep','Made sleep worse'],
+     condition:a=>a.used==='Yes'},
+  ],
+  meal:[
+    {id:'name',type:'text',q:'What did you eat?',placeholder:'Describe the meal or list ingredients...'},
+    {id:'type',type:'pills',q:'Meal type',opts:['Breakfast','Lunch','Dinner','Snack']},
+    {id:'had_protein',type:'opts',q:'Did you eat fresh protein (cooked today)?',
+     opts:['Yes — fresh cooked','Leftover protein','No protein in this meal']},
+    {id:'had_histamine',type:'opts',q:'Did this meal contain any histamine triggers?',
+     opts:['No — clean low-histamine meal','Minor triggers (small amounts)','Yes — moderate histamine foods','Yes — significant triggers (tomatoes, chocolate, etc)']},
+    {id:'dao_before',type:'opts',q:'Did you take DAO enzyme before this meal?',
+     opts:['Yes — took DAO','No — did not take DAO','Did not have it with me'],
+     condition:a=>a.had_histamine!=='No — clean low-histamine meal'},
+    {id:'had_fatty',type:'opts',q:'Was this meal high in fat (fried, butter, cream, heavy meat)?',
+     opts:['No — light meal','Somewhat fatty','Yes — high fat meal (curry, fried, heavy)']},
+    {id:'oxbile_before',type:'opts',q:'Did you take ox bile before this meal?',
+     opts:['Yes — took ox bile','No — did not take ox bile','Did not have it with me'],
+     condition:a=>a.had_fatty==='Yes — high fat meal (curry, fried, heavy)'},
+    {id:'walked_after',type:'opts',q:'Did you walk after this meal?',
+     opts:['Yes — went for a walk','Short movement (5–10 min)','No — stayed seated or rested']},
+    {id:'gluten',type:'opts',q:'Did this meal contain gluten?',
+     opts:['No gluten','Small trace amount','Yes — intentional gluten']},
+    {id:'dao_for_gluten',type:'opts',q:'Did you take DAO before the gluten?',
+     opts:['Yes — took DAO before','No — no enzyme'],
+     condition:a=>a.gluten!=='No gluten'},
+  ],
+  reaction:[
+    {id:'trigger',type:'opts',q:'What triggered this reaction?',
+     opts:['Food — known trigger','Food — uncertain what','Stress or anxiety','Exertion','Heat or temperature','Unknown','Multiple things']},
+    {id:'food_eaten',type:'text',q:'What did you eat or drink in the past 2 hours?',placeholder:'List everything...'},
+    {id:'symptoms',type:'multi',q:'Which symptoms?',
+     opts:['Palpitations','Elevated heart rate','Elevated blood pressure','Headache','Flushing','Sweating','Nausea','GI discomfort','Dizziness','Anxiety','Visual issues','Fatigue','Chills','Burping/nausea for hours']},
+    {id:'severity',type:'opts',q:'How severe?',
+     opts:['Mild — uncomfortable but manageable','Moderate — significantly affecting me','Severe — very difficult to manage']},
+    {id:'took_protocol',type:'opts',q:'Did you follow your reaction protocol?',
+     opts:['Yes — ginger, sat down, breathed','Partially','No']},
+  ],
+};
+
+function visibleSteps(){
+  const steps=FLOWS[activeFlow]||[];
+  return steps.filter(s=>!s.condition||s.condition(flowAnswers));
+}
+
+function renderFlow(){
+  const steps=visibleSteps();
+  if(flowStep>=steps.length){finalizeFlow();return;}
+  const step=steps[flowStep];
+  const pct=Math.round((flowStep/steps.length)*100);
+  let html=`<div class="modal-header">
+    <div><div class="modal-title">${flowTitle(activeFlow)}</div>
+    <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-top:3px">Step ${flowStep+1} of ${steps.length}</div></div>
+    <button class="modal-close" onclick="closeModal()">×</button>
+  </div>
+  <div style="height:2px;background:var(--border2);border-radius:99px;margin-bottom:1.25rem">
+    <div style="height:100%;width:${pct}%;background:var(--pdim);border-radius:99px;transition:width .3s"></div>
+  </div>
+  <div class="q-label">Question ${flowStep+1}</div>
+  <div class="q-text">${step.q}</div>`;
+
+  const saved=flowAnswers[step.id];
+
+  if(step.type==='opts'){
+    html+=`<div class="opts-col">`;
+    step.opts.forEach(o=>{
+      const sel=saved===o?'sel':'';
+      html+=`<button class="opt-btn ${sel}" onclick="answerFlow('${step.id}','${o.replace(/'/g,"\\'")}')">${o}</button>`;
+    });
+    html+=`</div>`;
+    if(saved) html+=`<button class="next-btn" onclick="nextFlow()">Continue →</button>`;
+  }
+  else if(step.type==='pills'){
+    html+=`<div class="pills-row">`;
+    step.opts.forEach(o=>{
+      const sel=saved===o?'sel':'';
+      html+=`<button class="pill-btn ${sel}" onclick="answerFlow('${step.id}','${o.replace(/'/g,"\\'")}')">${o}</button>`;
+    });
+    html+=`</div>`;
+    if(saved) html+=`<button class="next-btn" onclick="nextFlow()">Continue →</button>`;
+  }
+  else if(step.type==='text'){
+    html+=`<textarea class="text-in" id="flow-text" placeholder="${step.placeholder||''}">${saved||''}</textarea>`;
+    html+=`<button class="next-btn" onclick="answerFlowText()">Continue →</button>`;
+  }
+  else if(step.type==='multi'){
+    const sel=saved||[];
+    html+=`<div class="opts-col">`;
+    step.opts.forEach(o=>{
+      const isSel=sel.includes(o);
+      html+=`<button class="opt-btn ${isSel?'sel':''}" onclick="toggleMulti('${step.id}','${o.replace(/'/g,"\\'")}')">${o}</button>`;
+    });
+    html+=`</div>`;
+    html+=`<button class="next-btn" ${sel.length===0?'disabled':''} onclick="nextFlow()">Continue →</button>`;
+  }
+
+  if(flowStep>0) html+=`<button class="back-btn" onclick="flowBack()">← Back</button>`;
+
+  document.getElementById('modal-inner').innerHTML=html;
+}
+
+function flowTitle(t){
+  return{sleep:'Sleep & last night',exercise:'Movement log',weed:'Substances',meal:'Meal log',reaction:'Reaction episode'}[t]||t;
+}
+
+function answerFlow(id,val){
+  flowAnswers[id]=val;
+  renderFlow();
+  // auto advance after short delay for opts/pills
+  setTimeout(()=>{
+    if(activeFlow&&flowAnswers[id]===val) nextFlow();
+  },320);
+}
+
+function answerFlowText(){
+  const el=document.getElementById('flow-text');
+  if(!el||!el.value.trim())return;
+  flowAnswers[steps().id]=el.value.trim();
+  nextFlow();
+}
+function steps(){return visibleSteps()[flowStep];}
+
+function toggleMulti(id,val){
+  if(!flowAnswers[id])flowAnswers[id]=[];
+  const idx=flowAnswers[id].indexOf(val);
+  if(idx>-1)flowAnswers[id].splice(idx,1);
+  else flowAnswers[id].push(val);
+  renderFlow();
+}
+
+function nextFlow(){
+  flowStep++;
+  renderFlow();
+}
+function flowBack(){
+  if(flowStep>0){flowStep--;renderFlow();}
+}
+
+function finalizeFlow(){
+  const cfg=getCfg();
+  const s=cfg.scales;
+  const flows=getFlowData(today());
+  let pts=0; let summary=''; let flags=[];
+
+  if(activeFlow==='sleep'){
+    const h=flowAnswers.hours||'';
+    if(h.startsWith('9+'))pts+=s.sleep_9plus;
+    else if(h.startsWith('8'))pts+=s.sleep_89;
+    else if(h.startsWith('7'))pts+=s.sleep_78;
+    else if(h.startsWith('6'))pts+=s.sleep_67;
+    else if(h.startsWith('Under'))pts+=s.sleep_under6;
+    if(flowAnswers.quality?.startsWith('Restorative'))pts+=2;
+    else if(flowAnswers.quality?.startsWith('Poor'))pts-=2;
+    if(flowAnswers.bedtime==='9–10pm'||flowAnswers.bedtime==='Before 9pm')pts+=2;
+    else if(flowAnswers.bedtime?.includes('After midnight')||flowAnswers.bedtime?.includes('After 1am'))pts-=3;
+    summary=`${flowAnswers.hours||'?'} sleep · ${flowAnswers.quality?.split('—')[0].trim()||'?'} · Bed ${flowAnswers.bedtime||'?'}`;
+  }
+
+  if(activeFlow==='exercise'){
+    const t=flowAnswers.type||'';
+    if(t.startsWith('Tier 1'))pts+=s.t1_walk;
+    else if(t.startsWith('Tier 2'))pts+=s.exercise_base;
+    else if(t.startsWith('Tier 3'))pts+=s.exercise_base/2;
+    if(flowAnswers.tolerance?.startsWith('Great')||flowAnswers.tolerance?.startsWith('Good'))pts+=2;
+    if(flowAnswers.after?.startsWith('Significantly'))pts-=2;
+    summary=t.split('—')[0].trim()+(flowAnswers.duration?` · ${flowAnswers.duration}`:'');
+  }
+
+  if(activeFlow==='alcohol'){
+    const d=flowAnswers.drank||'No';
+    const cfg2=getCfg();const s2=cfg2.scales;
+    if(d.startsWith('No')){pts=0;summary='No alcohol';}
+    else if(d.includes('one')){pts=s2.alcohol_one||-3;summary='One drink';}
+    else if(d.includes('two')){pts=s2.alcohol_two||-7;summary='Two drinks';}
+    else{pts=s2.alcohol_heavy||-10;summary='Multiple drinks';}
+    flows[activeFlow]={pts,summary,rawAnswers:{...flowAnswers}};
+    saveFlowData(today(),flows);
+    showFlowDone(pts,summary,[]);return;
+  }
+  if(activeFlow==='weed'){
+    if(flowAnswers.used==='No'){pts=0;summary='Not used';}
+    else{
+      const e=flowAnswers.effect||'';
+      if(e.startsWith('Really helped'))pts=s.weed_helped_sleep;
+      else if(e.startsWith('Somewhat'))pts=1;
+      else if(e.startsWith('Neutral'))pts=s.weed_neutral;
+      else if(e.startsWith('Slightly negative'))pts=-1;
+      else pts=s.weed_disrupted;
+      summary='Used · '+(e.split('—')[0].trim()||'logged');
+    }
+  }
+
+  if(activeFlow==='meal'){
+    pts+=s.meal_base;
+    if(flowAnswers.had_protein==='Yes — fresh cooked')pts+=s.meal_fresh_protein;
+    else if(flowAnswers.had_protein==='Leftover protein')pts-=2;
+    if(flowAnswers.walked_after==='Yes — went for a walk')pts+=s.walk_after_meal;
+    else if(flowAnswers.walked_after?.startsWith('Short'))pts+=s.walk_after_meal/2;
+
+    const histLevel=flowAnswers.had_histamine||'';
+    const hadDAO=flowAnswers.dao_before==='Yes — took DAO';
+    const fatLevel=flowAnswers.had_fatty||'';
+    const hadOx=flowAnswers.oxbile_before==='Yes — took ox bile';
+    const glutenLevel=flowAnswers.gluten||'';
+    const hadDAOGluten=flowAnswers.dao_for_gluten==='Yes — took DAO before';
+
+    if(glutenLevel==='Yes — intentional gluten'){
+      if(hadDAOGluten)pts+=s.gluten_with_dao;
+      else pts+=s.gluten_no_dao;
+    }
+    if(histLevel==='Yes — significant triggers (tomatoes, chocolate, etc)'){
+      if(hadDAO)pts+=s.high_hist_with_dao;
+      else{pts+=s.high_hist_no_dao;flags.push('High histamine meal without DAO — consider taking enzyme next time');}
+    } else if(histLevel==='Yes — moderate histamine foods'||histLevel==='Minor triggers (small amounts)'){
+      if(!hadDAO&&histLevel!=='Minor triggers (small amounts)')flags.push('Moderate histamine meal without DAO');
+      pts-=1;
+    }
+    if(fatLevel==='Yes — high fat meal (curry, fried, heavy)'){
+      if(hadOx)pts+=s.gallbladder_with_ox;
+      else{pts+=s.gallbladder_no_ox;flags.push('High fat / gallbladder trigger without ox bile — take it before next time');}
+    }
+
+    const mealName=flowAnswers.name?.slice(0,40)||'Meal';
+    summary=`${flowAnswers.type||'Meal'}: ${mealName}${flowAnswers.walked_after==='Yes — went for a walk'?' · walked ✓':''}`;
+
+    // Save as food entry
+    const food=getFoodEntries(today());
+    food.push({name:mealName,pts,type:'meal',flags,time:nowTime(),rawAnswers:{...flowAnswers}});
+    saveFoodEntries(today(),food);
+
+    // Save flags
+    if(flags.length){
+      const store=getStore();
+      if(!store[today()])store[today()]={};
+      if(!store[today()].enzymeFlags)store[today()].enzymeFlags=[];
+      store[today()].enzymeFlags.push(...flags);
+      saveStore(store);
+    }
+
+    // Show completion
+    showFlowDone(pts,summary,flags);
+    return;
+  }
+
+  if(activeFlow==='reaction'){
+    // just log it, no pts penalty (the body is doing enough)
+    pts=1; // 1pt for logging self-awareness
+    summary=`Reaction: ${flowAnswers.severity?.split('—')[0].trim()||'logged'} · ${flowAnswers.trigger||'unknown trigger'}`;
+    const food=getFoodEntries(today());
+    food.push({name:'Reaction episode: '+summary,pts,type:'reaction',time:nowTime(),rawAnswers:{...flowAnswers}});
+    saveFoodEntries(today(),food);
+    showFlowDone(pts,summary,[]);
+    return;
+  }
+
+  flows[activeFlow]={pts,summary,rawAnswers:{...flowAnswers}};
+  saveFlowData(today(),flows);
+  showFlowDone(pts,summary,flags);
+}
+
+function showFlowDone(pts,summary,flags){
+  const sign=pts>=0?'+':'';
+  let html=`<div class="done-msg">
+    <div class="done-icon">${pts>=5?'🌟':pts>=0?'✓':'↓'}</div>
+    <div class="done-title">Logged</div>
+    <div class="done-sub">${summary}</div>
+    <div class="done-pts">${sign}${pts.toFixed?pts.toFixed(1):pts} pts</div>`;
+  if(flags.length){
+    html+=`<div style="margin-top:1rem">`;
+    flags.forEach(f=>html+=`<div class="flag-box" style="margin-bottom:6px">🔔 ${f}</div>`);
+    html+=`</div>`;
+  }
+  html+=`<button class="next-btn" style="margin-top:1.25rem" onclick="closeModal();renderToday()">Done</button></div>`;
+  document.getElementById('modal-inner').innerHTML=html;
+}
+
+// ── LOG PAGE ──────────────────────────────────────────────
+function renderLog(){
+  const food=getFoodEntries(today());
+  const drinks=getStore()[today()]?.drinks||[];
+  const cfg=getCfg();const s=cfg.scales;
+  let html=`<div style="font-size:18px;font-weight:500;margin-bottom:.25rem">Today's log</div>
+  <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:1rem">${new Date().toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'})}</div>`;
+
+  // DRINK LOG
+  html+=`<div class="sec"><span class="sec-dot" style="background:var(--teal)"></span>Hydration</div>`;
+  html+=`<div style="background:var(--card);border:0.5px solid var(--border);border-radius:var(--rl);padding:.875rem 1rem;margin-bottom:.5rem">`;
+  const drinkPts=drinks.reduce((a,d)=>a+d.pts,0);
+  html+=`<div style="font-size:10px;font-family:var(--mono);color:var(--teal);margin-bottom:.5rem">+${drinkPts.toFixed(1)} pts today</div>`;
+  if(drinks.length===0){
+    html+=`<div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:.5rem 0">No drinks logged yet</div>`;
+  } else {
+    html+=`<div class="drink-entries">`;
+    const drinkOzTotal=drinks.filter(d=>d.type==='still'||d.type==='nuun').reduce((a,d)=>a+(d.oz||0),0);
+    html+=`<div style="font-size:10px;font-family:var(--mono);color:var(--teal);margin-bottom:.4rem">${drinkOzTotal}oz still water today</div>`;
+    drinks.forEach((d,i)=>html+=`<div class="drink-entry">
+      <div class="drink-name">${d.name}${d.oz?' ('+d.oz+'oz)':''}</div>
+      <div class="drink-pts" style="color:${(d.pts||0)>=0?'var(--teal)':'var(--red)'}">${(d.pts||0)>=0?'+':''}${d.pts||0}</div>
+      <button class="drink-del" onclick="removeDrink(${i})">×</button>
+    </div>`);
+    html+=`</div>`;
+  }
+  const drinkTypes=[
+    {name:'Still water',type:'still',defaultOz:8},
+    {name:'NUUN',type:'nuun',defaultOz:16},
+    {name:'Ginger tea',type:'ginger',defaultOz:8},
+    {name:'Peppermint tea',type:'peppermint',defaultOz:8},
+    {name:'Chamomile tea',type:'chamomile',defaultOz:8},
+    {name:'Sparkling water',type:'sparkling',defaultOz:12},
+    {name:'Coffee (after food)',type:'coffee_after',defaultOz:8},
+    {name:'Coffee (before food)',type:'coffee_before',defaultOz:8},
+  ];
+  html+=`<div style="font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin:.5rem 0 .3rem">Quick add (tap to log oz)</div>`;
+  html+=`<div class="drink-add-row">`;
+  drinkTypes.forEach(d=>{
+    html+=`<button class="drink-type-btn" onclick="promptDrink('${d.name}','${d.type}',${d.defaultOz})">${d.name}</button>`;
+  });
+  html+=`</div></div>`;
+
+  // MEAL LOG
+  html+=`<div class="sec"><span class="sec-dot" style="background:var(--amber)"></span>Meals & food</div>`;
+  html+=`<div class="flow-card" onclick="openFlow('meal')">
+    <div class="fc-top"><div class="fc-title">Log a meal</div><div class="fc-pts">tap to add →</div></div>
+    <div class="fc-sub">Calculates points based on content, enzymes taken, and whether you walked after</div>
+  </div>`;
+
+  if(food.length>0){
+    food.forEach((e,i)=>{
+      const c=e.pts>=0?'var(--green)':'var(--red)';
+      const sign=e.pts>=0?'+':'';
+      html+=`<div class="flow-card has-data" style="margin-bottom:5px">
+        <div class="fc-top"><div class="fc-title">${e.name.slice(0,50)}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="fc-pts" style="color:${c}">${sign}${e.pts}</div>
+          <button onclick="removeMeal(${i});event.stopPropagation()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px">×</button>
+        </div></div>
+        <div class="fc-sub">${e.type} · ${e.time||''}${e.flags?.length?' · 🔔 '+e.flags[0]:''}</div>
+      </div>`;
+    });
+  }
+
+  // ENZYME FLAGS
+  const flags=getStore()[today()]?.enzymeFlags||[];
+  if(flags.length){
+    html+=`<div class="sec"><span class="sec-dot" style="background:var(--amber)"></span>Enzyme reminders</div>`;
+    html+=`<div class="flag-summary"><div class="flag-title">🔔 Missed enzyme opportunities today</div>`;
+    flags.forEach(f=>html+=`<div class="flag-item">${f}</div>`);
+    html+=`</div>`;
+  }
+
+  // REACTION
+  html+=`<div class="sec"><span class="sec-dot" style="background:var(--red)"></span>Reaction episode</div>`;
+  html+=`<div class="flow-card" onclick="openFlow('reaction')">
+    <div class="fc-top"><div class="fc-title">Log a reaction</div><div class="fc-pts">on-demand →</div></div>
+    <div class="fc-sub">Trigger, symptoms, severity, protocol used</div>
+  </div>`;
+
+  document.getElementById('pg-log').innerHTML=html;
+}
+
+function promptDrink(name,type,defaultOz){
+  const ozStr=prompt(`How many oz of ${name}?`, defaultOz);
+  if(ozStr===null)return;
+  const oz=parseFloat(ozStr)||defaultOz;
+  const cfg=getCfg();const s=cfg.scales;
+  let pts=0;
+  if(type==='still')pts=Math.round((oz/16)*s.oz_per_16*10)/10;
+  else if(type==='nuun')pts=Math.round((s.nuun_bonus+(oz/16)*s.oz_per_16)*10)/10;
+  else if(type==='sparkling')pts=Math.round((oz/16)*s.sparkling_per_16*10)/10;
+  else if(type==='ginger')pts=2.5;
+  else if(type==='peppermint'||type==='chamomile')pts=2;
+  else if(type==='coffee_after')pts=0.5;
+  else if(type==='coffee_before')pts=-2;
+  const d=getStore();if(!d[today()])d[today()]={};
+  if(!d[today()].drinks)d[today()].drinks=[];
+  d[today()].drinks.push({name,type,oz,pts,time:nowTime()});
+  saveStore(d);
+  renderLog();
+  if(document.getElementById('pg-today').classList.contains('active'))renderToday();
+}
+
+function addDrink(name,pts){
+  const d=getStore();
+  if(!d[today()])d[today()]={};
+  if(!d[today()].drinks)d[today()].drinks=[];
+  d[today()].drinks.push({name,pts,time:nowTime()});
+  saveStore(d);
+  renderLog();
+  if(document.getElementById('pg-today').classList.contains('active'))renderToday();
+}
+function removeDrink(idx){
+  const d=getStore();
+  if(d[today()]?.drinks)d[today()].drinks.splice(idx,1);
+  saveStore(d);renderLog();
+}
+function removeMeal(idx){
+  const food=getFoodEntries(today());
+  food.splice(idx,1);
+  saveFoodEntries(today(),food);
+  renderLog();
+  renderToday();
+}
+
+// ── CI SYSTEM ─────────────────────────────────────────────
+const CI_QS=[
+  {id:'hungry',    prompt:'Do I feel hungry?',              action:'Eat something with carbs and protein.'},
+  {id:'thirsty',   prompt:'Do I feel thirsty?',             action:'Get a drink.'},
+  {id:'tired',     prompt:'Do I feel tired?',               action:'Take off glasses and lay down to rest — at least 5 min.'},
+  {id:'anxious',   prompt:'Do I feel anxious?',             action:'Complete switching and downregulating practices.'},
+  {id:'overwhelmed',prompt:'Do I feel overwhelmed?',        action:'Complete settling practices.'},
+  {id:'nauseous',  prompt:'Do I feel nauseous?',            action:'Drink water, eat something, or take a ginger chew.'},
+  {id:'dizzy',     prompt:'Do I feel dizzy?',               action:'Take glasses off, rest eyes closed 5+ min, ginger chew.'},
+  {id:'restless',  prompt:'Do I feel restless?',            action:'Take a walk or stretch.'},
+  {id:'bathroom',  prompt:'Do I need the bathroom?',        action:'Go to the bathroom!'},
+];
+let ciAnswers={},ciPhase=1,ciActionsCompleted=[];
+
+function openCI(){
+  ciAnswers={};ciPhase=1;ciActionsCompleted=[];
+  renderCI();
+  document.getElementById('modal-bg').style.display='flex';
+}
+function renderCI(){
+  const answered=Object.keys(ciAnswers).length;
+  const canSave=answered===CI_QS.length;
+  let html=`<div class="modal-header">
+    <div><div class="modal-title">Hourly check-in ✦</div>
+    <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-top:3px">${ciPhase===1?'tap yes or no for each':'action suggestions for your yes answers'}</div></div>
+    <button class="modal-close" onclick="closeModal()">×</button>
+  </div>`;
+  if(ciPhase===1){
+    html+=`<div class="pts-preview">+${(2+answered*0.2).toFixed(1)} pts for this check-in (${answered}/${CI_QS.length} answered)</div>`;
+    CI_QS.forEach(q=>{
+      const a=ciAnswers[q.id];
+      html+=`<div class="ci-q">
+        <div class="ci-q-text">${q.prompt}</div>
+        <div class="ci-btns">
+          <button class="ci-btn ${a===true?'yes-sel':''}" onclick="ansCI('${q.id}',true)">YES</button>
+          <button class="ci-btn ${a===false?'no-sel':''}" onclick="ansCI('${q.id}',false)">NO</button>
+        </div>
+      </div>`;
+    });
+    html+=`<button class="next-btn" style="margin-top:.75rem;${!canSave?'opacity:.3;cursor:default':''}" onclick="${canSave?'saveCI()':''}">${canSave?'Save check-in':'Answer all questions to save'}</button>`;
+  } else {
+    const yeses=CI_QS.filter(q=>ciAnswers[q.id]===true);
+    html+=`<div style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-bottom:.75rem">${ciActionsCompleted.length}/${yeses.length} actions done</div>`;
+    yeses.forEach(q=>{
+      const done=ciActionsCompleted.includes(q.id);
+      html+=`<div class="ci-action ${done?'done-action':''}">
+        <div class="ci-action-text"><strong>${q.prompt.replace('Do I feel ','').replace('Do I need ','').replace('?','')}</strong>${q.action}</div>
+        <button class="ci-done-btn ${done?'done':''}" onclick="toggleCIAction('${q.id}')">${done?'Done ✓':'Mark done'}</button>
+      </div>`;
+    });
+    html+=`<div style="display:flex;gap:8px;margin-top:1rem">
+      <button class="next-btn" style="flex:1;background:var(--card);color:var(--text2);border:0.5px solid var(--border2)" onclick="ciPhase=1;renderCI()">Back</button>
+      <button class="next-btn" style="flex:2" onclick="finalizeCI()">Save (${ciActionsCompleted.length}/${yeses.length} done)</button>
+    </div>`;
+  }
+  document.getElementById('modal-inner').innerHTML=html;
+}
+function ansCI(id,val){ciAnswers[id]=val;renderCI();}
+function saveCI(){
+  const yeses=CI_QS.filter(q=>ciAnswers[q.id]===true);
+  if(yeses.length===0){finalizeCI();return;}
+  ciPhase=2;renderCI();
+}
+function toggleCIAction(id){
+  const idx=ciActionsCompleted.indexOf(id);
+  if(idx>-1)ciActionsCompleted.splice(idx,1);else ciActionsCompleted.push(id);
+  renderCI();
+}
+function finalizeCI(){
+  const pts=parseFloat((2+Object.keys(ciAnswers).length*0.2).toFixed(1));
+  const reaction=['nauseous','dizzy','anxious','tired'].filter(s=>ciAnswers[s]===true).length>=3;
+  const entry={time:nowTime(),answers:{...ciAnswers},actionsCompleted:[...ciActionsCompleted],pts};
+  saveCIEntry(today(),entry);
+  const d=getStore();if(!d[today()])d[today()]={};
+  if(!d[today()].ciPts)d[today()].ciPts=0;
+  d[today()].ciPts+=pts;saveStore(d);
+  closeModal();updateFAB();
+  if(reaction)setTimeout(()=>alert('⚠️ Multiple symptoms detected — consider your reaction protocol: ginger chew, sit down, breathe slowly.'),300);
+  if(document.getElementById('pg-today').classList.contains('active'))renderToday();
+}
+const LAST_FIRED='sc6_lf';
+function updateFAB(){
+  const entries=getCIEntries(today());
+  const last=entries.length?entries[entries.length-1].time:null;
+  const mins=last?((hour()*60+new Date().getMinutes())-(parseInt(last.split(':')[0])*60+parseInt(last.split(':')[1]))):999;
+  const fab=document.getElementById('ci-fab');
+  const dot=document.getElementById('fab-dot');
+  if(!fab)return;
+  if(mins>=60){fab.style.background='var(--red)';fab.innerHTML='<span class="fab-dot urgent"></span>Check in now';dot&&dot.classList.add('urgent');}
+  else if(mins>=45){fab.style.background='var(--amber)';fab.innerHTML='<span class="fab-dot" style="background:var(--amber)"></span>Check in soon';}
+  else{fab.style.background='var(--pdim)';fab.innerHTML='<span class="fab-dot"></span>Check in';}
+}
+function maybeFire(){
+  const now=new Date();const h=now.getHours();const m=now.getMinutes();
+  const sched=[{h:7,k:'morning'},{h:8,k:'ci'},{h:9,k:'ci'},{h:10,k:'ci'},{h:11,k:'ci'},{h:12,k:'midday'},{h:13,k:'ci'},{h:14,k:'ci'},{h:15,k:'ci'},{h:16,k:'ci'},{h:17,k:'ci'},{h:18,k:'ci'},{h:19,k:'ci'},{h:20,k:'ci'},{h:21,k:'ci'},{h:22,k:'evening'}];
+  const entry=sched.find(e=>e.h===h);
+  if(!entry||m>4)return;
+  const key=`${now.toDateString()}-${h}-${entry.k}`;
+  if(localStorage.getItem(LAST_FIRED)===key)return;
+  localStorage.setItem(LAST_FIRED,key);
+  if(Notification.permission==='granted')new Notification('Check in',{body:'How are you doing right now?',tag:'sc-ci'});
+  if(entry.k==='ci')openCI();
+}
+setInterval(maybeFire,60000);setInterval(updateFAB,60000);maybeFire();
+
+// ── HISTORY ───────────────────────────────────────────────
+function renderHistory(){
+  const store=getStore();const food=getFood();const ci=getCI();
+  const dates=[...new Set([...Object.keys(store),...Object.keys(food),...Object.keys(ci)])].sort((a,b)=>b.localeCompare(a));
+  if(dates.length===0){
+    document.getElementById('pg-history').innerHTML='<div style="text-align:center;padding:3rem;font-family:var(--mono);font-size:12px;color:var(--text3)">No history yet. Start logging!</div>';
+    return;
+  }
+  const scores={};dates.forEach(d=>scores[d]=calcScore(d));
+  const vals=Object.values(scores);
+  const avg=Math.round(vals.reduce((a,b)=>a+Math.max(0,b),0)/vals.length);
+  const best=Math.max(...vals);
+  const streak=calcStreak([...dates].reverse());
+  const last7=[...dates].slice(0,7).reverse();
+
+  let html=`<div class="stat-grid">
+    <div class="stat-card"><div class="stat-num" style="color:var(--amber)">${streak}</div><div class="stat-lbl">day streak</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--teal)">${avg}</div><div class="stat-lbl">avg score</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green)">${best}</div><div class="stat-lbl">best day</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--purple)">${dates.length}</div><div class="stat-lbl">days logged</div></div>
+  </div>`;
+
+  // week chart
+  html+=`<div class="chart-wrap"><div class="wbars">`;
+  last7.forEach(d=>{
+    const s=scores[d]||0;
+    const h=Math.max(3,Math.round((Math.max(0,s)/100)*64));
+    const day=new Date(d+'T12:00:00').toLocaleDateString([],{weekday:'short'});
+    html+=`<div class="wbar-col"><div class="wbar" style="height:${h}px;background:${scoreColor(s)}"></div><div class="wbar-lbl">${day}</div></div>`;
+  });
+  html+=`</div></div>`;
+
+  // calendar
+  const now=new Date();const y=now.getFullYear();const mo=now.getMonth();
+  const first=new Date(y,mo,1).getDay();const daysInMo=new Date(y,mo+1,0).getDate();
+  html+=`<div style="font-size:13px;font-weight:500;margin-bottom:.5rem">${now.toLocaleDateString([],{month:'long',year:'numeric'})}</div>`;
+  html+=`<div class="cal-grid">`;
+  ['S','M','T','W','T','F','S'].forEach(d=>html+=`<div class="cal-dow">${d}</div>`);
+  for(let i=0;i<first;i++)html+=`<div class="cal-day"></div>`;
+  for(let d=1;d<=daysInMo;d++){
+    const ds=`${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isT=ds===today();
+    const s=scores[ds];
+    let bg=isT?'var(--pdim)':'var(--border)';let tc=isT?'#fff':'var(--text3)';
+    if(s!==undefined){bg=scoreColor(s);tc='var(--bg)';}
+    html+=`<div class="cal-day" style="background:${bg};color:${tc}">${d}</div>`;
+  }
+  html+=`</div>`;
+
+  // enzyme flags this week
+  const allFlags=last7.flatMap(d=>store[d]?.enzymeFlags||[]);
+  if(allFlags.length){
+    html+=`<div class="sec"><span class="sec-dot" style="background:var(--amber)"></span>Enzyme pattern (last 7 days)</div>`;
+    html+=`<div class="flag-summary"><div class="flag-title">🔔 Missed enzyme opportunities</div>`;
+    const unique=[...new Set(allFlags)];
+    unique.forEach(f=>html+=`<div class="flag-item">${f}</div>`);
+    html+=`</div>`;
+  }
+
+  // recent
+  html+=`<div class="sec"><span class="sec-dot" style="background:var(--purple)"></span>Recent days</div>`;
+  dates.slice(0,14).forEach(d=>{
+    const s=scores[d];
+    const lbl=d===today()?'Today':new Date(d+'T12:00:00').toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});
+    html+=`<div style="background:var(--card);border:0.5px solid var(--border);border-radius:8px;padding:9px 12px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:13px;color:var(--text2)">${lbl}</div>
+      <div style="font-family:var(--mono);font-size:12px;color:${scoreColor(s)}">${s}</div>
+    </div>`;
+  });
+  document.getElementById('pg-history').innerHTML=html;
+}
+function calcStreak(sorted){
+  let n=0;const t=new Date(today());
+  for(let i=0;i<sorted.length;i++){const e=new Date(t);e.setDate(t.getDate()-i);if(sorted[i]===e.toISOString().slice(0,10))n++;else break;}
+  return n;
+}
+
+// ── BADGES ────────────────────────────────────────────────
+const BADGE_DEFS=[
+  {id:'first',icon:'🌱',name:'First Step',desc:'Log your first day'},
+  {id:'s80',icon:'⭐',name:'Great Day',desc:'Score 80+ in a day'},
+  {id:'s90',icon:'🌟',name:'Excellent Day',desc:'Score 90+ in a day'},
+  {id:'s100',icon:'💎',name:'Perfect Day',desc:'Hit 100 — flawless'},
+  {id:'str3',icon:'🔥',name:'3 Day Streak',desc:'3 days in a row'},
+  {id:'str7',icon:'🏆',name:'Week Warrior',desc:'7 days in a row'},
+  {id:'str30',icon:'👑',name:'Month Strong',desc:'30 days in a row'},
+  {id:'meds7',icon:'💊',name:'Med Perfect Week',desc:'All meds 7 days'},
+  {id:'walk7',icon:'🚶',name:'Walker',desc:'Walked after meals 7 days'},
+  {id:'sleep9_3',icon:'🌙',name:'Sleep Queen',desc:'9+ hours 3 nights in a row'},
+  {id:'ns7',icon:'🧠',name:'NS Flow Week',desc:'Full NS flow 7 days'},
+  {id:'clean',icon:'🌿',name:'Clean Day',desc:'No missed enzymes + low histamine'},
+  {id:'comeback',icon:'💪',name:'Comeback Kid',desc:'70+ after a sub-40 day'},
+  {id:'ci_5',icon:'👁',name:'Body Aware',desc:'5 check-ins in one day'},
+  {id:'enzyme_week',icon:'⚗️',name:'Enzyme Week',desc:'No missed enzyme flags for 7 days'},
+];
+
+function checkBadges(){
+  const store=getStore();const food=getFood();const ci=getCI();
+  const earned=getBadges();
+  const dates=Object.keys(store).sort();
+  function earn(id){if(!earned.includes(id))earned.push(id);}
+  if(dates.length>0)earn('first');
+  dates.forEach(d=>{
+    const s=calcScore(d);
+    if(s>=80)earn('s80');if(s>=90)earn('s90');if(s>=100)earn('s100');
+    if((ci[d]||[]).length>=5)earn('ci_5');
+  });
+  const streak=calcStreak([...dates].reverse());
+  if(streak>=3)earn('str3');if(streak>=7)earn('str7');if(streak>=30)earn('str30');
+  const last7=dates.slice(-7);
+  const meds=['prop_am','prop_mid','prop_pm','prozac','mag'];
+  if(last7.length>=7&&last7.every(d=>meds.every(m=>store[d]?.checked?.[m])))earn('meds7');
+  const sleepScores=dates.filter(d=>getFlowData(d).sleep?.rawAnswers?.hours?.startsWith('9+'));
+  for(let i=0;i<=sleepScores.length-3;i++){if(sleepScores[i+1]&&sleepScores[i+2])earn('sleep9_3');}
+  const nsKeys=['ns_listen','ns_shake','ns_rhythm','ns_box','ns_hug'];
+  if(last7.length>=7&&last7.every(d=>nsKeys.every(k=>store[d]?.checked?.[k])))earn('ns7');
+  if(last7.length>=7&&last7.every(d=>!(store[d]?.enzymeFlags?.length>0)))earn('enzyme_week');
+  const sortedScores=dates.map(d=>({d,s:calcScore(d)}));
+  for(let i=1;i<sortedScores.length;i++){if(sortedScores[i-1].s<40&&sortedScores[i].s>=70){earn('comeback');break;}}
+  saveBadges(earned);
+}
+const BB='sc6_badges';
+function getBadges(){try{return JSON.parse(localStorage.getItem(BB)||'[]')}catch(e){return[]}}
+function saveBadges(b){localStorage.setItem(BB,JSON.stringify(b));}
+function renderBadges(){
+  checkBadges();
+  const earned=getBadges();
+  let html=`<div style="font-size:18px;font-weight:500;margin-bottom:.25rem">Badges</div>
+  <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:1.25rem">${earned.length} of ${BADGE_DEFS.length} earned</div>
+  <div class="badge-grid">`;
+  BADGE_DEFS.forEach(b=>{
+    html+=`<div class="badge${earned.includes(b.id)?' earned':''}">
+      <div class="badge-icon">${b.icon}</div>
+      <div><div class="badge-name">${b.name}</div><div class="badge-desc">${b.desc}</div></div>
+    </div>`;
+  });
+  html+=`</div>`;
+  document.getElementById('pg-badges').innerHTML=html;
+}
+
+// ── SETTINGS ──────────────────────────────────────────────
+function renderSettings(){
+  const cfg=getCfg();
+  const allGroups=[
+    {label:'Last night tasks', items:Object.entries(cfg.tasks).filter(([,t])=>t.sec==='lastnight')},
+    {label:'Medications', items:Object.entries(cfg.tasks).filter(([,t])=>t.sec==='meds')},
+    {label:'Self care', items:Object.entries(cfg.tasks).filter(([,t])=>t.sec==='self')},
+    {label:'Social & wellbeing', items:Object.entries(cfg.tasks).filter(([,t])=>t.sec==='social')},
+    {label:'Nervous system', items:Object.entries(cfg.ns)},
+    {label:'Hobbies', items:Object.entries(cfg.hobbies)},
+    {label:'Movement', items:Object.entries(cfg.move)},
+  ];
+  const scaleItems=Object.entries(cfg.scales);
+
+  let html=`<div style="font-size:18px;font-weight:500;margin-bottom:.25rem">Settings</div>
+  <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:1.25rem">Edit task names, point values, and active status</div>`;
+
+  allGroups.forEach(g=>{
+    html+=`<div class="settings-sec">${g.label}</div>`;
+    g.items.forEach(([id,t])=>{
+      const sign=t.pts>=0?'+':'';
+      html+=`<div class="setting-row">
+        <button class="s-toggle ${t.active?'on':''}" onclick="toggleActive('${id}')"></button>
+        <div class="setting-name" style="${!t.active?'opacity:.4':''}">
+          <input type="text" value="${t.name}" onchange="updateTaskName('${id}',this.value)" style="background:transparent;border:none;font-size:13px;color:var(--text2);font-family:var(--sans);width:100%;outline:none;padding:0"/>
+        </div>
+        <div class="setting-pts-wrap">
+          <button class="s-btn" onclick="adjustTask('${id}',-0.5)">−</button>
+          <div class="s-val ${t.pts>=0?'pos':'neg'}" id="sv-${id}">${sign}${t.pts}</div>
+          <button class="s-btn" onclick="adjustTask('${id}',0.5)">+</button>
+        </div>
+      </div>`;
+    });
+  });
+
+  html+=`<div class="settings-sec">Point scales (flows)</div>`;
+  const scaleLabels={
+    sleep_9plus:'Sleep 9+ hours',sleep_89:'Sleep 8-9 hrs',sleep_78:'Sleep 7-8 hrs',sleep_67:'Sleep 6-7 hrs',sleep_under6:'Sleep under 6 hrs',
+    meal_base:'Base meal points',meal_fresh_protein:'Fresh protein bonus',walk_after_meal:'Walk after meal',
+    dao_offset_high_hist:'High histamine with DAO (offset)',oxbile_offset_gallbladder:'Gallbladder trigger with ox bile (offset)',
+    gluten_no_dao:'Gluten without DAO',gluten_with_dao:'Gluten with DAO',
+    high_hist_no_dao:'High histamine without DAO',high_hist_with_dao:'High histamine with DAO',
+    gallbladder_no_ox:'Gallbladder trigger without ox bile',gallbladder_with_ox:'Gallbladder trigger with ox bile',
+    alcohol:'Alcohol',t1_walk:'Tier 1 outdoor walk',exercise_base:'Exercise base points',
+    weed_helped_sleep:'Weed — helped sleep',weed_neutral:'Weed — neutral',weed_disrupted:'Weed — disrupted sleep',
+    water_still:'Still water (per glass)',water_nuun:'NUUN',water_ginger_tea:'Ginger tea',water_peppermint:'Peppermint tea',water_chamomile:'Chamomile tea',water_sparkling:'Sparkling water',water_coffee_after:'Coffee (after food)',water_coffee_before:'Coffee (before food)',
+    ci_base:'Check-in base points',ci_per_q:'Check-in per question',
+  };
+  scaleItems.forEach(([id,val])=>{
+    if(!scaleLabels[id])return;
+    const sign=val>=0?'+':'';
+    html+=`<div class="setting-row">
+      <div class="setting-name">${scaleLabels[id]||id}</div>
+      <div class="setting-pts-wrap">
+        <button class="s-btn" onclick="adjustScale('${id}',-0.5)">−</button>
+        <div class="s-val ${val>=0?'pos':'neg'}" id="ss-${id}">${sign}${val}</div>
+        <button class="s-btn" onclick="adjustScale('${id}',0.5)">+</button>
+      </div>
+    </div>`;
+  });
+
+  html+=`<div style="margin-top:1.5rem;display:flex;gap:8px">
+    <button onclick="resetCfg()" style="flex:1;padding:11px;background:var(--rbg);border:0.5px solid rgba(244,130,106,.3);border-radius:8px;color:var(--red);font-family:var(--mono);font-size:11px;cursor:pointer">Reset to defaults</button>
+    <button onclick="exportCfg()" style="flex:1;padding:11px;background:var(--pbg);border:0.5px solid rgba(196,184,248,.3);border-radius:8px;color:var(--purple);font-family:var(--mono);font-size:11px;cursor:pointer">Export config</button>
+  </div>`;
+
+  document.getElementById('pg-settings').innerHTML=html;
+}
+
+function toggleActive(id){
+  const cfg=getCfg();
+  const all={...cfg.tasks,...cfg.ns,...cfg.hobbies,...cfg.move};
+  if(cfg.tasks[id])cfg.tasks[id].active=!cfg.tasks[id].active;
+  else if(cfg.ns[id])cfg.ns[id].active=!cfg.ns[id].active;
+  else if(cfg.hobbies[id])cfg.hobbies[id].active=!cfg.hobbies[id].active;
+  else if(cfg.move[id])cfg.move[id].active=!cfg.move[id].active;
+  saveCfg(cfg);renderSettings();
+}
+function adjustTask(id,delta){
+  const cfg=getCfg();
+  const all=[cfg.tasks,cfg.ns,cfg.hobbies,cfg.move];
+  all.forEach(g=>{if(g[id])g[id].pts=Math.round((g[id].pts+delta)*10)/10;});
+  saveCfg(cfg);
+  const el=document.getElementById('sv-'+id);
+  if(el){const v=all.find(g=>g[id])?.[id]?.pts||0;el.textContent=(v>=0?'+':'')+v;}
+}
+function adjustScale(id,delta){
+  const cfg=getCfg();
+  cfg.scales[id]=Math.round((cfg.scales[id]+delta)*10)/10;
+  saveCfg(cfg);
+  const el=document.getElementById('ss-'+id);
+  const v=cfg.scales[id];
+  if(el)el.textContent=(v>=0?'+':'')+v;
+}
+function updateTaskName(id,val){
+  const cfg=getCfg();
+  [cfg.tasks,cfg.ns,cfg.hobbies,cfg.move].forEach(g=>{if(g[id])g[id].name=val;});
+  saveCfg(cfg);
+}
+function resetCfg(){
+  if(!confirm('Reset all settings to defaults?'))return;
+  localStorage.removeItem(CFG);renderSettings();renderToday();
+}
+function exportCfg(){
+  const blob=new Blob([JSON.stringify(getCfg(),null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='score_config.json';a.click();
+}
+
+// ── NAV ───────────────────────────────────────────────────
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pg-'+id).classList.add('active');
+  document.querySelectorAll('.nav-btn')[['today','log','history','badges','settings'].indexOf(id)].classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='today')renderToday();
+  else if(id==='log')renderLog();
+  else if(id==='history')renderHistory();
+  else if(id==='badges')renderBadges();
+  else if(id==='settings')renderSettings();
+}
+renderToday();
+</script>
+</body>
+</html>
