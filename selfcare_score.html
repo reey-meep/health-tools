@@ -7,347 +7,431 @@
 <meta name="apple-mobile-web-app-title" content="Daily Score">
 <title>Daily Self-Care Score</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
-:root{
-  --bg:#0f0f0e;--surface:#161614;--card:#1e1e1b;--card2:#242421;
-  --border:#2a2a26;--border2:#363630;
-  --text:#e8e4d8;--text2:#9a9488;--text3:#5a5750;
-  --purple:#c4b8f8;--pdim:#7b6fd4;--pbg:#1e1a3a;
-  --teal:#7dd4b8;--tbg:#0a2420;
-  --amber:#f0b84a;--abg:#2a1e06;
-  --red:#f4826a;--rbg:#2a0f0a;
-  --green:#8ecf6a;--gbg:#152108;
-  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
-  --r:10px;--rl:14px;
-}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh}
-.nav{display:flex;background:var(--surface);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:100;overflow-x:auto;scrollbar-width:none}
-.nav::-webkit-scrollbar{display:none}
-.nav-btn{flex:1;min-width:55px;padding:13px 4px 11px;font-size:10px;font-weight:500;color:var(--text3);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;font-family:var(--mono);letter-spacing:.04em}
-.nav-btn.active{color:var(--purple);border-bottom-color:var(--purple)}
-.page{display:none;padding:1rem;max-width:680px;margin:0 auto;padding-bottom:5rem}
-.page.active{display:block}
 
-/* RING */
-.ring-wrap{display:flex;flex-direction:column;align-items:center;padding:1.25rem 0 .5rem}
-.ring{position:relative;width:150px;height:150px}
-.ring svg{transform:rotate(-90deg)}
-.ring-bg{fill:none;stroke:var(--border2);stroke-width:10}
-.ring-fill{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .5s,stroke .3s}
-.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.ring-num{font-size:40px;font-weight:600;font-family:var(--mono);line-height:1}
-.ring-denom{font-size:11px;font-family:var(--mono);color:var(--text3)}
-.ring-grade{font-size:13px;font-weight:500;margin-top:.4rem;font-family:var(--mono)}
-.ring-sub{font-size:11px;color:var(--text3);margin-top:2px;text-align:center}
-.pace-badge{font-family:var(--mono);font-size:11px;padding:4px 12px;border-radius:99px;margin-top:.5rem;font-weight:500}
-.pace-green{background:rgba(142,207,106,.12);color:var(--green);border:0.5px solid rgba(142,207,106,.3)}
-.pace-yellow{background:rgba(240,184,74,.12);color:var(--amber);border:0.5px solid rgba(240,184,74,.3)}
-.pace-red{background:rgba(244,130,106,.12);color:var(--red);border:0.5px solid rgba(244,130,106,.3)}
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
+:root {
+ --cream: #faf7f2;
+ --cream2: #f4efe6;
+ --cream3: #ede6d8;
+ --card: rgba(255,255,255,0.92);
+ --card-border: rgba(212,200,180,0.55);
+ --border: #e8dfd0;
+ --border2: #d4c8b4;
+ --text: #2d2418;
+ --text2: #6b5844;
+ --text3: #a08870;
+ --leaf: #4a7c59;
+ --leaf-light: #7ab088;
+ --sage: #6a9470;
+ --gold: #c4922a;
+ --gold-light: #e8c97e;
+ --blossom: #c4607a;
+ --lavender: #7a6cba;
+ --lavender-light: #b0a8e0;
+ --shadow: 0 2px 12px rgba(44,36,24,0.07);
+ --shadow-lg: 0 6px 28px rgba(44,36,24,0.1);
+ --r: 16px;
+ --rl: 20px;
+ --serif: 'Lora', Georgia, serif;
+ --sans: 'DM Sans', sans-serif;
+ --mono: 'DM Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: var(--sans); background: var(--cream); color: var(--text); min-height: 100vh; overflow-x: hidden; transition: background-color 1.8s ease; }
+
+/* BG LAYER */
+#bg-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; transition: background 1.8s ease; }
+
+/* NAV */
+.nav { display: flex; background: rgba(250,247,242,0.9); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; overflow-x: auto; scrollbar-width: none; transition: background-color 1.8s ease; }
+.nav::-webkit-scrollbar { display: none; }
+.nav-btn { flex: 1; min-width: 55px; padding: 13px 4px 11px; font-size: 10px; font-weight: 500; color: var(--text3); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; font-family: var(--mono); letter-spacing: .06em; text-transform: uppercase; transition: color .15s; }
+.nav-btn.active { color: var(--leaf); border-bottom-color: var(--leaf); }
+
+/* PAGES */
+.page { display: none; position: relative; z-index: 1; padding: 1.25rem; max-width: 640px; margin: 0 auto; padding-bottom: 5.5rem; }
+.page.active { display: block; }
+
+/* SCORE CARD */
+.score-card { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--rl); box-shadow: var(--shadow-lg); padding: 1.5rem 1.25rem 1.25rem; margin-bottom: 1rem; text-align: center; position: relative; overflow: hidden; }
+.score-card-bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--leaf-light), var(--gold-light), #f0c0c8); border-radius: var(--rl) var(--rl) 0 0; }
+.score-date { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: .875rem; }
+.score-number { font-family: var(--serif); font-size: 68px; font-weight: 600; line-height: 1; margin-bottom: 2px; transition: color .5s; }
+.score-denom { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-bottom: .5rem; }
+.score-grade { font-family: var(--serif); font-size: 15px; font-style: italic; margin-bottom: .75rem; transition: color .5s; }
+.pace-pill { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 4px 12px; border-radius: 99px; margin-bottom: .875rem; }
+.pace-green { background: rgba(74,124,89,.1); color: var(--leaf); border: 1px solid rgba(74,124,89,.2); }
+.pace-yellow { background: rgba(196,146,42,.1); color: var(--gold); border: 1px solid rgba(196,146,42,.2); }
+.pace-red { background: rgba(180,70,60,.08); color: #b84640; border: 1px solid rgba(180,70,60,.18); }
+
+/* XP */
+.xp-row { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: .5rem; }
+.level-pill { display: inline-flex; align-items: center; gap: 5px; background: rgba(122,108,186,.1); border: 1px solid rgba(122,108,186,.25); border-radius: 99px; padding: 4px 12px; font-family: var(--mono); font-size: 11px; color: var(--lavender); }
+.streak-pill { display: inline-flex; align-items: center; gap: 4px; background: rgba(220,130,50,.1); border: 1px solid rgba(220,130,50,.22); border-radius: 99px; padding: 4px 10px; font-family: var(--mono); font-size: 11px; color: #c87838; }
+.xp-bar-wrap { max-width: 180px; margin: 0 auto .25rem; }
+.xp-track { height: 4px; background: var(--cream3); border-radius: 99px; overflow: hidden; }
+.xp-fill { height: 100%; background: linear-gradient(90deg, var(--sage), var(--leaf)); border-radius: 99px; transition: width .8s cubic-bezier(.4,0,.2,1); }
+.xp-lbl { font-family: var(--mono); font-size: 9px; color: var(--text3); text-align: center; margin-top: 3px; }
+.ci-info { font-family: var(--mono); font-size: 10px; color: var(--text3); text-align: center; margin-top: .4rem; }
+
+/* CHALLENGES */
+.challenge-card { background: var(--card); border: 1px solid rgba(122,108,186,.2); border-radius: var(--r); padding: .875rem 1rem; margin-bottom: 7px; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow); }
+.ch-icon-wrap { width: 38px; height: 38px; border-radius: 11px; background: linear-gradient(135deg, rgba(106,148,112,.15), rgba(74,124,89,.08)); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+.ch-body { flex: 1; min-width: 0; }
+.ch-eyebrow { font-family: var(--mono); font-size: 9px; color: var(--text3); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 2px; }
+.ch-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.ch-desc { font-size: 11px; color: var(--text2); line-height: 1.4; margin-bottom: 5px; }
+.ch-bar { height: 3px; background: var(--cream3); border-radius: 99px; overflow: hidden; }
+.ch-bar-fill { height: 100%; background: linear-gradient(90deg, var(--sage), var(--leaf)); border-radius: 99px; transition: width .5s; }
+.ch-status { font-family: var(--mono); font-size: 9px; color: var(--text3); margin-top: 3px; }
+.ch-done .ch-status { color: var(--leaf); }
+.ch-reward { font-family: var(--mono); font-size: 10px; color: var(--gold); white-space: nowrap; flex-shrink: 0; }
+.wch-card { background: rgba(74,124,89,.04); border: 1px solid rgba(74,124,89,.18); border-radius: var(--r); padding: .75rem 1rem; margin-bottom: 1rem; }
+.wch-eyebrow { font-family: var(--mono); font-size: 9px; color: var(--sage); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 3px; }
+.wch-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.wch-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
 
 /* SECTIONS */
-.sec{font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin:1.1rem 0 .4rem;font-family:var(--mono);display:flex;align-items:center;gap:8px}
-.sec-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.sec-pts{margin-left:auto;font-size:9px}
+.sec { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--text3); margin: 1.25rem 0 .5rem; }
+.sec-line { flex: 1; height: 1px; background: var(--border); }
 
-/* CHECKBOXES */
-.tasks{display:flex;flex-direction:column;gap:5px}
-.task{display:flex;align-items:center;gap:9px;background:var(--card);border:0.5px solid var(--border);border-radius:8px;padding:9px 11px;cursor:pointer;user-select:none;transition:background .12s}
-.task.on{background:var(--card2)}
-.task.neg.on{background:var(--rbg);border-color:rgba(244,130,106,.35)}
-.task.neg{border-color:rgba(244,130,106,.15)}
-.chk{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.task.on .chk{background:var(--teal);border-color:var(--teal)}
-.task.neg.on .chk{background:var(--red);border-color:var(--red)}
-.chk svg{display:none}
-.task.on .chk svg,.task.neg.on .chk svg{display:block}
-.t-name{font-size:12.5px;line-height:1.4;flex:1;color:var(--text2)}
-.task.on .t-name{color:var(--text3)}
-.t-pts{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:99px;flex-shrink:0}
-.pp{background:rgba(142,207,106,.08);color:var(--green)}
-.np{background:rgba(244,130,106,.08);color:var(--red)}
+/* TASKS */
+.tasks { display: flex; flex-direction: column; gap: 6px; }
+.task { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; padding: 10px 12px; cursor: pointer; user-select: none; box-shadow: var(--shadow); transition: all .15s; }
+.task:active { transform: scale(.985); }
+.task.on { background: rgba(74,124,89,.06); border-color: rgba(74,124,89,.28); }
+.task.neg { border-color: rgba(180,70,60,.15); }
+.task.neg.on { background: rgba(180,70,60,.05); border-color: rgba(180,70,60,.25); }
+.chk { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--border2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .2s; background: white; box-shadow: inset 0 1px 2px rgba(0,0,0,.06); }
+.task.on .chk { background: var(--leaf); border-color: var(--leaf); animation: checkBounce .25s ease; }
+.task.neg.on .chk { background: #b84640; border-color: #b84640; }
+.chk svg { display: none; }
+.task.on .chk svg { display: block; }
+@keyframes checkBounce { 0%{transform:scale(0)} 60%{transform:scale(1.25)} 100%{transform:scale(1)} }
+.t-name { font-size: 13px; color: var(--text2); flex: 1; line-height: 1.4; }
+.task.on .t-name { color: var(--text3); }
+.t-pts { font-family: var(--mono); font-size: 10px; padding: 2px 7px; border-radius: 99px; flex-shrink: 0; }
+.pp { background: rgba(74,124,89,.1); color: var(--leaf); }
+.np { background: rgba(180,70,60,.08); color: #b84640; }
+.info-btn { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 14px; padding: 0 2px; flex-shrink: 0; opacity: .5; transition: opacity .15s; line-height: 1; }
+.info-btn:hover { opacity: 1; color: var(--lavender); }
 
-/* COLLAPSIBLE */
-.col-header{display:flex;align-items:center;gap:8px;background:var(--card);border:0.5px solid var(--border);border-radius:8px;padding:9px 11px;cursor:pointer;margin-bottom:4px}
-.col-title{font-size:12.5px;font-weight:500;color:var(--text);flex:1}
-.col-count{font-family:var(--mono);font-size:10px;color:var(--teal)}
-.col-arrow{font-size:10px;color:var(--text3);transition:transform .2s}
-.col-arrow.open{transform:rotate(180deg)}
-.col-body{display:none;padding:0 0 4px 8px}
-.col-body.open{display:block}
-.subsec{font-size:9px;color:var(--text3);font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;margin:.6rem 0 .3rem .5rem}
+/* COLLAPSIBLES */
+.col-header { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; padding: 10px 12px; cursor: pointer; margin-bottom: 5px; box-shadow: var(--shadow); }
+.col-title { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; }
+.col-count { font-family: var(--mono); font-size: 10px; color: var(--leaf); }
+.col-arrow { font-size: 10px; color: var(--text3); transition: transform .2s; }
+.col-arrow.open { transform: rotate(180deg); }
+.col-body { display: none; padding: 0 0 4px 10px; }
+.col-body.open { display: block; }
+.subsec { font-size: 9px; color: var(--text3); font-family: var(--mono); letter-spacing: .08em; text-transform: uppercase; margin: .75rem 0 .3rem .5rem; }
 
 /* FLOW CARDS */
-.flow-card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--rl);padding:.875rem 1rem;margin-bottom:6px;cursor:pointer;transition:border-color .15s}
-.flow-card:hover{border-color:var(--border2)}
-.flow-card.has-data{border-color:rgba(125,212,184,.3);background:rgba(125,212,184,.04)}
-.fc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
-.fc-title{font-size:13px;font-weight:500;color:var(--text)}
-.fc-pts{font-family:var(--mono);font-size:11px;color:var(--teal)}
-.fc-sub{font-size:12px;color:var(--text3)}
-.fc-flag{font-size:10px;font-family:var(--mono);color:var(--amber);margin-top:3px}
-.fc-add{font-size:11px;color:var(--pdim);font-family:var(--mono);margin-top:2px}
+.flow-card { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--r); padding: .875rem 1rem; margin-bottom: 7px; cursor: pointer; box-shadow: var(--shadow); transition: all .15s; }
+.flow-card:hover { box-shadow: var(--shadow-lg); border-color: var(--border2); }
+.flow-card.has-data { border-color: rgba(74,124,89,.3); background: rgba(74,124,89,.03); }
+.fc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; }
+.fc-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.fc-pts { font-family: var(--mono); font-size: 11px; color: var(--leaf); }
+.fc-sub { font-size: 12px; color: var(--text3); line-height: 1.4; }
 
 /* MODAL */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:flex-end;justify-content:center}
-.modal{background:var(--surface);border:0.5px solid var(--border2);border-radius:20px 20px 0 0;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;padding:1.25rem;padding-bottom:2rem}
-.modal-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem}
-.modal-title{font-size:17px;font-weight:600}
-.modal-close{background:none;border:0.5px solid var(--border2);border-radius:50%;width:28px;height:28px;color:var(--text3);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
-.q-label{font-size:10px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
-.q-text{font-size:16px;font-weight:500;margin-bottom:1rem;line-height:1.35}
-.opts-col{display:flex;flex-direction:column;gap:6px;margin-bottom:1rem}
-.opt-btn{padding:11px 14px;background:var(--card);border:0.5px solid var(--border2);border-radius:8px;font-size:13px;cursor:pointer;text-align:left;color:var(--text2);transition:all .12s}
-.opt-btn:hover{border-color:var(--pdim);color:var(--text)}
-.opt-btn.sel{background:var(--pbg);border-color:var(--pdim);color:var(--purple);font-weight:500}
-.pills-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:1rem}
-.pill-btn{padding:7px 14px;background:var(--card);border:0.5px solid var(--border2);border-radius:99px;font-size:12px;cursor:pointer;color:var(--text2);transition:all .12s;font-family:var(--mono)}
-.pill-btn:hover{border-color:var(--pdim)}
-.pill-btn.sel{background:var(--pbg);border-color:var(--pdim);color:var(--purple)}
-.text-in{width:100%;background:var(--card);border:0.5px solid var(--border2);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--text);font-family:var(--sans);outline:none;resize:none;line-height:1.5;margin-bottom:1rem;min-height:70px}
-.text-in:focus{border-color:var(--pdim)}
-.next-btn{width:100%;padding:13px;background:var(--pdim);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:opacity .15s}
-.next-btn:hover{opacity:.88}
-.next-btn:disabled{opacity:.3;cursor:default}
-.back-btn{width:100%;padding:10px;background:none;border:none;font-size:13px;color:var(--text3);cursor:pointer;margin-top:6px}
-.flag-box{background:rgba(240,184,74,.08);border:0.5px solid rgba(240,184,74,.3);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--amber);font-family:var(--mono);margin-bottom:1rem;line-height:1.5}
-.pts-preview{background:rgba(125,212,184,.08);border:0.5px solid rgba(125,212,184,.2);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--teal);font-family:var(--mono);margin-bottom:.75rem;text-align:center}
-.done-msg{text-align:center;padding:1.5rem 0}
-.done-icon{font-size:36px;margin-bottom:.75rem}
-.done-title{font-size:18px;font-weight:500;margin-bottom:6px}
-.done-sub{font-size:13px;color:var(--text2);line-height:1.6}
-.done-pts{font-family:var(--mono);font-size:22px;color:var(--teal);margin-top:.75rem}
+.modal-bg { position: fixed; inset: 0; background: rgba(44,36,24,.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 200; display: flex; align-items: flex-end; justify-content: center; }
+.modal { background: #fffef9; border: 1px solid var(--border); border-radius: 24px 24px 0 0; width: 100%; max-width: 640px; max-height: 92vh; overflow-y: auto; padding: 1rem 1.25rem 2.5rem; }
+.modal-handle { width: 36px; height: 4px; background: var(--cream3); border-radius: 99px; margin: 0 auto 1.25rem; }
+.modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; }
+.modal-title { font-family: var(--serif); font-size: 20px; font-weight: 500; }
+.modal-close { background: var(--cream2); border: 1px solid var(--border); border-radius: 50%; width: 30px; height: 30px; color: var(--text3); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+.q-label { font-family: var(--mono); font-size: 9px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+.q-text { font-family: var(--serif); font-size: 19px; color: var(--text); margin-bottom: 1.25rem; line-height: 1.4; }
+.opts-col { display: flex; flex-direction: column; gap: 7px; margin-bottom: 1rem; }
+.opt-btn { padding: 12px 14px; background: var(--cream); border: 1.5px solid var(--border); border-radius: 12px; font-size: 13px; font-family: var(--sans); cursor: pointer; text-align: left; color: var(--text2); transition: all .12s; }
+.opt-btn:hover { border-color: var(--leaf); }
+.opt-btn.sel { background: rgba(74,124,89,.08); border-color: var(--leaf); color: var(--leaf); font-weight: 500; }
+.pills-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 1rem; }
+.pill-btn { padding: 7px 14px; background: var(--cream); border: 1.5px solid var(--border); border-radius: 99px; font-size: 12px; font-family: var(--mono); cursor: pointer; color: var(--text2); transition: all .12s; }
+.pill-btn.sel { background: rgba(74,124,89,.08); border-color: var(--leaf); color: var(--leaf); }
+.text-in { width: 100%; background: var(--cream); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 14px; font-family: var(--sans); color: var(--text); outline: none; resize: none; line-height: 1.6; margin-bottom: 1rem; min-height: 70px; }
+.text-in:focus { border-color: var(--leaf); }
+.num-in { background: var(--cream); border: 1.5px solid var(--border); border-radius: 12px; padding: 10px 12px; font-size: 18px; color: var(--text); font-family: var(--mono); outline: none; width: 120px; text-align: center; margin-bottom: 1rem; }
+.next-btn { width: 100%; padding: 14px; background: var(--leaf); border: none; border-radius: 12px; color: white; font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--sans); box-shadow: 0 4px 16px rgba(74,124,89,.22); margin-top: .5rem; transition: opacity .15s, transform .08s; }
+.next-btn:hover { opacity: .9; }
+.next-btn:active { transform: scale(.98); }
+.next-btn:disabled { opacity: .3; cursor: default; transform: none; }
+.back-btn { width: 100%; padding: 10px; background: none; border: none; font-size: 13px; color: var(--text3); cursor: pointer; margin-top: 6px; }
+.flag-box { background: rgba(196,146,42,.07); border: 1px solid rgba(196,146,42,.22); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--gold); font-family: var(--mono); margin-bottom: .75rem; line-height: 1.55; }
+.pts-preview { background: rgba(74,124,89,.06); border: 1px solid rgba(74,124,89,.18); border-radius: 10px; padding: 8px 12px; font-size: 12px; color: var(--leaf); font-family: var(--mono); margin-bottom: .75rem; text-align: center; }
+.done-msg { text-align: center; padding: 1.5rem 0; }
+.done-icon { font-size: 44px; margin-bottom: .875rem; }
+.done-title { font-family: var(--serif); font-size: 22px; font-weight: 500; margin-bottom: 6px; }
+.done-sub { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: .5rem; }
+.done-pts { font-family: var(--serif); font-size: 28px; font-weight: 600; color: var(--leaf); margin: .5rem 0 .25rem; }
 
 /* DRINK LOG */
-.drink-entries{display:flex;flex-direction:column;gap:4px;margin-bottom:.5rem}
-.drink-entry{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--card);border:0.5px solid var(--border);border-radius:7px}
-.drink-name{font-size:12px;flex:1;color:var(--text2)}
-.drink-pts{font-family:var(--mono);font-size:10px;color:var(--teal)}
-.drink-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0 3px}
-.drink-del:hover{color:var(--red)}
-.drink-add-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:.5rem}
-.drink-type-btn{padding:6px 12px;background:var(--card);border:0.5px solid var(--border2);border-radius:99px;font-size:11px;color:var(--text2);cursor:pointer;font-family:var(--mono);transition:all .12s;white-space:nowrap}
-.drink-type-btn:hover{border-color:var(--teal);color:var(--teal)}
+.drink-entries { display: flex; flex-direction: column; gap: 5px; margin-bottom: .75rem; }
+.drink-entry { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(74,124,89,.04); border: 1px solid rgba(74,124,89,.14); border-radius: 10px; }
+.drink-name { font-size: 12px; flex: 1; color: var(--text2); }
+.drink-pts { font-family: var(--mono); font-size: 10px; color: var(--leaf); }
+.drink-del { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 15px; padding: 0 2px; }
+.drink-type-btn { padding: 7px 13px; background: var(--card); border: 1px solid var(--card-border); border-radius: 99px; font-size: 11px; color: var(--text2); cursor: pointer; font-family: var(--mono); white-space: nowrap; box-shadow: var(--shadow); transition: all .12s; }
+.drink-type-btn:hover { border-color: var(--leaf); color: var(--leaf); }
 
-/* CHECKIN FAB */
-.ci-fab{position:fixed;bottom:1.5rem;right:1.25rem;background:var(--pdim);border:none;border-radius:99px;padding:10px 16px;color:#fff;font-family:var(--mono);font-size:11px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.4);z-index:150;display:flex;align-items:center;gap:6px}
-.fab-dot{width:7px;height:7px;border-radius:50%;background:var(--amber)}
-@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
-.fab-dot.urgent{background:var(--red);animation:pulse 1.2s infinite}
+/* FAB */
+.ci-fab { position: fixed; bottom: 1.5rem; right: 1.25rem; background: var(--leaf); border: none; border-radius: 99px; padding: 12px 18px; color: white; font-family: var(--mono); font-size: 11px; cursor: pointer; box-shadow: 0 4px 20px rgba(74,124,89,.32); z-index: 150; display: flex; align-items: center; gap: 6px; transition: all .15s; }
+.ci-fab:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(74,124,89,.38); }
+.fab-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold-light); }
+@keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+.fab-dot.urgent { background: #e05040; animation: pulse 1.2s infinite; }
+
+/* CI MODAL */
+.ci-q { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--cream); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 6px; }
+.ci-q-text { font-size: 13px; color: var(--text2); }
+.ci-btns { display: flex; gap: 5px; }
+.ci-btn { font-family: var(--mono); font-size: 11px; padding: 5px 11px; border-radius: 8px; border: 1px solid var(--border); background: white; color: var(--text3); cursor: pointer; transition: all .1s; }
+.ci-btn.yes-sel { background: rgba(180,70,60,.08); border-color: #b84640; color: #b84640; }
+.ci-btn.no-sel { background: rgba(74,124,89,.08); border-color: var(--leaf); color: var(--leaf); }
+.ci-action { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: rgba(180,70,60,.04); border: 1px solid rgba(180,70,60,.14); border-radius: 10px; margin-bottom: 6px; }
+.ci-action.done-action { opacity: .5; }
+.ci-action-text { flex: 1; font-size: 12px; color: var(--text2); line-height: 1.55; }
+.ci-action-text strong { color: #b84640; font-weight: 500; display: block; margin-bottom: 2px; }
+.ci-done-btn { font-family: var(--mono); font-size: 10px; padding: 4px 10px; border-radius: 8px; border: 1px solid var(--border); background: white; color: var(--text3); cursor: pointer; white-space: nowrap; }
+.ci-done-btn.done { background: rgba(74,124,89,.08); border-color: var(--leaf); color: var(--leaf); }
 
 /* HISTORY */
-.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:.75rem}
-.stat-card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:.875rem 1rem}
-.stat-num{font-size:24px;font-weight:600;font-family:var(--mono)}
-.stat-lbl{font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px}
-.chart-wrap{background:var(--card);border:0.5px solid var(--border);border-radius:var(--rl);padding:1rem;margin-bottom:.75rem}
-.wbars{display:flex;gap:5px;align-items:flex-end;height:72px;margin-bottom:4px}
-.wbar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
-.wbar{width:100%;border-radius:3px 3px 0 0;min-height:3px}
-.wbar-lbl{font-size:9px;font-family:var(--mono);color:var(--text3)}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:.75rem}
-.cal-dow{font-size:8px;font-family:var(--mono);color:var(--text3);text-align:center;padding-bottom:3px}
-.cal-day{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;font-family:var(--mono)}
-.flag-summary{background:rgba(240,184,74,.06);border:0.5px solid rgba(240,184,74,.25);border-radius:var(--r);padding:.875rem 1rem;margin-bottom:.5rem}
-.flag-title{font-size:12px;font-weight:500;color:var(--amber);margin-bottom:5px}
-.flag-item{font-size:11px;color:var(--text2);font-family:var(--mono);padding:3px 0;border-bottom:0.5px solid var(--border)}
-.flag-item:last-child{border-bottom:none}
+.stat-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-bottom: .875rem; }
+.stat-card { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--r); padding: 1rem; box-shadow: var(--shadow); }
+.stat-num { font-family: var(--serif); font-size: 28px; font-weight: 600; }
+.stat-lbl { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 2px; }
+.chart-wrap { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--r); padding: 1rem; margin-bottom: .875rem; box-shadow: var(--shadow); }
+.wbars { display: flex; gap: 6px; align-items: flex-end; height: 72px; margin-bottom: 5px; }
+.wbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.wbar { width: 100%; border-radius: 4px 4px 0 0; min-height: 3px; transition: height .5s ease; }
+.wbar-lbl { font-size: 9px; font-family: var(--mono); color: var(--text3); }
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+.cal-dow { font-size: 8px; font-family: var(--mono); color: var(--text3); text-align: center; padding-bottom: 3px; }
+.cal-day { aspect-ratio: 1; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 8px; font-family: var(--mono); }
+.week-report { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--r); padding: 1rem; margin-bottom: .875rem; box-shadow: var(--shadow); }
+.week-grade { font-family: var(--serif); font-size: 42px; font-weight: 600; }
+.flag-summary { background: rgba(196,146,42,.06); border: 1px solid rgba(196,146,42,.2); border-radius: var(--r); padding: .875rem 1rem; margin-bottom: .5rem; }
+.flag-title { font-size: 12px; font-weight: 500; color: var(--gold); margin-bottom: 5px; }
+.flag-item { font-size: 11px; color: var(--text2); font-family: var(--mono); padding: 3px 0; border-bottom: 1px solid var(--border); }
+.flag-item:last-child { border-bottom: none; }
 
 /* BADGES */
-.badge-grid{display:flex;flex-direction:column;gap:5px}
-.badge{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);padding:.75rem 1rem;display:flex;align-items:center;gap:10px;opacity:.3}
-.badge.earned{opacity:1;border-color:rgba(240,184,74,.3);background:rgba(240,184,74,.03)}
-.badge-icon{font-size:20px;flex-shrink:0}
-.badge-name{font-size:13px;font-weight:500}
-.badge-desc{font-size:11px;color:var(--text3);margin-top:1px}
+.badge-grid { display: flex; flex-direction: column; gap: 7px; }
+.badge { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--r); padding: .875rem 1rem; display: flex; align-items: center; gap: 12px; opacity: .3; box-shadow: var(--shadow); transition: all .3s; }
+.badge.earned { opacity: 1; border-color: rgba(196,146,42,.35); background: rgba(196,146,42,.04); }
+.badge-icon { font-size: 22px; flex-shrink: 0; }
+.badge-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.badge-desc { font-size: 11px; color: var(--text3); margin-top: 1px; }
 
 /* SETTINGS */
-.settings-sec{font-size:10px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:1.25rem 0 .5rem}
-.setting-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border)}
-.setting-row:last-child{border-bottom:none}
-.setting-name{font-size:13px;flex:1;color:var(--text2)}
-.setting-pts-wrap{display:flex;align-items:center;gap:6px}
-.s-btn{background:none;border:0.5px solid var(--border2);border-radius:4px;width:24px;height:24px;cursor:pointer;font-size:14px;color:var(--text3);display:flex;align-items:center;justify-content:center}
-.s-btn:hover{border-color:var(--pdim);color:var(--purple)}
-.s-val{font-family:var(--mono);font-size:12px;font-weight:500;min-width:36px;text-align:center}
-.s-val.pos{color:var(--green)}
-.s-val.neg{color:var(--red)}
-.s-toggle{width:36px;height:20px;background:var(--border2);border-radius:99px;cursor:pointer;position:relative;transition:background .15s;border:none;flex-shrink:0}
-.s-toggle.on{background:var(--teal)}
-.s-toggle::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:white;top:3px;left:3px;transition:left .15s}
-.s-toggle.on::after{left:19px}
-.s-impact{font-size:9px;font-family:var(--mono);padding:2px 6px;border-radius:99px;flex-shrink:0}
-.ic{background:rgba(244,130,106,.08);color:var(--red)}
-.ih{background:rgba(240,184,74,.08);color:var(--amber)}
-.im{background:rgba(125,212,184,.08);color:var(--teal)}
-.il{background:rgba(90,87,80,.15);color:var(--text3)}
+.settings-sec { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); margin: 1.25rem 0 .5rem; }
+.setting-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.setting-row:last-child { border-bottom: none; }
+.setting-name { font-size: 13px; flex: 1; color: var(--text2); }
+.s-pts-wrap { display: flex; align-items: center; gap: 6px; }
+.s-btn { background: white; border: 1px solid var(--border); border-radius: 6px; width: 26px; height: 26px; cursor: pointer; font-size: 15px; color: var(--text3); display: flex; align-items: center; justify-content: center; transition: all .1s; }
+.s-btn:hover { border-color: var(--leaf); color: var(--leaf); }
+.s-val { font-family: var(--mono); font-size: 12px; font-weight: 500; min-width: 36px; text-align: center; }
+.pos { color: var(--leaf); } .neg { color: #b84640; }
+.s-toggle { width: 36px; height: 20px; background: var(--border2); border-radius: 99px; cursor: pointer; position: relative; transition: background .15s; border: none; flex-shrink: 0; }
+.s-toggle.on { background: var(--leaf); }
+.s-toggle::after { content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: white; top: 3px; left: 3px; transition: left .15s; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+.s-toggle.on::after { left: 19px; }
+.info-content { font-size: 13px; color: var(--text2); line-height: 1.75; }
 
-.ci-q{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--card);border:0.5px solid var(--border);border-radius:8px;margin-bottom:5px}
-.ci-q-text{font-size:13px;color:var(--text2)}
-.ci-q-text strong{color:var(--text);font-weight:500}
-.ci-btns{display:flex;gap:5px}
-.ci-btn{font-family:var(--mono);font-size:11px;padding:5px 10px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;transition:all .12s}
-.ci-btn.yes-sel{background:rgba(244,130,106,.15);border-color:var(--red);color:var(--red)}
-.ci-btn.no-sel{background:rgba(142,207,106,.08);border-color:var(--green);color:var(--green)}
-.ci-action{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:var(--card);border:0.5px solid rgba(244,130,106,.2);border-radius:8px;margin-bottom:5px}
-.ci-action.done-action{opacity:.5;border-color:rgba(142,207,106,.2)}
-.ci-action-text{flex:1;font-size:12px;color:var(--text2);line-height:1.5}
-.ci-action-text strong{color:var(--red);font-weight:500;display:block;margin-bottom:2px}
-.ci-done-btn{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;white-space:nowrap}
-.ci-done-btn.done{background:rgba(142,207,106,.08);border-color:var(--green);color:var(--green)}
+/* CELEBRATIONS */
+.celebrate-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 500; }
+.confetti-piece { position: absolute; border-radius: 2px; animation: cfall linear forwards; }
+@keyframes cfall { 0%{opacity:1;transform:translateY(-10px) rotate(0)} 100%{opacity:0;transform:translateY(100vh) rotate(720deg)} }
+.milestone-toast { position: fixed; top: 68px; left: 50%; transform: translateX(-50%); background: white; border: 1.5px solid var(--border); border-radius: 14px; padding: .65rem 1.25rem; font-family: var(--mono); font-size: 12px; color: var(--text); z-index: 400; text-align: center; box-shadow: var(--shadow-lg); animation: tIn .35s ease, tOut .35s ease 2.6s forwards; white-space: nowrap; max-width: 90vw; }
+@keyframes tIn { from{opacity:0;transform:translateX(-50%) translateY(-8px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+@keyframes tOut { from{opacity:1} to{opacity:0} }
+.toast-gold { border-color: var(--gold); color: var(--text); }
+
+.page-title { font-family: var(--serif); font-size: 22px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+.page-sub { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-bottom: 1.25rem; }
+
 </style>
 </head>
 <body>
+<!-- AUTH SCREEN -->
+<div id="auth-screen" style="display:flex;position:fixed;inset:0;background:var(--cream);z-index:500;flex-direction:column;align-items:center;justify-content:center;padding:2rem">
+  <div style="max-width:360px;width:100%;text-align:center">
+    <div style="font-family:var(--serif);font-size:32px;font-weight:500;color:var(--text);margin-bottom:8px">Grow</div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:.08em;margin-bottom:2.5rem">daily self-care score</div>
+    <div style="background:white;border:1px solid var(--border);border-radius:var(--rl);padding:1.75rem;box-shadow:var(--shadow-lg)">
+      <div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:6px">Sign in</div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:1.25rem">Enter your email to receive a sign-in link.</div>
+      <input id="auth-email" type="email" placeholder="your@email.com"
+        style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:var(--sans);color:var(--text);background:var(--cream);outline:none;margin-bottom:.75rem"
+        onkeydown="if(event.key==='Enter')handleMagicLinkSubmit()"
+        onfocus="this.style.borderColor='var(--leaf)'"
+        onblur="this.style.borderColor='var(--border)'"/>
+      <button id="auth-btn" onclick="handleMagicLinkSubmit()"
+        style="width:100%;padding:13px;background:var(--leaf);border:none;border-radius:10px;color:white;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);box-shadow:0 4px 16px rgba(74,124,89,.22)">
+        Send sign-in link
+      </button>
+      <div id="auth-msg" style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:.75rem;min-height:18px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP WRAPPER -->
+<div id="app-wrap" style="display:none">
+<div id="bg-layer" style="position:fixed;inset:0;pointer-events:none;z-index:0;transition:background 1.8s ease"></div>
 <nav class="nav">
-  <button class="nav-btn active" onclick="goPage('today')">Today</button>
-  <button class="nav-btn" onclick="goPage('log')">Log</button>
-  <button class="nav-btn" onclick="goPage('history')">History</button>
-  <button class="nav-btn" onclick="goPage('badges')">Badges</button>
-  <button class="nav-btn" onclick="goPage('settings')">Settings</button>
+ <button class="nav-btn active" onclick="goPage('today')">Today</button>
+ <button class="nav-btn" onclick="goPage('log')">Log</button>
+ <button class="nav-btn" onclick="goPage('history')">History</button>
+ <button class="nav-btn" onclick="goPage('badges')">Badges</button>
+ <button class="nav-btn" onclick="goPage('settings')">Settings</button>
 </nav>
 <div id="pg-today" class="page active"></div>
 <div id="pg-log" class="page"></div>
 <div id="pg-history" class="page"></div>
 <div id="pg-badges" class="page"></div>
 <div id="pg-settings" class="page"></div>
+<div id="pg-patterns" class="page"></div>
 
 <!-- MODAL -->
 <div id="modal-bg" class="modal-bg" style="display:none" onclick="closeMBG(event)">
-  <div class="modal" id="modal-inner"></div>
+ <div class="modal" id="modal-inner"><div class="modal-handle"></div></div>
 </div>
 
 <!-- CI FAB -->
 <button class="ci-fab" id="ci-fab" onclick="openCI()">
-  <span class="fab-dot" id="fab-dot"></span>Check in
+ <span class="fab-dot" id="fab-dot"></span>Check in
 </button>
 
 <script>
-// ── CONSTANTS ─────────────────────────────────────────────
+// CONSTANTS 
 const SK='sc6_v1', FK='sc6_food_v1', CK='sc6_ci_v1', CFG='sc6_cfg_v1', LF='sc6_lf';
 const DAYS_START=7, DAYS_END=22;
 
 const HIGH_HISTAMINE_KEYWORDS=['tomato','pepper','chocolate','avocado','citrus','lemon','lime','vinegar','alcohol','wine','beer','soy sauce','aged cheese','smoked','canned fish','fermented','kimchi','sauerkraut','spinach','eggplant','strawberry','salami','pepperoni','bacon'];
 const FATTY_KEYWORDS=['butter','cream','fried','karaage','ribs','burger','cheese','curry','oil','fat','pork belly','duck'];
 
-// ── DEFAULT TASKS CONFIG ──────────────────────────────────
+// DEFAULT TASKS CONFIG 
 const DEFAULT_CFG = {
-  tasks:{
-    // LAST NIGHT
-    mag:       {name:'Magnesium before bed',          pts:9,  impact:'c', active:true, sec:'lastnight'},
-    brush_n:   {name:'Brushed teeth last night',      pts:3,  impact:'m', active:true, sec:'lastnight'},
-    floss:     {name:'Flossed last night',             pts:3,  impact:'m', active:true, sec:'lastnight'},
-    wash_face: {name:'Washed face last night',         pts:2,  impact:'l', active:true, sec:'lastnight'},
-    skincare:  {name:'Skincare routine last night',    pts:3,  impact:'l', active:true, sec:'lastnight'},
-    no_phone:  {name:'No phone 30 min before bed',     pts:4,  impact:'h', active:true, sec:'lastnight'},
-    // MEDS
-    prop_am:   {name:'Propranolol — morning',          pts:10, impact:'c', active:true, sec:'meds'},
-    prop_mid:  {name:'Propranolol — midday',           pts:10, impact:'c', active:true, sec:'meds'},
-    prop_pm:   {name:'Propranolol — evening',          pts:10, impact:'c', active:true, sec:'meds'},
-    prozac:    {name:'Prozac 15mg',                    pts:10, impact:'c', active:true, sec:'meds'},
-    probiotic: {name:'Probiotic',                      pts:9,  impact:'c', active:true, sec:'meds'},
-    dmannose:  {name:'D-mannose',                      pts:8,  impact:'c', active:true, sec:'meds'},
-    vitd:      {name:'Vitamin D3',                     pts:6,  impact:'h', active:true, sec:'meds'},
-    iron_vitc: {name:'Iron + vitamin C (or vitC only)',pts:5,  impact:'h', active:true, sec:'meds'},
-    quercetin: {name:'Quercetin 500mg',                pts:4,  impact:'m', active:true, sec:'meds'},
-    b2:        {name:'Riboflavin B2 400mg',             pts:3,  impact:'m', active:true, sec:'meds'},
-    // SELF CARE
-    brush_am:  {name:'Brushed teeth this morning',     pts:2,  impact:'m', active:true, sec:'self'},
-    redlight:  {name:'Red light therapy',              pts:4,  impact:'m', active:true, sec:'self'},
-    wake_time: {name:'Consistent wake time',           pts:5,  impact:'h', active:true, sec:'self'},
-    // SOCIAL
-    solo_block:{name:'Intentional solo block',         pts:3,  impact:'h', active:true, sec:'social'},
-    commons:   {name:'The Commons',           pts:3,  impact:'m', active:true, sec:'social'},
-    meetup:    {name:'Meetup event',                   pts:3,  impact:'m', active:true, sec:'social'},
-  },
-  // NS practices - kept separate for collapsible
-  ns:{
-    ns_listen:     {name:'Listening (3 min)',           pts:2, active:true, sub:'Daily flow'},
-    ns_shake:      {name:'Shake and Twist (2 min)',     pts:2, active:true, sub:'Daily flow'},
-    ns_rhythm:     {name:'Find Rhythm (2 min)',         pts:2, active:true, sub:'Daily flow'},
-    ns_box:        {name:'Box breathing (4 min)',       pts:4, active:true, sub:'Daily flow'},
-    ns_hug:        {name:'Self-Containment Hug',        pts:2, active:true, sub:'Daily flow'},
-    sw_push:       {name:'Push (wall lean)',            pts:2, active:true, sub:'Switching'},
-    sw_thumb:      {name:'Thumb Circles',               pts:2, active:true, sub:'Switching'},
-    sw_nose:       {name:'Fingers to Nose',             pts:2, active:true, sub:'Switching'},
-    sw_feet:       {name:'Touch Feet',                  pts:2, active:true, sub:'Switching'},
-    sw_arms:       {name:'Touch Arms',                  pts:2, active:true, sub:'Switching'},
-    sw_sensory:    {name:'Sensory Experience',          pts:3, active:true, sub:'Switching'},
-    reg_box:       {name:'Box breathing (5 min)',       pts:3, active:true, sub:'Regulate'},
-    reg_eye:       {name:'Eye Relaxation',              pts:2, active:true, sub:'Regulate'},
-    reg_ooo:       {name:'Ooo Aaa Eee Tapping',        pts:2, active:true, sub:'Regulate'},
-    reg_tilt:      {name:'Head Tilt',                   pts:2, active:true, sub:'Regulate'},
-    down_stomp:    {name:'Stomp and Sigh',              pts:3, active:true, sub:'Downregulate'},
-    down_shake:    {name:'Shake and Twist extended',    pts:3, active:true, sub:'Downregulate'},
-    down_contract: {name:'Contract and Extend',         pts:2, active:true, sub:'Downregulate'},
-    down_fold:     {name:'Breathe and Fold',            pts:2, active:true, sub:'Downregulate'},
-    up_rhythm:     {name:'Find Rhythm (5 min)',         pts:3, active:true, sub:'Upregulate'},
-    up_flow:       {name:'Find Flow — figure-8',        pts:3, active:true, sub:'Upregulate'},
-    up_ears:       {name:'Regulating Ears',             pts:2, active:true, sub:'Upregulate'},
-    up_eyes:       {name:'Regulating Eyes',             pts:2, active:true, sub:'Upregulate'},
-    set_butterfly: {name:'Butterfly Hug',               pts:3, active:true, sub:'Settling'},
-    set_voo:       {name:'Voo Sound',                   pts:3, active:true, sub:'Settling'},
-    set_hug:       {name:'Self-Containment (reactive)', pts:2, active:true, sub:'Settling'},
-    set_distance:  {name:'Distancing practice',         pts:2, active:true, sub:'Settling'},
-  },
-  hobbies:{
-    hob_read:      {name:'Reading',                     pts:3, active:true},
-    hob_knit:      {name:'Knitting / crocheting',       pts:3, active:true},
-    hob_origami:   {name:'Origami / puzzles',           pts:3, active:true},
-    hob_game:      {name:'Solo gaming',                 pts:2, active:true},
-    hob_piano:     {name:'Piano',                       pts:4, active:true},
-    hob_watercolor:{name:'Watercolors / art',           pts:4, active:true},
-    hob_macrame:   {name:'Macrame',                     pts:3, active:true},
-    hob_cook:      {name:'Intentional cooking',         pts:4, active:true},
-    hob_guitar:    {name:'Guitar',                      pts:4, active:true},
-    hob_movie:     {name:'Movie alone (intentional)',   pts:2, active:true},
-    hob_poetry:   {name:'Poetry',                     pts:3, active:true},
-  },
-  // movement checkboxes
-  move:{
-    t2_chintuck:  {name:'Chin tucks',                  pts:2, active:true, sub:'Neck/chin'},
-    t2_necknod:   {name:'Resisted neck nods',           pts:2, active:true, sub:'Neck/chin'},
-    t2_tongue:    {name:'Tongue-to-palate swallow',     pts:1.5,active:true,sub:'Neck/chin'},
-    t2_cobrahead: {name:'Cobra head lifts',             pts:1.5,active:true,sub:'Neck/chin'},
-    t2_wallpush:  {name:'Wall pushups (2 rounds)',      pts:2, active:true, sub:'Strength'},
-    t2_scap:      {name:'Scapular wall slides',         pts:2, active:true, sub:'Strength'},
-    t2_superman:  {name:'Superman holds',               pts:2, active:true, sub:'Strength'},
-    t2_ytw:       {name:'Prone Y-T-W raises',           pts:2, active:true, sub:'Strength'},
-    t2_incline:   {name:'Incline pushups',              pts:2, active:true, sub:'Strength'},
-    t2_doorway:   {name:'Doorway chest stretch',        pts:1.5,active:true,sub:'Stretches'},
-    t2_catcow:    {name:'Cat-cow',                      pts:1.5,active:true,sub:'Stretches'},
-    t2_child:     {name:"Child's pose",                 pts:1.5,active:true,sub:'Stretches'},
-    t2_forward:   {name:'Seated forward fold',          pts:1.5,active:true,sub:'Stretches'},
-    t2_fig4:      {name:'Figure-4 stretch',             pts:1.5,active:true,sub:'Stretches'},
-    t2_thoracic:  {name:'Thoracic spine opener',        pts:2, active:true, sub:'Stretches'},
-    t3_chin:      {name:'Chin tucks lying down',        pts:1, active:true, sub:'Tier 3'},
-    t3_catcow:    {name:'Cat-cow gentle',               pts:1, active:true, sub:'Tier 3'},
-    t3_knees:     {name:'Knees to chest hug',           pts:1, active:true, sub:'Tier 3'},
-    t3_fig4:      {name:'Figure-4 stretch',             pts:1, active:true, sub:'Tier 3'},
-    t3_box:       {name:'Box breathing (2 min)',        pts:2, active:true, sub:'Tier 3'},
-  },
-  // point scales for flows
-  scales:{
-    sleep_9plus: 10, sleep_89: 7, sleep_78: 4, sleep_67: 1, sleep_under6: -3,
-    meal_base: 3, meal_fresh_protein: 4, walk_after_meal: 4,
-    dao_offset_high_hist: 7, oxbile_offset_gallbladder: 6,
-    gluten_no_dao: -10, gluten_with_dao: -3,
-    high_hist_no_dao: -6, high_hist_with_dao: -1,
-    gallbladder_no_ox: -6, gallbladder_with_ox: -1,
-    alcohol_none: 0, alcohol_one: -3, alcohol_two: -7, alcohol_heavy: -10,
-    t1_walk: 12, exercise_base: 6,
-    weed_helped_sleep: 2, weed_neutral: 0, weed_disrupted: -2,
-    water_still: 1.5, water_nuun: 3, water_sparkling: 0.5,
-    water_ginger_tea: 2.5, water_peppermint: 2, water_chamomile: 2, water_coffee_after: 0.5, water_coffee_before: -2,
-    ci_base: 2, ci_per_q: 0.2,
-    oz_per_16: 2, sparkling_per_16: 0.5, nuun_bonus: 2,
-  }
+ tasks:{
+ // LAST NIGHT
+ mag: {name:'Magnesium before bed', pts:9, impact:'c', active:true, sec:'lastnight'},
+ brush_n: {name:'Brushed teeth last night', pts:3, impact:'m', active:true, sec:'lastnight'},
+ floss: {name:'Flossed last night', pts:3, impact:'m', active:true, sec:'lastnight'},
+ wash_face: {name:'Washed face last night', pts:2, impact:'l', active:true, sec:'lastnight'},
+ skincare: {name:'Skincare routine last night', pts:3, impact:'l', active:true, sec:'lastnight'},
+ no_phone: {name:'No phone 30 min before bed', pts:4, impact:'h', active:true, sec:'lastnight'},
+ // MEDS
+ prop_am: {name:'Propranolol morning', pts:10, impact:'c', active:true, sec:'meds'},
+ prop_mid: {name:'Propranolol midday', pts:10, impact:'c', active:true, sec:'meds'},
+ prop_pm: {name:'Propranolol evening', pts:10, impact:'c', active:true, sec:'meds'},
+ prozac: {name:'Prozac 15mg', pts:10, impact:'c', active:true, sec:'meds'},
+ probiotic: {name:'Probiotic', pts:9, impact:'c', active:true, sec:'meds'},
+ dmannose: {name:'D-mannose', pts:8, impact:'c', active:true, sec:'meds'},
+ vitd: {name:'Vitamin D3', pts:6, impact:'h', active:true, sec:'meds'},
+ iron_vitc: {name:'Iron + vitamin C (or vitC only)',pts:5, impact:'h', active:true, sec:'meds'},
+ quercetin: {name:'Quercetin 500mg', pts:4, impact:'m', active:true, sec:'meds'},
+ b2: {name:'Riboflavin B2 400mg', pts:3, impact:'m', active:true, sec:'meds'},
+ // SELF CARE
+ brush_am: {name:'Brushed teeth this morning', pts:2, impact:'m', active:true, sec:'self'},
+ redlight: {name:'Red light therapy', pts:4, impact:'m', active:true, sec:'self'},
+ wake_time: {name:'Consistent wake time', pts:5, impact:'h', active:true, sec:'self'},
+ // SOCIAL
+ solo_block:{name:'Intentional solo block', pts:3, impact:'h', active:true, sec:'social'},
+ commons: {name:'The Commons', pts:3, impact:'m', active:true, sec:'social'},
+ meetup: {name:'Meetup event', pts:3, impact:'m', active:true, sec:'social'},
+ },
+ // NS practices - kept separate for collapsible
+ ns:{
+ ns_listen: {name:'Listening (3 min)', pts:2, active:true, sub:'Daily flow'},
+ ns_shake: {name:'Shake and Twist (2 min)', pts:2, active:true, sub:'Daily flow'},
+ ns_rhythm: {name:'Find Rhythm (2 min)', pts:2, active:true, sub:'Daily flow'},
+ ns_box: {name:'Box breathing (4 min)', pts:4, active:true, sub:'Daily flow'},
+ ns_hug: {name:'Self-Containment Hug', pts:2, active:true, sub:'Daily flow'},
+ sw_push: {name:'Push (wall lean)', pts:2, active:true, sub:'Switching'},
+ sw_thumb: {name:'Thumb Circles', pts:2, active:true, sub:'Switching'},
+ sw_nose: {name:'Fingers to Nose', pts:2, active:true, sub:'Switching'},
+ sw_feet: {name:'Touch Feet', pts:2, active:true, sub:'Switching'},
+ sw_arms: {name:'Touch Arms', pts:2, active:true, sub:'Switching'},
+ sw_sensory: {name:'Sensory Experience', pts:3, active:true, sub:'Switching'},
+ reg_box: {name:'Box breathing (5 min)', pts:3, active:true, sub:'Regulate'},
+ reg_eye: {name:'Eye Relaxation', pts:2, active:true, sub:'Regulate'},
+ reg_ooo: {name:'Ooo Aaa Eee Tapping', pts:2, active:true, sub:'Regulate'},
+ reg_tilt: {name:'Head Tilt', pts:2, active:true, sub:'Regulate'},
+ down_stomp: {name:'Stomp and Sigh', pts:3, active:true, sub:'Downregulate'},
+ down_shake: {name:'Shake and Twist extended', pts:3, active:true, sub:'Downregulate'},
+ down_contract: {name:'Contract and Extend', pts:2, active:true, sub:'Downregulate'},
+ down_fold: {name:'Breathe and Fold', pts:2, active:true, sub:'Downregulate'},
+ up_rhythm: {name:'Find Rhythm (5 min)', pts:3, active:true, sub:'Upregulate'},
+ up_flow: {name:'Find Flow figure-8', pts:3, active:true, sub:'Upregulate'},
+ up_ears: {name:'Regulating Ears', pts:2, active:true, sub:'Upregulate'},
+ up_eyes: {name:'Regulating Eyes', pts:2, active:true, sub:'Upregulate'},
+ set_butterfly: {name:'Butterfly Hug', pts:3, active:true, sub:'Settling'},
+ set_voo: {name:'Voo Sound', pts:3, active:true, sub:'Settling'},
+ set_hug: {name:'Self-Containment (reactive)', pts:2, active:true, sub:'Settling'},
+ set_distance: {name:'Distancing practice', pts:2, active:true, sub:'Settling'},
+ },
+ hobbies:{
+ hob_read: {name:'Reading', pts:3, active:true},
+ hob_knit: {name:'Knitting / crocheting', pts:3, active:true},
+ hob_origami: {name:'Origami / puzzles', pts:3, active:true},
+ hob_game: {name:'Solo gaming', pts:2, active:true},
+ hob_piano: {name:'Piano', pts:4, active:true},
+ hob_watercolor:{name:'Watercolors / art', pts:4, active:true},
+ hob_macrame: {name:'Macrame', pts:3, active:true},
+ hob_cook: {name:'Intentional cooking', pts:4, active:true},
+ hob_guitar: {name:'Guitar', pts:4, active:true},
+ hob_movie: {name:'Movie alone (intentional)', pts:2, active:true},
+ hob_poetry: {name:'Poetry', pts:3, active:true},
+ },
+ // movement checkboxes
+ move:{
+ t2_chintuck: {name:'Chin tucks', pts:2, active:true, sub:'Neck/chin'},
+ t2_necknod: {name:'Resisted neck nods', pts:2, active:true, sub:'Neck/chin'},
+ t2_tongue: {name:'Tongue-to-palate swallow', pts:1.5,active:true,sub:'Neck/chin'},
+ t2_cobrahead: {name:'Cobra head lifts', pts:1.5,active:true,sub:'Neck/chin'},
+ t2_wallpush: {name:'Wall pushups (2 rounds)', pts:2, active:true, sub:'Strength'},
+ t2_scap: {name:'Scapular wall slides', pts:2, active:true, sub:'Strength'},
+ t2_superman: {name:'Superman holds', pts:2, active:true, sub:'Strength'},
+ t2_ytw: {name:'Prone Y-T-W raises', pts:2, active:true, sub:'Strength'},
+ t2_incline: {name:'Incline pushups', pts:2, active:true, sub:'Strength'},
+ t2_doorway: {name:'Doorway chest stretch', pts:1.5,active:true,sub:'Stretches'},
+ t2_catcow: {name:'Cat-cow', pts:1.5,active:true,sub:'Stretches'},
+ t2_child: {name:"Child's pose", pts:1.5,active:true,sub:'Stretches'},
+ t2_forward: {name:'Seated forward fold', pts:1.5,active:true,sub:'Stretches'},
+ t2_fig4: {name:'Figure-4 stretch', pts:1.5,active:true,sub:'Stretches'},
+ t2_thoracic: {name:'Thoracic spine opener', pts:2, active:true, sub:'Stretches'},
+ t3_chin: {name:'Chin tucks lying down', pts:1, active:true, sub:'Tier 3'},
+ t3_catcow: {name:'Cat-cow gentle', pts:1, active:true, sub:'Tier 3'},
+ t3_knees: {name:'Knees to chest hug', pts:1, active:true, sub:'Tier 3'},
+ t3_fig4: {name:'Figure-4 stretch', pts:1, active:true, sub:'Tier 3'},
+ t3_box: {name:'Box breathing (2 min)', pts:2, active:true, sub:'Tier 3'},
+ },
+ // point scales for flows
+ scales:{
+ sleep_9plus: 10, sleep_89: 7, sleep_78: 4, sleep_67: 1, sleep_under6: -3,
+ meal_base: 3, meal_fresh_protein: 4, walk_after_meal: 4,
+ dao_offset_high_hist: 7, oxbile_offset_gallbladder: 6,
+ gluten_no_dao: -10, gluten_with_dao: -3,
+ high_hist_no_dao: -6, high_hist_with_dao: -1,
+ gallbladder_no_ox: -6, gallbladder_with_ox: -1,
+ alcohol_none: 0, alcohol_one: -3, alcohol_two: -7, alcohol_heavy: -10,
+ t1_walk: 12, exercise_base: 6,
+ weed_helped_sleep: 2, weed_neutral: 0, weed_disrupted: -2,
+ water_still: 1.5, water_nuun: 3, water_sparkling: 0.5,
+ water_ginger_tea: 2.5, water_peppermint: 2, water_chamomile: 2, water_coffee_after: 0.5, water_coffee_before: -2,
+ ci_base: 2, ci_per_q: 0.2,
+ oz_per_16: 2, sparkling_per_16: 0.5, nuun_bonus: 2,
+ }
 };
 
 function getCfg(){
-  try{
-    const s=JSON.parse(localStorage.getItem(CFG)||'null');
-    return s||JSON.parse(JSON.stringify(DEFAULT_CFG));
-  }catch(e){return JSON.parse(JSON.stringify(DEFAULT_CFG));}
+ try{
+ const s=JSON.parse(localStorage.getItem(CFG)||'null');
+ return s||JSON.parse(JSON.stringify(DEFAULT_CFG));
+ }catch(e){return JSON.parse(JSON.stringify(DEFAULT_CFG));}
 }
 function saveCfg(c){localStorage.setItem(CFG,JSON.stringify(c));}
 
@@ -359,6 +443,7 @@ function getCI(){try{return JSON.parse(localStorage.getItem(CK)||'{}')}catch(e){
 function saveCI(d){localStorage.setItem(CK,JSON.stringify(d))}
 
 function today(){return new Date().toISOString().slice(0,10)}
+function hr(){return new Date().getHours()}
 function nowTime(){return new Date().toTimeString().slice(0,5)}
 function hour(){return new Date().getHours()}
 
@@ -372,1058 +457,1860 @@ function saveCIEntry(date,e){const d=getCI();if(!d[date])d[date]=[];d[date].push
 function getFlowData(date){return getStore()[date]?.flows||{}}
 function saveFlowData(date,flows){const d=getStore();if(!d[date])d[date]={};d[date].flows=flows;saveStore(d);}
 
-// ── SCORING ───────────────────────────────────────────────
+// SCORING 
 function calcScore(date){
-  const cfg=getCfg();
-  const checked=getChecked(date);
-  const food=getFoodEntries(date);
-  const flows=getFlowData(date);
-  const ciEntries=getCIEntries(date);
-  let pts=0;
+ const cfg=getCfg();
+ const checked=getChecked(date);
+ const food=getFoodEntries(date);
+ const flows=getFlowData(date);
+ const ciEntries=getCIEntries(date);
+ let pts=0;
 
-  // checkboxes
-  Object.entries({...cfg.tasks,...cfg.ns,...cfg.hobbies,...cfg.move}).forEach(([id,t])=>{
-    if(t.active && checked[id]) pts+=t.pts;
-  });
+ // checkboxes
+ Object.entries({...cfg.tasks,...cfg.ns,...cfg.hobbies,...cfg.move}).forEach(([id,t])=>{
+ if(t.active && checked[id]) pts+=t.pts;
+ });
 
-  // food entries
-  food.forEach(e=>pts+=e.pts);
+ // food entries
+ food.forEach(e=>pts+=e.pts);
 
-  // flow scores
-  if(flows.sleep) pts+=flows.sleep.pts||0;
-  if(flows.exercise) pts+=flows.exercise.pts||0;
-  if(flows.weed) pts+=flows.weed.pts||0;
+ // flow scores
+ if(flows.sleep) pts+=flows.sleep.pts||0;
+ if(flows.exercise) pts+=flows.exercise.pts||0;
+ if(flows.weed) pts+=flows.weed.pts||0;
 
-  // CI pts
-  ciEntries.forEach(e=>pts+=(e.pts||0));
+ // CI pts
+ ciEntries.forEach(e=>pts+=(e.pts||0));
 
-  // max for scaling
-  const maxPts=calcMaxPts(cfg);
-  const scaled=Math.round((pts/maxPts)*100);
-  return Math.max(-20,Math.min(100,scaled));
+ // max for scaling
+ const maxPts=calcMaxPts(cfg);
+ const scaled=Math.round((pts/maxPts)*100);
+ return Math.max(-20,Math.min(100,scaled));
 }
 
 function calcMaxPts(cfg){
-  let m=0;
-  Object.values({...cfg.tasks,...cfg.ns,...cfg.hobbies,...cfg.move}).forEach(t=>{if(t.active&&t.pts>0)m+=t.pts;});
-  // add flow maxes
-  const s=cfg.scales;
-  m+=s.sleep_9plus+s.meal_base*3+s.meal_fresh_protein*3+s.walk_after_meal*3+s.t1_walk+s.water_still*8+s.water_nuun;
-  return m;
+ let m=0;
+ Object.values({...cfg.tasks,...cfg.ns,...cfg.hobbies,...cfg.move}).forEach(t=>{if(t.active&&t.pts>0)m+=t.pts;});
+ // add flow maxes
+ const s=cfg.scales;
+ m+=s.sleep_9plus+s.meal_base*3+s.meal_fresh_protein*3+s.walk_after_meal*3+s.t1_walk+s.water_still*8+s.water_nuun;
+ return m;
 }
 
 function scoreColor(s){
-  if(s>=90)return'var(--teal)';if(s>=75)return'var(--green)';
-  if(s>=55)return'var(--amber)';if(s>=35)return'var(--purple)';
-  if(s>=0)return'var(--text3)';return'var(--red)';
+ if(s>=90)return'var(--leaf)';if(s>=75)return'var(--sage)';
+ if(s>=55)return'var(--gold)';if(s>=35)return'var(--lavender)';
+ if(s>=0)return'var(--text3)';return'#b84640';
 }
 function scoreGrade(s){
-  if(s>=95)return'Perfect 💎';if(s>=85)return'Excellent ⭐';if(s>=70)return'Great day 🌟';
-  if(s>=55)return'Good effort';if(s>=40)return'Getting there';if(s>=25)return'Rough day';
-  if(s>=0)return'Start somewhere';return'Below zero 😬';
+  if(s>=95)return'Perfect';
+  if(s>=85)return'Excellent';
+  if(s>=70)return'Great day';
+  if(s>=55)return'Good';
+  if(s>=40)return'Getting there';
+  if(s>=25)return'Low day';
+  if(s>=0)return'Starting out';
+  return'Below zero';
+}
+
+// Realistic pacing curve — heavy morning logging, steady afternoon
+const PACE_CURVE={7:0,8:25,9:42,10:50,11:55,12:60,13:64,14:67,15:70,16:73,17:76,18:80,19:84,20:88,21:93,22:100};
+function getExpected(){
+  const h=new Date().getHours(),m=new Date().getMinutes();
+  if(h<DAYS_START)return 0;
+  if(h>=DAYS_END)return 100;
+  const base=PACE_CURVE[h]??0,next=PACE_CURVE[h+1]??100;
+  return Math.round(base+(next-base)*(m/60));
 }
 function getPace(score){
-  const h=hour()+new Date().getMinutes()/60;
-  if(h<DAYS_START||h>DAYS_END)return'green';
-  const exp=Math.round(((h-DAYS_START)/(DAYS_END-DAYS_START))*100);
-  const diff=score-exp;
-  if(diff>=-5)return'green';if(diff>=-20)return'yellow';return'red';
+  if(hr()<DAYS_START||hr()>=DAYS_END)return'green';
+  const diff=score-getExpected();
+  return diff>=-5?'green':diff>=-18?'yellow':'red';
 }
 function getPaceLabel(score){
-  const h=hour();
-  const part=h<12?'morning':h<17?'afternoon':'evening';
   const p=getPace(score);
-  if(p==='green')return`On track for the ${part} ✓`;
-  if(p==='yellow')return`Slightly behind for ${part}`;
-  return`Behind pace for ${part}`;
+  const diff=score-getExpected();
+  if(p==='green')return'On track';
+  if(p==='yellow')return Math.abs(diff)+' pts behind';
+  return Math.abs(diff)+' pts behind pace';
 }
 
-// ── CHECK ICON SVG ────────────────────────────────────────
-const CHECK='<svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5L3 5.5L8 1" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+// CHECK ICON SVG 
+const CHECK='<svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5L3 5.5L8 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-// ── TODAY PAGE ────────────────────────────────────────────
+
+
+// XP & LEVELS 
+const XPK='sc7_xp';
+const LEVELS=[
+  {lvl:1,  name:'Level 1',  xp:0},
+  {lvl:2,  name:'Level 2',  xp:200},
+  {lvl:3,  name:'Level 3',  xp:500},
+  {lvl:4,  name:'Level 4',  xp:900},
+  {lvl:5,  name:'Level 5',  xp:1400},
+  {lvl:6,  name:'Level 6',  xp:2000},
+  {lvl:7,  name:'Level 7',  xp:2800},
+  {lvl:8,  name:'Level 8',  xp:3800},
+  {lvl:9,  name:'Level 9',  xp:5200},
+  {lvl:10, name:'Level 10', xp:7000},
+];
+function getXP(){try{return JSON.parse(localStorage.getItem(XPK)||'null')||{total:0,dailyPts:{}}}catch(e){return{total:0,dailyPts:{}}}}
+function saveXP(x){localStorage.setItem(XPK,JSON.stringify(x))}
+function getLevel(t){let l=LEVELS[0];for(const lv of LEVELS){if(t>=lv.xp)l=lv;}return l;}
+function getNextLevel(t){return LEVELS.find(l=>l.xp>t)||LEVELS[LEVELS.length-1];}
+
+function addXP(pts){
+ if(pts<=0)return;
+ const xp=getXP();
+ const oldLvl=getLevel(xp.total);
+ xp.total+=pts;
+ xp.dailyPts=xp.dailyPts||{};
+ xp.dailyPts[today()]=(xp.dailyPts[today()]||0)+pts;
+ saveXP(xp);
+ const newLvl=getLevel(xp.total);
+ if(newLvl.lvl>oldLvl.lvl) setTimeout(()=>celebrateLevelUp(newLvl),500);
+}
+
+// DAILY / WEEKLY CHALLENGES 
+const DAILY_CHALLENGES=[
+ {id:'all_meds', title:'Med perfect day', desc:'Take all 4 core meds today', bonus:15, icon:''},
+ {id:'walk_meals', title:'Walk after every meal', desc:'Log 2+ meals with a walk after', bonus:12, icon:''},
+ {id:'hydration', title:'Hydration hero', desc:'Log 64+ oz of still water', bonus:10, icon:''},
+ {id:'ns_full', title:'Full NS flow', desc:'Complete all 5 daily NS practices', bonus:10, icon:''},
+ {id:'early_morn', title:'Morning momentum', desc:'Log sleep + take all meds before 10am', bonus:8, icon:''},
+ {id:'clean_eat', title:'Clean eating day', desc:'Log 2+ meals with no trigger foods', bonus:12, icon:''},
+ {id:'check3', title:'Body awareness', desc:'Complete 3+ hourly check-ins today', bonus:8, icon:''},
+];
+const WEEKLY_CHALLENGES=[
+ {id:'w_streak', title:'7-day logging streak', desc:'Log something every day this week', bonus:50, icon:''},
+ {id:'w_meds', title:'Med perfect week', desc:'All meds every day for 7 days', bonus:40, icon:''},
+ {id:'w_sleep', title:'Sleep queen week', desc:'9+ hours sleep 5 out of 7 nights', bonus:35, icon:''},
+ {id:'w_enzyme', title:'Enzyme discipline', desc:'No missed enzyme flags all week', bonus:30, icon:''},
+ {id:'w_ns', title:'NS flow week', desc:'Full NS flow at least 5 days', bonus:25, icon:''},
+];
+function getDailyChallenge(){
+ const d=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/(864e5));
+ return DAILY_CHALLENGES[d%DAILY_CHALLENGES.length];
+}
+function getWeeklyChallenge(){
+ const w=Math.floor(Date.now()/(864e5*7));
+ return WEEKLY_CHALLENGES[w%WEEKLY_CHALLENGES.length];
+}
+function checkDailyChallenge(checked,food,drinks,flows,flags){
+ const ch=getDailyChallenge();
+ const ciE=getCI()[today()]||[];
+ const meds=['prop_am','prop_mid','prop_pm','prozac'];
+ if(ch.id==='all_meds') return meds.every(k=>checked[k]);
+ if(ch.id==='walk_meals') return (food||[]).filter(f=>f.rawAnswers?.walked==='Yes went for a walk ').length>=2;
+ if(ch.id==='hydration') return (drinks||[]).filter(d=>d.type==='still').reduce((a,d)=>a+(d.oz||0),0)>=64;
+ if(ch.id==='ns_full') return ['ns_listen','ns_shake','ns_rhythm','ns_box','ns_hug'].every(k=>checked[k]);
+ if(ch.id==='early_morn') return meds.every(k=>checked[k])&&(flows?.sleep?.pts>0);
+ if(ch.id==='clean_eat') return (food||[]).length>=2&&(food||[]).filter(f=>f.rawAnswers?.histamine?.startsWith('No')).length>=(food||[]).length-1;
+ if(ch.id==='check3') return ciE.length>=3;
+ return false;
+}
+
+// CELEBRATIONS 
+let _milestonesFired=(()=>{try{return JSON.parse(localStorage.getItem('sc7_ms')||'{}')}catch(e){return{}}})();
+function checkMilestones(score){
+ const key=today()+'-'+score;
+ if(_milestonesFired[key])return;
+ const milestones=[
+ {score:25,msg:'Getting started! ',confetti:false},
+ {score:50,msg:'Halfway there! ',confetti:false},
+ {score:75,msg:'Great day! ',confetti:true},
+ {score:90,msg:'Excellent day! ',confetti:true},
+ {score:100,msg:'PERFECT DAY! ',confetti:true},
+ ];
+ for(const m of milestones){
+ const dayKey=today()+'-ms-'+m.score;
+ if(score>=m.score&&!_milestonesFired[dayKey]){
+ _milestonesFired[dayKey]=true;
+ localStorage.setItem('sc7_ms',JSON.stringify(_milestonesFired));
+ if(m.confetti)launchConfetti();
+ showToast(m.msg,'');
+ addXP(3);
+ }
+ }
+}
+function launchConfetti(){
+ let overlay=document.getElementById('celebrate-overlay');
+ if(!overlay){overlay=document.createElement('div');overlay.id='celebrate-overlay';overlay.className='celebrate-overlay';document.body.appendChild(overlay);}
+ const colors=['#c4b8f8','#7dd4b8','#f0b84a','#f4826a','#8ecf6a','#ffd700'];
+ for(let i=0;i<55;i++){
+ const el=document.createElement('div');el.className='confetti-piece';
+ el.style.cssText=`left:${Math.random()*100}vw;background:${colors[Math.floor(Math.random()*colors.length)]};animation-delay:${Math.random()*.8}s;animation-duration:${1.4+Math.random()*.8}s;transform:rotate(${Math.random()*360}deg)`;
+ overlay.appendChild(el);setTimeout(()=>el.remove(),2800);
+ }
+}
+function showToast(msg,cls){
+ const el=document.createElement('div');
+ el.className='milestone-toast '+(cls||'');
+ el.textContent=msg;
+ document.body.appendChild(el);
+ setTimeout(()=>el.remove(),3200);
+}
+function celebrateLevelUp(level){
+ launchConfetti();
+ showToast('Level up — '+level.name,'toast-gold');
+}
+function celebrateCheck(){
+ const ring=document.querySelector('.ring-fill');
+ if(!ring)return;
+ ring.style.filter='drop-shadow(0 0 6px currentColor)';
+ setTimeout(()=>{if(ring)ring.style.filter='';},500);
+}
+
+
+
+// SCORE-RESPONSIVE BACKGROUND 
+function updateBackground(score) {
+ const s = Math.max(0, Math.min(100, score));
+ let bodyBg, radialTop;
+ if (s < 20) {
+ bodyBg = 'hsl(35,8%,96%)';
+ radialTop = 'rgba(195,200,210,0.3)';
+ } else if (s < 40) {
+ const t=(s-20)/20;
+ bodyBg = `hsl(${35+5*t},${8+4*t}%,96%)`;
+ radialTop = `rgba(${Math.round(195+15*t)},${Math.round(200-10*t)},${Math.round(210-40*t)},${0.3-0.05*t})`;
+ } else if (s < 60) {
+ const t=(s-40)/20;
+ bodyBg = `hsl(${40+6*t},${12+6*t}%,96%)`;
+ radialTop = `rgba(${Math.round(210+20*t)},${Math.round(190+10*t)},${Math.round(170-10*t)},${0.25+0.05*t})`;
+ } else if (s < 80) {
+ const t=(s-60)/20;
+ bodyBg = `hsl(${46+6*t},${18+8*t}%,97%)`;
+ radialTop = `rgba(${Math.round(230+15*t)},${Math.round(200+10*t)},${Math.round(160-10*t)},${0.28+0.08*t})`;
+ } else {
+ const t=(s-80)/20;
+ bodyBg = `hsl(${52+4*t},${26+6*t}%,${97+1*t}%)`;
+ radialTop = `rgba(${Math.round(245+5*t)},${Math.round(210+10*t)},${Math.round(150-10*t)},${0.35+0.1*t})`;
+ }
+ document.body.style.backgroundColor = bodyBg;
+ const layer = document.getElementById('bg-layer');
+ if (layer) layer.style.background = `radial-gradient(ellipse 90% 45% at 50% -5%, ${radialTop}, transparent 70%)`;
+ const nav = document.querySelector('.nav');
+ if (nav) nav.style.backgroundColor = bodyBg.replace('hsl(','hsla(').replace(')',',0.9)');
+}
+
+// TODAY PAGE 
 function renderToday(){
-  const cfg=getCfg();
-  const checked=getChecked(today());
-  const score=calcScore(today());
-  const color=scoreColor(score);
-  const pace=getPace(score);
-  const ciEntries=getCIEntries(today());
-  const lastCI=ciEntries.length?ciEntries[ciEntries.length-1].time:null;
-  const minsAgo=lastCI?((hour()*60+new Date().getMinutes())-(parseInt(lastCI)*60+parseInt(lastCI.split(':')[1]))):999;
+ const cfg=getCfg();
+ const checked=getChecked(today());
+ const flows=getFlowData(today());
+ const score=calcScore(today());
+ const color=scoreColor(score);
+ const pace=getPace(score);
+ const ciEntries=getCIEntries(today());
+ const lastCI=ciEntries.length?ciEntries[ciEntries.length-1].time:null;
+ const minsAgo=lastCI?((hour()*60+new Date().getMinutes())-(parseInt(lastCI)*60+parseInt(lastCI.split(':')[1]))):999;
 
-  const circ=2*Math.PI*62;
-  const pct=Math.max(0,score/100);
-  const paceColor=pace==='green'?'var(--green)':pace==='yellow'?'var(--amber)':'var(--red)';
+ 
+ 
+ const circ=2*Math.PI*62;
+ const pct=Math.max(0,score/100);
+ const paceColor=getPace(score)==='green'?'var(--leaf)':getPace(score)==='yellow'?'var(--gold)':'#b84640';
+ const paceClass='pace-'+getPace(score);
 
-  let html=`<div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:4px">${new Date().toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})}</div>
-  <div class="ring-wrap">
-    <div class="ring">
-      <svg viewBox="0 0 140 140" width="150" height="150">
-        <circle class="ring-bg" cx="70" cy="70" r="62"/>
-        <circle class="ring-fill" cx="70" cy="70" r="62" stroke="${paceColor}" stroke-dasharray="${circ}" stroke-dashoffset="${circ*(1-pct)}"/>
-      </svg>
-      <div class="ring-center">
-        <div class="ring-num" style="color:${paceColor}">${score}</div>
-        <div class="ring-denom">/ 100</div>
-      </div>
-    </div>
-    <div class="ring-grade" style="color:${paceColor}">${scoreGrade(score)}</div>
-    <div class="pace-badge pace-${pace}">${getPaceLabel(score)}</div>
-    <div class="ring-sub" style="margin-top:.4rem">${ciEntries.length} check-in${ciEntries.length!==1?'s':''} today${lastCI?` · last ${minsAgo<60?minsAgo+'m':'1h+'}  ago`:''}</div>
-  </div>`;
+ let html=`<div class="score-card">
+ <div class="score-card-bar"></div>
+ <div class="score-date">${new Date().toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})}</div>
+ <div style="position:relative;width:156px;height:156px;margin:0 auto .5rem">
+ <svg viewBox="0 0 140 140" width="156" height="156" style="transform:rotate(-90deg)">
+ <circle fill="none" stroke="var(--cream3)" stroke-width="9" cx="70" cy="70" r="62"/>
+ <circle fill="none" stroke-width="9" stroke-linecap="round" cx="70" cy="70" r="62"
+ stroke="${paceColor}" stroke-dasharray="${circ}" stroke-dashoffset="${circ*(1-pct)}"
+ style="transition:stroke-dashoffset .7s cubic-bezier(.4,0,.2,1),stroke .4s"/>
+ </svg>
+ <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+ <div class="score-number" style="color:${paceColor}">${score}</div>
+ <div class="score-denom">/ 100</div>
+ </div>
+ </div>
+ <div class="score-grade" style="color:${paceColor}">${scoreGrade(score)}</div>
+ <div class="pace-pill ${paceClass}">${getPaceLabel(score)}</div>
+ <div class="ci-info">${ciEntries.length} check-in${ciEntries.length!==1?'s':''} today${lastCI?' · last '+minsAgo+'m ago':''}</div>`;
+ html+=`</div>`;
 
-  // ── LAST NIGHT (flow for sleep + checkboxes) ──
-  const sleepFlow=getFlowData(today()).sleep;
-  const sleepPts=sleepFlow?.pts||0;
-  const sleepSummary=sleepFlow?.summary||'Tap to log sleep & last night';
-  html+=`<div class="sec"><span class="sec-dot" style="background:var(--pdim)"></span>Last night<span class="sec-pts" style="color:var(--pdim)">${sleepPts>0?'+'+sleepPts:''}</span></div>`;
-  html+=`<div class="flow-card ${sleepFlow?'has-data':''}" onclick="openFlow('sleep')">
-    <div class="fc-top"><div class="fc-title">Sleep & last night log</div><div class="fc-pts">${sleepFlow?'+'+sleepPts+' pts':'tap to log →'}</div></div>
-    <div class="fc-sub">${sleepFlow?sleepSummary:'Hours slept, bedtime, weed, last night tasks'}</div>
-  </div>`;
+ // LAST NIGHT (flow for sleep + checkboxes) 
+ const sleepFlow=getFlowData(today()).sleep;
+ const sleepPts=sleepFlow?.pts||0;
+ const sleepSummary=sleepFlow?.summary||'Tap to log sleep & last night';
+ html+=`<div class="sec"><div class="sec-line"></div>Last night<span class="sec-pts" style="font-size:9px" style="color:var(--pdim)">${sleepPts>0?'+'+sleepPts:''}</span><div class="sec-line"></div></div>`;
 
-  // last night checkboxes
-  html+=`<div class="tasks">`;
-  Object.entries(cfg.tasks).filter(([,t])=>t.sec==='lastnight'&&t.active).forEach(([id,t])=>{
-    const on=checked[id];
-    html+=taskHTML(id,t.name,t.pts,on,false);
-  });
-  html+=`</div>`;
+ // XP / Level / Streak
+ const xp=getXP();
+ const lvl=getLevel(xp.total);
+ const nxtLvl=getNextLevel(xp.total);
+ const xpPct=nxtLvl.xp>lvl.xp?Math.round(((xp.total-lvl.xp)/(nxtLvl.xp-lvl.xp))*100):100;
+ const streak=calcStreak([...Object.keys(getStore()).sort()].reverse());
+ html+=`<div class="xp-row">
+ <div class="level-pill">${lvl.name}</div>
+ ${streak>=2?'<div class="streak-pill"> '+streak+'</div>':''}
+ </div>
+ <div class="xp-bar-wrap">
+ <div class="xp-track"><div class="xp-fill" style="width:${xpPct}%"></div></div>
+ <div class="xp-lbl">${xp.total} pts · ${xpPct}% to ${nxtLvl.name}</div>
+ </div>`;
+ checkMilestones(score);
 
-  // ── MEDS ──
-  const medTasks=Object.entries(cfg.tasks).filter(([,t])=>t.sec==='meds'&&t.active);
-  const medDone=medTasks.filter(([id])=>checked[id]).length;
-  html+=`<div class="sec"><span class="sec-dot" style="background:var(--red)"></span>Medications & supplements<span class="sec-pts" style="color:var(--red)">${medDone}/${medTasks.length}</span></div>`;
-  html+=`<div class="tasks">`;
-  medTasks.forEach(([id,t])=>html+=taskHTML(id,t.name,t.pts,checked[id],false));
-  html+=`</div>`;
+ // Challenges
+ const todayDrinks=getStore()[today()]?.drinks||[];
+ const todayFlags=getStore()[today()]?.enzymeFlags||[];
+ const ch=getDailyChallenge();
+ const chDone=checkDailyChallenge(checked,getFoodEntries(today()),todayDrinks,flows,todayFlags);
+ const wch=getWeeklyChallenge();
+ html+=`<div class="challenge-card ${chDone?'ch-done':''}">
+ <div style="display:flex;align-items:center;gap:12px">
+ <div class="ch-icon-wrap">${ch.icon}</div>
+ <div class="ch-body">
+ <div class="ch-eyebrow">${ch.icon} Daily challenge</div>
+ <div class="ch-title">${ch.title}</div>
+ <div class="ch-desc">${ch.desc}</div>
+ <div class="ch-reward">+${ch.bonus} pts bonus if completed</div>
+ <div class="ch-bar"><div class="ch-bar-fill" style="width:${chDone?100:0}%"></div></div>
+ <div class="ch-status">${chDone?'Completed! pts earned':'In progress...'}</div></div></div>
+ </div>
+ <div class="wch-card">
+ <div class="wch-eyebrow">${wch.icon} Weekly challenge</div>
+ <div class="wch-title">${wch.title}</div>
+ <div class="wch-sub">${wch.desc} · +${wch.bonus} pts</div>
+ </div>`;
+ html+=`<div class="flow-card ${sleepFlow?'has-data':''}" onclick="openFlow('sleep')">
+ <div class="fc-top"><div class="fc-title">Sleep & last night log</div><div class="fc-pts">${sleepFlow?'+'+sleepPts+' pts':'tap to log '}</div></div>
+ <div class="fc-sub">${sleepFlow?sleepSummary:'Hours slept, bedtime, weed, last night tasks'}</div>
+ </div>`;
 
-  // ── MOVEMENT ──
-  const exFlow=getFlowData(today()).exercise;
-  html+=`<div class="sec"><span class="sec-dot" style="background:var(--green)"></span>Movement</div>`;
-  html+=`<div class="flow-card ${exFlow?'has-data':''}" onclick="openFlow('exercise')">
-    <div class="fc-top"><div class="fc-title">Exercise / movement</div><div class="fc-pts">${exFlow?'+'+exFlow.pts+' pts':'tap to log →'}</div></div>
-    <div class="fc-sub">${exFlow?exFlow.summary:'Tier 1 walk, Tier 2 workout, or Tier 3 rest day'}</div>
-  </div>`;
-  // movement checkboxes collapsible
-  const moveSubs=[...new Set(Object.values(cfg.move).map(t=>t.sub))];
-  const moveDone=Object.entries(cfg.move).filter(([id,t])=>t.active&&checked[id]).length;
-  const moveTotal=Object.values(cfg.move).filter(t=>t.active).length;
-  html+=`<div class="col-header" onclick="toggleCol('move-col')">
-    <div class="col-title">Exercises & stretches</div>
-    <div class="col-count">${moveDone}/${moveTotal}</div>
-    <div class="col-arrow" id="arr-move-col">▼</div>
-  </div>
-  <div class="col-body" id="move-col">`;
-  moveSubs.forEach(sub=>{
-    html+=`<div class="subsec">${sub}</div><div class="tasks">`;
-    Object.entries(cfg.move).filter(([,t])=>t.sub===sub&&t.active).forEach(([id,t])=>html+=taskHTML(id,t.name,t.pts,checked[id],false));
-    html+=`</div>`;
-  });
-  html+=`</div>`;
+ // last night checkboxes
+ html+=`<div class="tasks">`;
+ Object.entries(cfg.tasks).filter(([,t])=>t.sec==='lastnight'&&t.active).forEach(([id,t])=>{
+ const on=checked[id];
+ html+=taskHTML(id,t.name,t.pts,on,false);
+ });
+ html+=`</div>`;
 
-  // ── NS ──
-  const nsSubs=[...new Set(Object.values(cfg.ns).map(t=>t.sub))];
-  const nsDone=Object.entries(cfg.ns).filter(([id,t])=>t.active&&checked[id]).length;
-  const nsTotal=Object.values(cfg.ns).filter(t=>t.active).length;
-  html+=`<div class="sec"><span class="sec-dot" style="background:var(--purple)"></span>Nervous system<span class="sec-pts" style="color:var(--purple)">${nsDone}/${nsTotal}</span></div>`;
-  html+=`<div class="col-header" onclick="toggleCol('ns-col')">
-    <div class="col-title">NS practices</div>
-    <div class="col-count">${nsDone}/${nsTotal}</div>
-    <div class="col-arrow" id="arr-ns-col">▼</div>
-  </div>
-  <div class="col-body" id="ns-col">`;
-  nsSubs.forEach(sub=>{
-    html+=`<div class="subsec">${sub}</div><div class="tasks">`;
-    Object.entries(cfg.ns).filter(([,t])=>t.sub===sub&&t.active).forEach(([id,t])=>html+=taskHTML(id,t.name,t.pts,checked[id],false));
-    html+=`</div>`;
-  });
-  html+=`</div>`;
+ // MEDS 
+ const medTasks=Object.entries(cfg.tasks).filter(([,t])=>t.sec==='meds'&&t.active);
+ const medDone=medTasks.filter(([id])=>checked[id]).length;
+ html+=`<div class="sec"><div class="sec-line"></div>Medications & supplements<span class="sec-pts" style="font-size:9px" style="color:var(--red)">${medDone}/${medTasks.length}</span><div class="sec-line"></div></div>`;
+ html+=`<div class="tasks">`;
+ medTasks.forEach(([id,t])=>html+=taskHTML(id,t.name,t.pts,checked[id],false));
+ html+=`</div>`;
 
-  // ── SELF CARE ──
-  const selfTasks=Object.entries(cfg.tasks).filter(([,t])=>t.sec==='self'&&t.active);
-  html+=`<div class="sec"><span class="sec-dot" style="background:var(--purple)"></span>Self care today</div>`;
-  html+=`<div class="tasks">`;
-  selfTasks.forEach(([id,t])=>html+=taskHTML(id,t.name,t.pts,checked[id],false));
-  html+=`</div>`;
+ // MOVEMENT 
+ const exFlow=getFlowData(today()).exercise;
+ html+=`<div class="sec"><div class="sec-line"></div>Movement<div class="sec-line"></div></div>`;
+ html+=`<div class="flow-card ${exFlow?'has-data':''}" onclick="openFlow('exercise')">
+ <div class="fc-top"><div class="fc-title">Exercise / movement</div><div class="fc-pts">${exFlow?'+'+exFlow.pts+' pts':'tap to log '}</div></div>
+ <div class="fc-sub">${exFlow?exFlow.summary:'Tier 1 walk, Tier 2 workout, or Tier 3 rest day'}</div>
+ </div>`;
+ // movement checkboxes collapsible
+ const moveSubs=[...new Set(Object.values(cfg.move).map(t=>t.sub))];
+ const moveDone=Object.entries(cfg.move).filter(([id,t])=>t.active&&checked[id]).length;
+ const moveTotal=Object.values(cfg.move).filter(t=>t.active).length;
+ html+=`<div class="col-header" onclick="toggleCol('move-col')">
+ <div class="col-title">Exercises & stretches</div>
+ <div class="col-count">${moveDone}/${moveTotal}</div>
+ <div class="col-arrow" id="arr-move-col"></div>
+ </div>
+ <div class="col-body" id="move-col">`;
+ moveSubs.forEach(sub=>{
+ html+=`<div class="subsec">${sub}</div><div class="tasks">`;
+ Object.entries(cfg.move).filter(([,t])=>t.sub===sub&&t.active).forEach(([id,t])=>html+=taskHTML(id,t.name,t.pts,checked[id],false));
+ html+=`</div>`;
+ });
+ html+=`</div>`;
 
-  // ── HOBBIES ──
-  const hobDone=Object.entries(cfg.hobbies).filter(([id,t])=>t.active&&checked[id]).length;
-  const hobTotal=Object.values(cfg.hobbies).filter(t=>t.active).length;
-  html+=`<div class="sec"><span class="sec-dot" style="background:var(--amber)"></span>Hobbies & enrichment<span class="sec-pts" style="color:var(--amber)">${hobDone}/${hobTotal}</span></div>`;
-  html+=`<div class="col-header" onclick="toggleCol('hob-col')">
-    <div class="col-title">Hobbies</div>
-    <div class="col-count">${hobDone}/${hobTotal}</div>
-    <div class="col-arrow" id="arr-hob-col">▼</div>
-  </div>
-  <div class="col-body" id="hob-col">
-  <div class="tasks">`;
-  Object.entries(cfg.hobbies).filter(([,t])=>t.active).forEach(([id,t])=>html+=taskHTML(id,t.name,t.pts,checked[id],false));
-  html+=`</div></div>`;
+ // NS 
+ const nsSubs=[...new Set(Object.values(cfg.ns).map(t=>t.sub))];
+ const nsDone=Object.entries(cfg.ns).filter(([id,t])=>t.active&&checked[id]).length;
+ const nsTotal=Object.values(cfg.ns).filter(t=>t.active).length;
+ html+=`<div class="sec"><div class="sec-line"></div>Nervous system<span class="sec-pts" style="font-size:9px" style="color:var(--purple)">${nsDone}/${nsTotal}</span><div class="sec-line"></div></div>`;
+ html+=`<div class="col-header" onclick="toggleCol('ns-col')">
+ <div class="col-title">NS practices</div>
+ <div class="col-count">${nsDone}/${nsTotal}</div>
+ <div class="col-arrow" id="arr-ns-col"></div>
+ </div>
+ <div class="col-body" id="ns-col">`;
+ nsSubs.forEach(sub=>{
+ html+=`<div class="subsec">${sub}</div><div class="tasks">`;
+ Object.entries(cfg.ns).filter(([,t])=>t.sub===sub&&t.active).forEach(([id,t])=>html+=taskHTML(id,t.name,t.pts,checked[id],false));
+ html+=`</div>`;
+ });
+ html+=`</div>`;
 
-  // ── SOCIAL ──
-  html+=`<div class="sec"><span class="sec-dot" style="background:var(--teal)"></span>Connection & wellbeing</div>`;
-  html+=`<div class="tasks">`;
-  Object.entries(cfg.tasks).filter(([,t])=>t.sec==='social'&&t.active).forEach(([id,t])=>html+=taskHTML(id,t.name,t.pts,checked[id]));
-  html+=`</div>`;
+ // SELF CARE 
+ const selfTasks=Object.entries(cfg.tasks).filter(([,t])=>t.sec==='self'&&t.active);
+ html+=`<div class="sec"><div class="sec-line"></div>Self care today<div class="sec-line"></div></div>`;
+ html+=`<div class="tasks">`;
+ selfTasks.forEach(([id,t])=>html+=taskHTML(id,t.name,t.pts,checked[id],false));
+ html+=`</div>`;
 
-  // ── WEED ──
-  const weedFlow=getFlowData(today()).weed;
-  html+=`<div class="sec"><span class="sec-dot" style="background:var(--green)"></span>Substances</div>`;
-  const alcFlow=flows.alcohol;
-  html+=`<div class="flow-card ${weedFlow?'has-data':''}" onclick="openFlow('weed')">
-    <div class="fc-top"><div class="fc-title">Cannabis</div><div class="fc-pts">${weedFlow?(weedFlow.pts>=0?'+':'')+weedFlow.pts+' pts':'optional →'}</div></div>
-    <div class="fc-sub">${weedFlow?weedFlow.summary:'Log if used — effect on sleep and wellbeing'}</div>
-  </div>
-  <div class="flow-card ${alcFlow?'has-data':''}" onclick="openFlow('alcohol')">
-    <div class="fc-top"><div class="fc-title">Alcohol</div><div class="fc-pts">${alcFlow?(alcFlow.pts>=0?'+':'')+alcFlow.pts+' pts':'optional →'}</div></div>
-    <div class="fc-sub">${alcFlow?alcFlow.summary:'Log if consumed — honest tracking'}</div>
-  </div>`;
+ // HOBBIES 
+ const hobDone=Object.entries(cfg.hobbies).filter(([id,t])=>t.active&&checked[id]).length;
+ const hobTotal=Object.values(cfg.hobbies).filter(t=>t.active).length;
+ html+=`<div class="sec"><div class="sec-line"></div>Hobbies & enrichment<span class="sec-pts" style="font-size:9px" style="color:var(--amber)">${hobDone}/${hobTotal}</span><div class="sec-line"></div></div>`;
+ html+=`<div class="col-header" onclick="toggleCol('hob-col')">
+ <div class="col-title">Hobbies</div>
+ <div class="col-count">${hobDone}/${hobTotal}</div>
+ <div class="col-arrow" id="arr-hob-col"></div>
+ </div>
+ <div class="col-body" id="hob-col">
+ <div class="tasks">`;
+ Object.entries(cfg.hobbies).filter(([,t])=>t.active).forEach(([id,t])=>html+=taskHTML(id,t.name,t.pts,checked[id],false));
+ html+=`</div></div>`;
 
-  document.getElementById('pg-today').innerHTML=html;
+ // SOCIAL 
+ html+=`<div class="sec"><div class="sec-line"></div>Connection & wellbeing<div class="sec-line"></div></div>`;
+ html+=`<div class="tasks">`;
+ Object.entries(cfg.tasks).filter(([,t])=>t.sec==='social'&&t.active).forEach(([id,t])=>html+=taskHTML(id,t.name,t.pts,checked[id]));
+ html+=`</div>`;
+
+ // WEED 
+ const weedFlow=getFlowData(today()).weed;
+ html+=`<div class="sec"><div class="sec-line"></div>Substances<div class="sec-line"></div></div>`;
+ const alcFlow=flows.alcohol;
+ html+=`<div class="flow-card ${weedFlow?'has-data':''}" onclick="openFlow('weed')">
+ <div class="fc-top"><div class="fc-title">Cannabis</div><div class="fc-pts">${weedFlow?(weedFlow.pts>=0?'+':'')+weedFlow.pts+' pts':'optional '}</div></div>
+ <div class="fc-sub">${weedFlow?weedFlow.summary:'Log if used effect on sleep and wellbeing'}</div>
+ </div>
+ <div class="flow-card ${alcFlow?'has-data':''}" onclick="openFlow('alcohol')">
+ <div class="fc-top"><div class="fc-title">Alcohol</div><div class="fc-pts">${alcFlow?(alcFlow.pts>=0?'+':'')+alcFlow.pts+' pts':'optional '}</div></div>
+ <div class="fc-sub">${alcFlow?alcFlow.summary:'Log if consumed honest tracking'}</div>
+ </div>`;
+
+ document.getElementById('pg-today').innerHTML=html;
+ updateBackground(score);
 }
 
 function taskHTML(id,name,pts,on,neg=false){
-  const onCls=on?'on':'';
-  const negCls=neg?'neg':'';
-  const sign=pts>0?'+':'';
-  const ptsClass=pts>=0?'pp':'np';
-  return `<div class="task ${onCls} ${negCls}" onclick="toggleTask('${id}')">
-    <div class="chk">${CHECK}</div>
-    <div class="t-name">${name}</div>
-    <div class="t-pts ${ptsClass}">${sign}${pts}</div>
-  </div>`;
+ const onCls=on?'on':'';
+ const negCls=neg?'neg':'';
+ const sign=pts>0?'+':'';
+ const ptsClass=pts>=0?'pp':'np';
+ return `<div class="task ${onCls} ${negCls}" onclick="toggleTask('${id}')">
+ <div class="chk">${CHECK}</div>
+ <div class="t-name">${name}</div>
+ <div class="t-pts ${ptsClass}">${sign}${pts}</div>
+ </div>`;
 }
 
 function toggleTask(id){
-  const c=getChecked(today());
-  c[id]=!c[id]; if(!c[id])delete c[id];
-  saveChecked(today(),c);
-  renderToday();
+ const c=getChecked(today());
+ const wasOff=!c[id];
+ c[id]=!c[id];if(!c[id])delete c[id];
+ saveChecked(today(),c);
+ if(wasOff){
+ const cfg=getCfg();
+ const all={...cfg.tasks,...cfg.ns,...cfg.hobbies,...cfg.move};
+ const pts=all[id]?.pts||0;
+ if(pts>0){addXP(pts);celebrateCheck();}
+ }
+ renderToday();
 }
 function toggleCol(id){
-  const b=document.getElementById(id);
-  const a=document.getElementById('arr-'+id);
-  if(b){b.classList.toggle('open');a.classList.toggle('open');}
+ const b=document.getElementById(id);
+ const a=document.getElementById('arr-'+id);
+ if(b){b.classList.toggle('open');a.classList.toggle('open');}
 }
 
-// ── FLOW ENGINE ───────────────────────────────────────────
+// FLOW ENGINE 
 let activeFlow=null, flowStep=0, flowAnswers={};
 
 function openFlow(type){
-  activeFlow=type; flowStep=0; flowAnswers={};
-  const existing=getFlowData(today())[type];
-  if(existing) flowAnswers={...existing.rawAnswers||{}};
-  renderFlow();
-  document.getElementById('modal-bg').style.display='flex';
+ activeFlow=type; flowStep=0; flowAnswers={};
+ const existing=getFlowData(today())[type];
+ if(existing) flowAnswers={...existing.rawAnswers||{}};
+ renderFlow();
+ document.getElementById('modal-bg').style.display='flex';
 }
 function closeModal(){document.getElementById('modal-bg').style.display='none';activeFlow=null;}
 function closeMBG(e){if(e.target===document.getElementById('modal-bg'))closeModal();}
 
 const FLOWS={
-  sleep:[
-    {id:'hours',type:'opts',q:'How many hours did you sleep?',
-     opts:['9+ hours','8–9 hours','7–8 hours','6–7 hours','Under 6 hours']},
-    {id:'quality',type:'opts',q:'How was the sleep quality?',
-     opts:['Restorative — woke up rested','Okay — not great but fine','Restless — woke up tired','Poor — barely slept']},
-    {id:'bedtime',type:'pills',q:'What time did you go to bed?',
-     opts:['Before 9pm','9–10pm','10–11pm','11pm–midnight','After midnight','After 1am']},
-    {id:'fell_asleep',type:'opts',q:'How easily did you fall asleep?',
-     opts:['Very easily','Took a while','Had trouble','Could not sleep well']},
-  ],
-  exercise:[
-    {id:'type',type:'opts',q:'What kind of movement today?',
-     opts:['Walk — flat terrain','Walk — with some hills','Bike ride — flat','Bike ride — with hills','No outdoor movement today']},
-    {id:'duration',type:'pills',q:'How long?',
-     opts:['Under 15 min','15–20 min','20–30 min','30–45 min','Over 45 min'],
-     condition:a=>!a.type?.startsWith('No')},
-    {id:'tolerance',type:'opts',q:'How did your body handle it?',
-     opts:['Great — no symptoms','Good — mild, recovered quickly','Okay — some symptoms managed','Difficult — significant symptoms'],
-     condition:a=>!a.type?.startsWith('No')},
-  ],
-  alcohol:[
-    {id:'drank',type:'opts',q:'Did you drink alcohol today?',
-     opts:['No — none','Yes — one drink','Yes — two drinks','Yes — more than two drinks']},
-    {id:'feel',type:'opts',q:'How do you feel?',condition:a=>a.drank!=='No — none',
-     opts:['Fine — no noticeable effect','Mildly affected','Significantly affected — symptomatic']},
-  ],
-  weed:[
-    {id:'used',type:'opts',q:'Did you use cannabis today / last night?',
-     opts:['Yes','No']},
-    {id:'effect',type:'opts',q:'How did it affect you overall?',
-     opts:['Really helped — better sleep and less anxiety','Somewhat helpful — mild positive effect','Neutral — no noticeable effect','Slightly negative — made me foggy or anxious','Negative — disrupted sleep or caused issues'],
-     condition:a=>a.used==='Yes'},
-    {id:'sleep_effect',type:'opts',q:'How did it affect your sleep?',
-     opts:['Helped me sleep much better','Helped a bit','No effect on sleep','Made sleep worse'],
-     condition:a=>a.used==='Yes'},
-  ],
-  meal:[
-    {id:'name',type:'text',q:'What did you eat?',placeholder:'Describe the meal or list ingredients...'},
-    {id:'type',type:'pills',q:'Meal type',opts:['Breakfast','Lunch','Dinner','Snack']},
-    {id:'had_protein',type:'opts',q:'Did you eat fresh protein (cooked today)?',
-     opts:['Yes — fresh cooked','Leftover protein','No protein in this meal']},
-    {id:'had_histamine',type:'opts',q:'Did this meal contain any histamine triggers?',
-     opts:['No — clean low-histamine meal','Minor triggers (small amounts)','Yes — moderate histamine foods','Yes — significant triggers (tomatoes, chocolate, etc)']},
-    {id:'dao_before',type:'opts',q:'Did you take DAO enzyme before this meal?',
-     opts:['Yes — took DAO','No — did not take DAO','Did not have it with me'],
-     condition:a=>a.had_histamine!=='No — clean low-histamine meal'},
-    {id:'had_fatty',type:'opts',q:'Was this meal high in fat (fried, butter, cream, heavy meat)?',
-     opts:['No — light meal','Somewhat fatty','Yes — high fat meal (curry, fried, heavy)']},
-    {id:'oxbile_before',type:'opts',q:'Did you take ox bile before this meal?',
-     opts:['Yes — took ox bile','No — did not take ox bile','Did not have it with me'],
-     condition:a=>a.had_fatty==='Yes — high fat meal (curry, fried, heavy)'},
-    {id:'walked_after',type:'opts',q:'Did you walk after this meal?',
-     opts:['Yes — went for a walk','Short movement (5–10 min)','No — stayed seated or rested']},
-    {id:'gluten',type:'opts',q:'Did this meal contain gluten?',
-     opts:['No gluten','Small trace amount','Yes — intentional gluten']},
-    {id:'dao_for_gluten',type:'opts',q:'Did you take DAO before the gluten?',
-     opts:['Yes — took DAO before','No — no enzyme'],
-     condition:a=>a.gluten!=='No gluten'},
-  ],
-  reaction:[
-    {id:'trigger',type:'opts',q:'What triggered this reaction?',
-     opts:['Food — known trigger','Food — uncertain what','Stress or anxiety','Exertion','Heat or temperature','Unknown','Multiple things']},
-    {id:'food_eaten',type:'text',q:'What did you eat or drink in the past 2 hours?',placeholder:'List everything...'},
-    {id:'symptoms',type:'multi',q:'Which symptoms?',
-     opts:['Palpitations','Elevated heart rate','Elevated blood pressure','Headache','Flushing','Sweating','Nausea','GI discomfort','Dizziness','Anxiety','Visual issues','Fatigue','Chills','Burping/nausea for hours']},
-    {id:'severity',type:'opts',q:'How severe?',
-     opts:['Mild — uncomfortable but manageable','Moderate — significantly affecting me','Severe — very difficult to manage']},
-    {id:'took_protocol',type:'opts',q:'Did you follow your reaction protocol?',
-     opts:['Yes — ginger, sat down, breathed','Partially','No']},
-  ],
+ sleep:[
+ {id:'hours',type:'opts',q:'How many hours did you sleep?',
+ opts:['9+ hours','89 hours','78 hours','67 hours','Under 6 hours']},
+ {id:'quality',type:'opts',q:'How was the sleep quality?',
+ opts:['Restorative woke up rested','Okay not great but fine','Restless woke up tired','Poor barely slept']},
+ {id:'bedtime',type:'pills',q:'What time did you go to bed?',
+ opts:['Before 9pm','910pm','1011pm','11pmmidnight','After midnight','After 1am']},
+ {id:'fell_asleep',type:'opts',q:'How easily did you fall asleep?',
+ opts:['Very easily','Took a while','Had trouble','Could not sleep well']},
+ ],
+ exercise:[
+ {id:'type',type:'opts',q:'What kind of movement today?',
+ opts:['Walk flat terrain','Walk with some hills','Bike ride flat','Bike ride with hills','No outdoor movement today']},
+ {id:'duration',type:'pills',q:'How long?',
+ opts:['Under 15 min','1520 min','2030 min','3045 min','Over 45 min'],
+ condition:a=>!a.type?.startsWith('No')},
+ {id:'tolerance',type:'opts',q:'How did your body handle it?',
+ opts:['Great no symptoms','Good mild, recovered quickly','Okay some symptoms managed','Difficult significant symptoms'],
+ condition:a=>!a.type?.startsWith('No')},
+ ],
+ alcohol:[
+ {id:'drank',type:'opts',q:'Did you drink alcohol today?',
+ opts:['No none','Yes one drink','Yes two drinks','Yes more than two drinks']},
+ {id:'feel',type:'opts',q:'How do you feel?',condition:a=>a.drank!=='No none',
+ opts:['Fine no noticeable effect','Mildly affected','Significantly affected symptomatic']},
+ ],
+ weed:[
+ {id:'used',type:'opts',q:'Did you use cannabis today / last night?',
+ opts:['Yes','No']},
+ {id:'effect',type:'opts',q:'How did it affect you overall?',
+ opts:['Really helped better sleep and less anxiety','Somewhat helpful mild positive effect','Neutral no noticeable effect','Slightly negative made me foggy or anxious','Negative disrupted sleep or caused issues'],
+ condition:a=>a.used==='Yes'},
+ {id:'sleep_effect',type:'opts',q:'How did it affect your sleep?',
+ opts:['Helped me sleep much better','Helped a bit','No effect on sleep','Made sleep worse'],
+ condition:a=>a.used==='Yes'},
+ ],
+ meal:[
+ {id:'name',type:'text',q:'What did you eat?',placeholder:'Describe the meal or list ingredients...'},
+ {id:'type',type:'pills',q:'Meal type',opts:['Breakfast','Lunch','Dinner','Snack']},
+ {id:'had_protein',type:'opts',q:'Did you eat fresh protein (cooked today)?',
+ opts:['Yes fresh cooked','Leftover protein','No protein in this meal']},
+ {id:'had_histamine',type:'opts',q:'Did this meal contain any histamine triggers?',
+ opts:['No clean low-histamine meal','Minor triggers (small amounts)','Yes moderate histamine foods','Yes significant triggers (tomatoes, chocolate, etc)']},
+ {id:'dao_before',type:'opts',q:'Did you take DAO enzyme before this meal?',
+ opts:['Yes took DAO','No did not take DAO','Did not have it with me'],
+ condition:a=>a.had_histamine!=='No clean low-histamine meal'},
+ {id:'had_fatty',type:'opts',q:'Was this meal high in fat (fried, butter, cream, heavy meat)?',
+ opts:['No light meal','Somewhat fatty','Yes high fat meal (curry, fried, heavy)']},
+ {id:'oxbile_before',type:'opts',q:'Did you take ox bile before this meal?',
+ opts:['Yes took ox bile','No did not take ox bile','Did not have it with me'],
+ condition:a=>a.had_fatty==='Yes high fat meal (curry, fried, heavy)'},
+ {id:'walked_after',type:'opts',q:'Did you walk after this meal?',
+ opts:['Yes went for a walk','Short movement (510 min)','No stayed seated or rested']},
+ {id:'gluten',type:'opts',q:'Did this meal contain gluten?',
+ opts:['No gluten','Small trace amount','Yes intentional gluten']},
+ {id:'dao_for_gluten',type:'opts',q:'Did you take DAO before the gluten?',
+ opts:['Yes took DAO before','No no enzyme'],
+ condition:a=>a.gluten!=='No gluten'},
+ ],
+ reaction:[
+ {id:'trigger',type:'opts',q:'What triggered this reaction?',
+ opts:['Food known trigger','Food uncertain what','Stress or anxiety','Exertion','Heat or temperature','Unknown','Multiple things']},
+ {id:'food_eaten',type:'text',q:'What did you eat or drink in the past 2 hours?',placeholder:'List everything...'},
+ {id:'symptoms',type:'multi',q:'Which symptoms?',
+ opts:['Palpitations','Elevated heart rate','Elevated blood pressure','Headache','Flushing','Sweating','Nausea','GI discomfort','Dizziness','Anxiety','Visual issues','Fatigue','Chills','Burping/nausea for hours']},
+ {id:'severity',type:'opts',q:'How severe?',
+ opts:['Mild uncomfortable but manageable','Moderate significantly affecting me','Severe very difficult to manage']},
+ {id:'took_protocol',type:'opts',q:'Did you follow your reaction protocol?',
+ opts:['Yes ginger, sat down, breathed','Partially','No']},
+ ],
 };
 
 function visibleSteps(){
-  const steps=FLOWS[activeFlow]||[];
-  return steps.filter(s=>!s.condition||s.condition(flowAnswers));
+ const steps=FLOWS[activeFlow]||[];
+ return steps.filter(s=>!s.condition||s.condition(flowAnswers));
 }
 
 function renderFlow(){
-  const steps=visibleSteps();
-  if(flowStep>=steps.length){finalizeFlow();return;}
-  const step=steps[flowStep];
-  const pct=Math.round((flowStep/steps.length)*100);
-  let html=`<div class="modal-header">
-    <div><div class="modal-title">${flowTitle(activeFlow)}</div>
-    <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-top:3px">Step ${flowStep+1} of ${steps.length}</div></div>
-    <button class="modal-close" onclick="closeModal()">×</button>
-  </div>
-  <div style="height:2px;background:var(--border2);border-radius:99px;margin-bottom:1.25rem">
-    <div style="height:100%;width:${pct}%;background:var(--pdim);border-radius:99px;transition:width .3s"></div>
-  </div>
-  <div class="q-label">Question ${flowStep+1}</div>
-  <div class="q-text">${step.q}</div>`;
+ const steps=visibleSteps();
+ if(flowStep>=steps.length){finalizeFlow();return;}
+ const step=steps[flowStep];
+ const pct=Math.round((flowStep/steps.length)*100);
+ let html=`<div class="modal-header">
+ <div><div class="modal-title">${flowTitle(activeFlow)}</div>
+ <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-top:3px">Step ${flowStep+1} of ${steps.length}</div></div>
+ <button class="modal-close" onclick="closeModal()">×</button>
+ </div>
+ <div style="height:2px;background:var(--border2);border-radius:99px;margin-bottom:1.25rem">
+ <div style="height:100%;width:${pct}%;background:var(--pdim);border-radius:99px;transition:width .3s"></div>
+ </div>
+ <div class="q-label">Question ${flowStep+1}</div>
+ <div class="q-text">${step.q}</div>`;
 
-  const saved=flowAnswers[step.id];
+ const saved=flowAnswers[step.id];
 
-  if(step.type==='opts'){
-    html+=`<div class="opts-col">`;
-    step.opts.forEach(o=>{
-      const sel=saved===o?'sel':'';
-      html+=`<button class="opt-btn ${sel}" onclick="answerFlow('${step.id}','${o.replace(/'/g,"\\'")}')">${o}</button>`;
-    });
-    html+=`</div>`;
-    if(saved) html+=`<button class="next-btn" onclick="nextFlow()">Continue →</button>`;
-  }
-  else if(step.type==='pills'){
-    html+=`<div class="pills-row">`;
-    step.opts.forEach(o=>{
-      const sel=saved===o?'sel':'';
-      html+=`<button class="pill-btn ${sel}" onclick="answerFlow('${step.id}','${o.replace(/'/g,"\\'")}')">${o}</button>`;
-    });
-    html+=`</div>`;
-    if(saved) html+=`<button class="next-btn" onclick="nextFlow()">Continue →</button>`;
-  }
-  else if(step.type==='text'){
-    html+=`<textarea class="text-in" id="flow-text" placeholder="${step.placeholder||''}">${saved||''}</textarea>`;
-    html+=`<button class="next-btn" onclick="answerFlowText()">Continue →</button>`;
-  }
-  else if(step.type==='multi'){
-    const sel=saved||[];
-    html+=`<div class="opts-col">`;
-    step.opts.forEach(o=>{
-      const isSel=sel.includes(o);
-      html+=`<button class="opt-btn ${isSel?'sel':''}" onclick="toggleMulti('${step.id}','${o.replace(/'/g,"\\'")}')">${o}</button>`;
-    });
-    html+=`</div>`;
-    html+=`<button class="next-btn" ${sel.length===0?'disabled':''} onclick="nextFlow()">Continue →</button>`;
-  }
+ if(step.type==='opts'){
+ html+=`<div class="opts-col">`;
+ step.opts.forEach(o=>{
+ const sel=saved===o?'sel':'';
+ html+=`<button class="opt-btn ${sel}" onclick="answerFlow('${step.id}','${o.replace(/'/g,"\\'")}')">${o}</button>`;
+ });
+ html+=`</div>`;
+ if(saved) html+=`<button class="next-btn" onclick="nextFlow()">Continue </button>`;
+ }
+ else if(step.type==='pills'){
+ html+=`<div class="pills-row">`;
+ step.opts.forEach(o=>{
+ const sel=saved===o?'sel':'';
+ html+=`<button class="pill-btn ${sel}" onclick="answerFlow('${step.id}','${o.replace(/'/g,"\\'")}')">${o}</button>`;
+ });
+ html+=`</div>`;
+ if(saved) html+=`<button class="next-btn" onclick="nextFlow()">Continue </button>`;
+ }
+ else if(step.type==='text'){
+ html+=`<textarea class="text-in" id="flow-text" placeholder="${step.placeholder||''}">${saved||''}</textarea>`;
+ html+=`<button class="next-btn" onclick="answerFlowText()">Continue </button>`;
+ }
+ else if(step.type==='multi'){
+ const sel=saved||[];
+ html+=`<div class="opts-col">`;
+ step.opts.forEach(o=>{
+ const isSel=sel.includes(o);
+ html+=`<button class="opt-btn ${isSel?'sel':''}" onclick="toggleMulti('${step.id}','${o.replace(/'/g,"\\'")}')">${o}</button>`;
+ });
+ html+=`</div>`;
+ html+=`<button class="next-btn" ${sel.length===0?'disabled':''} onclick="nextFlow()">Continue </button>`;
+ }
 
-  if(flowStep>0) html+=`<button class="back-btn" onclick="flowBack()">← Back</button>`;
+ if(flowStep>0) html+=`<button class="back-btn" onclick="flowBack()"> Back</button>`;
 
-  document.getElementById('modal-inner').innerHTML=html;
+ document.getElementById('modal-inner').innerHTML=html;
 }
 
 function flowTitle(t){
-  return{sleep:'Sleep & last night',exercise:'Movement log',weed:'Substances',meal:'Meal log',reaction:'Reaction episode'}[t]||t;
+ return{sleep:'Sleep & last night',exercise:'Movement log',weed:'Substances',meal:'Meal log',reaction:'Reaction episode'}[t]||t;
 }
 
 function answerFlow(id,val){
-  flowAnswers[id]=val;
-  renderFlow();
-  // auto advance after short delay for opts/pills
-  setTimeout(()=>{
-    if(activeFlow&&flowAnswers[id]===val) nextFlow();
-  },320);
+ flowAnswers[id]=val;
+ renderFlow();
+ // auto advance after short delay for opts/pills
+ setTimeout(()=>{
+ if(activeFlow&&flowAnswers[id]===val) nextFlow();
+ },320);
 }
 
 function answerFlowText(){
-  const el=document.getElementById('flow-text');
-  if(!el||!el.value.trim())return;
-  flowAnswers[steps().id]=el.value.trim();
-  nextFlow();
+ const el=document.getElementById('flow-text');
+ if(!el||!el.value.trim())return;
+ flowAnswers[steps().id]=el.value.trim();
+ nextFlow();
 }
 function steps(){return visibleSteps()[flowStep];}
 
 function toggleMulti(id,val){
-  if(!flowAnswers[id])flowAnswers[id]=[];
-  const idx=flowAnswers[id].indexOf(val);
-  if(idx>-1)flowAnswers[id].splice(idx,1);
-  else flowAnswers[id].push(val);
-  renderFlow();
+ if(!flowAnswers[id])flowAnswers[id]=[];
+ const idx=flowAnswers[id].indexOf(val);
+ if(idx>-1)flowAnswers[id].splice(idx,1);
+ else flowAnswers[id].push(val);
+ renderFlow();
 }
 
 function nextFlow(){
-  flowStep++;
-  renderFlow();
+ flowStep++;
+ renderFlow();
 }
 function flowBack(){
-  if(flowStep>0){flowStep--;renderFlow();}
+ if(flowStep>0){flowStep--;renderFlow();}
 }
 
 function finalizeFlow(){
-  const cfg=getCfg();
-  const s=cfg.scales;
-  const flows=getFlowData(today());
-  let pts=0; let summary=''; let flags=[];
+ const cfg=getCfg();
+ const s=cfg.scales;
+ const flows=getFlowData(today());
+ let pts=0; let summary=''; let flags=[];
 
-  if(activeFlow==='sleep'){
-    const h=flowAnswers.hours||'';
-    if(h.startsWith('9+'))pts+=s.sleep_9plus;
-    else if(h.startsWith('8'))pts+=s.sleep_89;
-    else if(h.startsWith('7'))pts+=s.sleep_78;
-    else if(h.startsWith('6'))pts+=s.sleep_67;
-    else if(h.startsWith('Under'))pts+=s.sleep_under6;
-    if(flowAnswers.quality?.startsWith('Restorative'))pts+=2;
-    else if(flowAnswers.quality?.startsWith('Poor'))pts-=2;
-    if(flowAnswers.bedtime==='9–10pm'||flowAnswers.bedtime==='Before 9pm')pts+=2;
-    else if(flowAnswers.bedtime?.includes('After midnight')||flowAnswers.bedtime?.includes('After 1am'))pts-=3;
-    summary=`${flowAnswers.hours||'?'} sleep · ${flowAnswers.quality?.split('—')[0].trim()||'?'} · Bed ${flowAnswers.bedtime||'?'}`;
-  }
+ if(activeFlow==='sleep'){
+ const h=flowAnswers.hours||'';
+ if(h.startsWith('9+'))pts+=s.sleep_9plus;
+ else if(h.startsWith('8'))pts+=s.sleep_89;
+ else if(h.startsWith('7'))pts+=s.sleep_78;
+ else if(h.startsWith('6'))pts+=s.sleep_67;
+ else if(h.startsWith('Under'))pts+=s.sleep_under6;
+ if(flowAnswers.quality?.startsWith('Restorative'))pts+=2;
+ else if(flowAnswers.quality?.startsWith('Poor'))pts-=2;
+ if(flowAnswers.bedtime==='910pm'||flowAnswers.bedtime==='Before 9pm')pts+=2;
+ else if(flowAnswers.bedtime?.includes('After midnight')||flowAnswers.bedtime?.includes('After 1am'))pts-=3;
+ summary=`${flowAnswers.hours||'?'} sleep · ${flowAnswers.quality?.split('')[0].trim()||'?'} · Bed ${flowAnswers.bedtime||'?'}`;
+ }
 
-  if(activeFlow==='exercise'){
-    const t=flowAnswers.type||'';
-    if(t.startsWith('Tier 1'))pts+=s.t1_walk;
-    else if(t.startsWith('Tier 2'))pts+=s.exercise_base;
-    else if(t.startsWith('Tier 3'))pts+=s.exercise_base/2;
-    if(flowAnswers.tolerance?.startsWith('Great')||flowAnswers.tolerance?.startsWith('Good'))pts+=2;
-    if(flowAnswers.after?.startsWith('Significantly'))pts-=2;
-    summary=t.split('—')[0].trim()+(flowAnswers.duration?` · ${flowAnswers.duration}`:'');
-  }
+ if(activeFlow==='exercise'){
+ const t=flowAnswers.type||'';
+ if(t.startsWith('Tier 1'))pts+=s.t1_walk;
+ else if(t.startsWith('Tier 2'))pts+=s.exercise_base;
+ else if(t.startsWith('Tier 3'))pts+=s.exercise_base/2;
+ if(flowAnswers.tolerance?.startsWith('Great')||flowAnswers.tolerance?.startsWith('Good'))pts+=2;
+ if(flowAnswers.after?.startsWith('Significantly'))pts-=2;
+ summary=t.split('')[0].trim()+(flowAnswers.duration?` · ${flowAnswers.duration}`:'');
+ }
 
-  if(activeFlow==='alcohol'){
-    const d=flowAnswers.drank||'No';
-    const cfg2=getCfg();const s2=cfg2.scales;
-    if(d.startsWith('No')){pts=0;summary='No alcohol';}
-    else if(d.includes('one')){pts=s2.alcohol_one||-3;summary='One drink';}
-    else if(d.includes('two')){pts=s2.alcohol_two||-7;summary='Two drinks';}
-    else{pts=s2.alcohol_heavy||-10;summary='Multiple drinks';}
-    flows[activeFlow]={pts,summary,rawAnswers:{...flowAnswers}};
-    saveFlowData(today(),flows);
-    showFlowDone(pts,summary,[]);return;
-  }
-  if(activeFlow==='weed'){
-    if(flowAnswers.used==='No'){pts=0;summary='Not used';}
-    else{
-      const e=flowAnswers.effect||'';
-      if(e.startsWith('Really helped'))pts=s.weed_helped_sleep;
-      else if(e.startsWith('Somewhat'))pts=1;
-      else if(e.startsWith('Neutral'))pts=s.weed_neutral;
-      else if(e.startsWith('Slightly negative'))pts=-1;
-      else pts=s.weed_disrupted;
-      summary='Used · '+(e.split('—')[0].trim()||'logged');
-    }
-  }
+ if(activeFlow==='alcohol'){
+ const d=flowAnswers.drank||'No';
+ const cfg2=getCfg();const s2=cfg2.scales;
+ if(d.startsWith('No')){pts=0;summary='No alcohol';}
+ else if(d.includes('one')){pts=s2.alcohol_one||-3;summary='One drink';}
+ else if(d.includes('two')){pts=s2.alcohol_two||-7;summary='Two drinks';}
+ else{pts=s2.alcohol_heavy||-10;summary='Multiple drinks';}
+ flows[activeFlow]={pts,summary,rawAnswers:{...flowAnswers}};
+ saveFlowData(today(),flows);
+ showFlowDone(pts,summary,[]);return;
+ }
+ if(activeFlow==='weed'){
+ if(flowAnswers.used==='No'){pts=0;summary='Not used';}
+ else{
+ const e=flowAnswers.effect||'';
+ if(e.startsWith('Really helped'))pts=s.weed_helped_sleep;
+ else if(e.startsWith('Somewhat'))pts=1;
+ else if(e.startsWith('Neutral'))pts=s.weed_neutral;
+ else if(e.startsWith('Slightly negative'))pts=-1;
+ else pts=s.weed_disrupted;
+ summary='Used · '+(e.split('')[0].trim()||'logged');
+ }
+ }
 
-  if(activeFlow==='meal'){
-    pts+=s.meal_base;
-    if(flowAnswers.had_protein==='Yes — fresh cooked')pts+=s.meal_fresh_protein;
-    else if(flowAnswers.had_protein==='Leftover protein')pts-=2;
-    if(flowAnswers.walked_after==='Yes — went for a walk')pts+=s.walk_after_meal;
-    else if(flowAnswers.walked_after?.startsWith('Short'))pts+=s.walk_after_meal/2;
+ if(activeFlow==='meal'){
+ pts+=s.meal_base;
+ if(flowAnswers.had_protein==='Yes fresh cooked')pts+=s.meal_fresh_protein;
+ else if(flowAnswers.had_protein==='Leftover protein')pts-=2;
+ if(flowAnswers.walked_after==='Yes went for a walk')pts+=s.walk_after_meal;
+ else if(flowAnswers.walked_after?.startsWith('Short'))pts+=s.walk_after_meal/2;
 
-    const histLevel=flowAnswers.had_histamine||'';
-    const hadDAO=flowAnswers.dao_before==='Yes — took DAO';
-    const fatLevel=flowAnswers.had_fatty||'';
-    const hadOx=flowAnswers.oxbile_before==='Yes — took ox bile';
-    const glutenLevel=flowAnswers.gluten||'';
-    const hadDAOGluten=flowAnswers.dao_for_gluten==='Yes — took DAO before';
+ const histLevel=flowAnswers.had_histamine||'';
+ const hadDAO=flowAnswers.dao_before==='Yes took DAO';
+ const fatLevel=flowAnswers.had_fatty||'';
+ const hadOx=flowAnswers.oxbile_before==='Yes took ox bile';
+ const glutenLevel=flowAnswers.gluten||'';
+ const hadDAOGluten=flowAnswers.dao_for_gluten==='Yes took DAO before';
 
-    if(glutenLevel==='Yes — intentional gluten'){
-      if(hadDAOGluten)pts+=s.gluten_with_dao;
-      else pts+=s.gluten_no_dao;
-    }
-    if(histLevel==='Yes — significant triggers (tomatoes, chocolate, etc)'){
-      if(hadDAO)pts+=s.high_hist_with_dao;
-      else{pts+=s.high_hist_no_dao;flags.push('High histamine meal without DAO — consider taking enzyme next time');}
-    } else if(histLevel==='Yes — moderate histamine foods'||histLevel==='Minor triggers (small amounts)'){
-      if(!hadDAO&&histLevel!=='Minor triggers (small amounts)')flags.push('Moderate histamine meal without DAO');
-      pts-=1;
-    }
-    if(fatLevel==='Yes — high fat meal (curry, fried, heavy)'){
-      if(hadOx)pts+=s.gallbladder_with_ox;
-      else{pts+=s.gallbladder_no_ox;flags.push('High fat / gallbladder trigger without ox bile — take it before next time');}
-    }
+ if(glutenLevel==='Yes intentional gluten'){
+ if(hadDAOGluten)pts+=s.gluten_with_dao;
+ else pts+=s.gluten_no_dao;
+ }
+ if(histLevel==='Yes significant triggers (tomatoes, chocolate, etc)'){
+ if(hadDAO)pts+=s.high_hist_with_dao;
+ else{pts+=s.high_hist_no_dao;flags.push('High histamine meal without DAO consider taking enzyme next time');}
+ } else if(histLevel==='Yes moderate histamine foods'||histLevel==='Minor triggers (small amounts)'){
+ if(!hadDAO&&histLevel!=='Minor triggers (small amounts)')flags.push('Moderate histamine meal without DAO');
+ pts-=1;
+ }
+ if(fatLevel==='Yes high fat meal (curry, fried, heavy)'){
+ if(hadOx)pts+=s.gallbladder_with_ox;
+ else{pts+=s.gallbladder_no_ox;flags.push('High fat / gallbladder trigger without ox bile take it before next time');}
+ }
 
-    const mealName=flowAnswers.name?.slice(0,40)||'Meal';
-    summary=`${flowAnswers.type||'Meal'}: ${mealName}${flowAnswers.walked_after==='Yes — went for a walk'?' · walked ✓':''}`;
+ const mealName=flowAnswers.name?.slice(0,40)||'Meal';
+ summary=`${flowAnswers.type||'Meal'}: ${mealName}${flowAnswers.walked_after==='Yes went for a walk'?' · walked ':''}`;
 
-    // Save as food entry
-    const food=getFoodEntries(today());
-    food.push({name:mealName,pts,type:'meal',flags,time:nowTime(),rawAnswers:{...flowAnswers}});
-    saveFoodEntries(today(),food);
+ // Save as food entry
+ const food=getFoodEntries(today());
+ food.push({name:mealName,pts,type:'meal',flags,time:nowTime(),rawAnswers:{...flowAnswers}});
+ saveFoodEntries(today(),food);
 
-    // Save flags
-    if(flags.length){
-      const store=getStore();
-      if(!store[today()])store[today()]={};
-      if(!store[today()].enzymeFlags)store[today()].enzymeFlags=[];
-      store[today()].enzymeFlags.push(...flags);
-      saveStore(store);
-    }
+ // Save flags
+ if(flags.length){
+ const store=getStore();
+ if(!store[today()])store[today()]={};
+ if(!store[today()].enzymeFlags)store[today()].enzymeFlags=[];
+ store[today()].enzymeFlags.push(...flags);
+ saveStore(store);
+ }
 
-    // Show completion
-    showFlowDone(pts,summary,flags);
-    return;
-  }
+ // Show completion
+ showFlowDone(pts,summary,flags);
+ return;
+ }
 
-  if(activeFlow==='reaction'){
-    // just log it, no pts penalty (the body is doing enough)
-    pts=1; // 1pt for logging self-awareness
-    summary=`Reaction: ${flowAnswers.severity?.split('—')[0].trim()||'logged'} · ${flowAnswers.trigger||'unknown trigger'}`;
-    const food=getFoodEntries(today());
-    food.push({name:'Reaction episode: '+summary,pts,type:'reaction',time:nowTime(),rawAnswers:{...flowAnswers}});
-    saveFoodEntries(today(),food);
-    showFlowDone(pts,summary,[]);
-    return;
-  }
+ if(activeFlow==='reaction'){
+ // just log it, no pts penalty (the body is doing enough)
+ pts=1; // 1pt for logging self-awareness
+ summary=`Reaction: ${flowAnswers.severity?.split('')[0].trim()||'logged'} · ${flowAnswers.trigger||'unknown trigger'}`;
+ const food=getFoodEntries(today());
+ food.push({name:'Reaction episode: '+summary,pts,type:'reaction',time:nowTime(),rawAnswers:{...flowAnswers}});
+ saveFoodEntries(today(),food);
+ showFlowDone(pts,summary,[]);
+ return;
+ }
 
-  flows[activeFlow]={pts,summary,rawAnswers:{...flowAnswers}};
-  saveFlowData(today(),flows);
-  showFlowDone(pts,summary,flags);
+ flows[activeFlow]={pts,summary,rawAnswers:{...flowAnswers}};
+ saveFlowData(today(),flows);
+ addXP(Math.max(0,Math.round(pts)));
+ showFlowDone(pts,summary,flags);
 }
 
 function showFlowDone(pts,summary,flags){
-  const sign=pts>=0?'+':'';
-  let html=`<div class="done-msg">
-    <div class="done-icon">${pts>=5?'🌟':pts>=0?'✓':'↓'}</div>
-    <div class="done-title">Logged</div>
-    <div class="done-sub">${summary}</div>
-    <div class="done-pts">${sign}${pts.toFixed?pts.toFixed(1):pts} pts</div>`;
-  if(flags.length){
-    html+=`<div style="margin-top:1rem">`;
-    flags.forEach(f=>html+=`<div class="flag-box" style="margin-bottom:6px">🔔 ${f}</div>`);
-    html+=`</div>`;
-  }
-  html+=`<button class="next-btn" style="margin-top:1.25rem" onclick="closeModal();renderToday()">Done</button></div>`;
-  document.getElementById('modal-inner').innerHTML=html;
+ const sign=pts>=0?'+':'';
+ let html=`<div class="done-msg">
+ <div style="width:48px;height:48px;border-radius:50%;background:rgba(74,124,89,.1);border:2px solid var(--leaf);margin:0 auto .875rem;display:flex;align-items:center;justify-content:center"><svg width="20" height="16" viewBox="0 0 20 16" fill="none"><path d="M2 8L7.5 13.5L18 2" stroke="var(--leaf)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+ <div class="done-title">Logged</div>
+ <div class="done-sub">${summary}</div>
+ <div class="done-pts">${sign}${pts.toFixed?pts.toFixed(1):pts} pts</div>`;
+ html+=Math.max(0,Math.round(typeof pts==='number'?pts:0))>0?`<div style="font-family:var(--mono);font-size:12px;color:var(--purple);margin-top:3px">+${Math.max(0,Math.round(typeof pts==='number'?pts:0))} pts earned</div>`:'';
+ if(flags.length){
+ html+=`<div style="margin-top:1rem">`;
+ flags.forEach(f=>html+=`<div class="flag-box" style="margin-bottom:6px"> ${f}</div>`);
+ html+=`</div>`;
+ }
+ html+=`<button class="next-btn" style="margin-top:1.25rem" onclick="closeModal();renderToday()">Done</button></div>`;
+ document.getElementById('modal-inner').innerHTML=html;
 }
 
-// ── LOG PAGE ──────────────────────────────────────────────
+// LOG PAGE 
 function renderLog(){
-  const food=getFoodEntries(today());
-  const drinks=getStore()[today()]?.drinks||[];
-  const cfg=getCfg();const s=cfg.scales;
-  let html=`<div style="font-size:18px;font-weight:500;margin-bottom:.25rem">Today's log</div>
-  <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:1rem">${new Date().toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'})}</div>`;
+ const food=getFoodEntries(today());
+ const drinks=getStore()[today()]?.drinks||[];
+ const cfg=getCfg();const s=cfg.scales;
+ let html=`<div style="font-size:18px;font-weight:500;margin-bottom:.25rem">Today's log</div>
+ <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:1rem">${new Date().toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'})}</div>`;
 
-  // DRINK LOG
-  html+=`<div class="sec"><span class="sec-dot" style="background:var(--teal)"></span>Hydration</div>`;
-  html+=`<div style="background:var(--card);border:0.5px solid var(--border);border-radius:var(--rl);padding:.875rem 1rem;margin-bottom:.5rem">`;
-  const drinkPts=drinks.reduce((a,d)=>a+d.pts,0);
-  html+=`<div style="font-size:10px;font-family:var(--mono);color:var(--teal);margin-bottom:.5rem">+${drinkPts.toFixed(1)} pts today</div>`;
-  if(drinks.length===0){
-    html+=`<div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:.5rem 0">No drinks logged yet</div>`;
-  } else {
-    html+=`<div class="drink-entries">`;
-    const drinkOzTotal=drinks.filter(d=>d.type==='still'||d.type==='nuun').reduce((a,d)=>a+(d.oz||0),0);
-    html+=`<div style="font-size:10px;font-family:var(--mono);color:var(--teal);margin-bottom:.4rem">${drinkOzTotal}oz still water today</div>`;
-    drinks.forEach((d,i)=>html+=`<div class="drink-entry">
-      <div class="drink-name">${d.name}${d.oz?' ('+d.oz+'oz)':''}</div>
-      <div class="drink-pts" style="color:${(d.pts||0)>=0?'var(--teal)':'var(--red)'}">${(d.pts||0)>=0?'+':''}${d.pts||0}</div>
-      <button class="drink-del" onclick="removeDrink(${i})">×</button>
-    </div>`);
-    html+=`</div>`;
-  }
-  const drinkTypes=[
-    {name:'Still water',type:'still',defaultOz:8},
-    {name:'NUUN',type:'nuun',defaultOz:16},
-    {name:'Ginger tea',type:'ginger',defaultOz:8},
-    {name:'Peppermint tea',type:'peppermint',defaultOz:8},
-    {name:'Chamomile tea',type:'chamomile',defaultOz:8},
-    {name:'Sparkling water',type:'sparkling',defaultOz:12},
-    {name:'Coffee (after food)',type:'coffee_after',defaultOz:8},
-    {name:'Coffee (before food)',type:'coffee_before',defaultOz:8},
-  ];
-  html+=`<div style="font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin:.5rem 0 .3rem">Quick add (tap to log oz)</div>`;
-  html+=`<div class="drink-add-row">`;
-  drinkTypes.forEach(d=>{
-    html+=`<button class="drink-type-btn" onclick="promptDrink('${d.name}','${d.type}',${d.defaultOz})">${d.name}</button>`;
-  });
-  html+=`</div></div>`;
+ // DRINK LOG
+ html+=`<div class="sec"><div class="sec-line"></div>Hydration<div class="sec-line"></div></div>`;
+ html+=`<div style="background:var(--card);border:0.5px solid var(--border);border-radius:var(--rl);padding:.875rem 1rem;margin-bottom:.5rem">`;
+ const drinkPts=drinks.reduce((a,d)=>a+d.pts,0);
+ html+=`<div style="font-size:10px;font-family:var(--mono);color:var(--teal);margin-bottom:.5rem">+${drinkPts.toFixed(1)} pts today</div>`;
+ if(drinks.length===0){
+ html+=`<div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:.5rem 0">No drinks logged yet</div>`;
+ } else {
+ html+=`<div class="drink-entries">`;
+ const drinkOzTotal=drinks.filter(d=>d.type==='still'||d.type==='nuun').reduce((a,d)=>a+(d.oz||0),0);
+ html+=`<div style="font-size:10px;font-family:var(--mono);color:var(--teal);margin-bottom:.4rem">${drinkOzTotal}oz still water today</div>`;
+ drinks.forEach((d,i)=>html+=`<div class="drink-entry">
+ <div class="drink-name">${d.name}${d.oz?' ('+d.oz+'oz)':''}</div>
+ <div class="drink-pts" style="color:${(d.pts||0)>=0?'var(--teal)':'var(--red)'}">${(d.pts||0)>=0?'+':''}${d.pts||0}</div>
+ <button class="drink-del" onclick="removeDrink(${i})">×</button>
+ </div>`);
+ html+=`</div>`;
+ }
+ const drinkTypes=[
+ {name:'Still water',type:'still',defaultOz:8},
+ {name:'NUUN',type:'nuun',defaultOz:16},
+ {name:'Ginger tea',type:'ginger',defaultOz:8},
+ {name:'Peppermint tea',type:'peppermint',defaultOz:8},
+ {name:'Chamomile tea',type:'chamomile',defaultOz:8},
+ {name:'Sparkling water',type:'sparkling',defaultOz:12},
+ {name:'Coffee (after food)',type:'coffee_after',defaultOz:8},
+ {name:'Coffee (before food)',type:'coffee_before',defaultOz:8},
+ ];
+ html+=`<div style="font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin:.5rem 0 .3rem">Quick add (tap to log oz)</div>`;
+ html+=`<div class="drink-add-row">`;
+ drinkTypes.forEach(d=>{
+ html+=`<button class="drink-type-btn" onclick="promptDrink('${d.name}','${d.type}',${d.defaultOz})">${d.name}</button>`;
+ });
+ html+=`</div></div>`;
 
-  // MEAL LOG
-  html+=`<div class="sec"><span class="sec-dot" style="background:var(--amber)"></span>Meals & food</div>`;
-  html+=`<div class="flow-card" onclick="openFlow('meal')">
-    <div class="fc-top"><div class="fc-title">Log a meal</div><div class="fc-pts">tap to add →</div></div>
-    <div class="fc-sub">Calculates points based on content, enzymes taken, and whether you walked after</div>
-  </div>`;
+ // MEAL LOG
+ html+=`<div class="sec"><div class="sec-line"></div>Meals & food<div class="sec-line"></div></div>`;
+ html+=`<div class="flow-card" onclick="openFlow('meal')">
+ <div class="fc-top"><div class="fc-title">Log a meal</div><div class="fc-pts">tap to add </div></div>
+ <div class="fc-sub">Calculates points based on content, enzymes taken, and whether you walked after</div>
+ </div>`;
 
-  if(food.length>0){
-    food.forEach((e,i)=>{
-      const c=e.pts>=0?'var(--green)':'var(--red)';
-      const sign=e.pts>=0?'+':'';
-      html+=`<div class="flow-card has-data" style="margin-bottom:5px">
-        <div class="fc-top"><div class="fc-title">${e.name.slice(0,50)}</div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="fc-pts" style="color:${c}">${sign}${e.pts}</div>
-          <button onclick="removeMeal(${i});event.stopPropagation()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px">×</button>
-        </div></div>
-        <div class="fc-sub">${e.type} · ${e.time||''}${e.flags?.length?' · 🔔 '+e.flags[0]:''}</div>
-      </div>`;
-    });
-  }
+ if(food.length>0){
+ food.forEach((e,i)=>{
+ const c=e.pts>=0?'var(--green)':'var(--red)';
+ const sign=e.pts>=0?'+':'';
+ html+=`<div class="flow-card has-data" style="margin-bottom:5px">
+ <div class="fc-top"><div class="fc-title">${e.name.slice(0,50)}</div>
+ <div style="display:flex;align-items:center;gap:8px">
+ <div class="fc-pts" style="color:${c}">${sign}${e.pts}</div>
+ <button onclick="removeMeal(${i});event.stopPropagation()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px">×</button>
+ </div></div>
+ <div class="fc-sub">${e.type} · ${e.time||''}${e.flags?.length?' · '+e.flags[0]:''}</div>
+ </div>`;
+ });
+ }
 
-  // ENZYME FLAGS
-  const flags=getStore()[today()]?.enzymeFlags||[];
-  if(flags.length){
-    html+=`<div class="sec"><span class="sec-dot" style="background:var(--amber)"></span>Enzyme reminders</div>`;
-    html+=`<div class="flag-summary"><div class="flag-title">🔔 Missed enzyme opportunities today</div>`;
-    flags.forEach(f=>html+=`<div class="flag-item">${f}</div>`);
-    html+=`</div>`;
-  }
+ // ENZYME FLAGS
+ const flags=getStore()[today()]?.enzymeFlags||[];
+ if(flags.length){
+ html+=`<div class="sec"><div class="sec-line"></div>Enzyme reminders<div class="sec-line"></div></div>`;
+ html+=`<div class="flag-summary"><div class="flag-title"> Missed enzyme opportunities today</div>`;
+ flags.forEach(f=>html+=`<div class="flag-item">${f}</div>`);
+ html+=`</div>`;
+ }
 
-  // REACTION
-  html+=`<div class="sec"><span class="sec-dot" style="background:var(--red)"></span>Reaction episode</div>`;
-  html+=`<div class="flow-card" onclick="openFlow('reaction')">
-    <div class="fc-top"><div class="fc-title">Log a reaction</div><div class="fc-pts">on-demand →</div></div>
-    <div class="fc-sub">Trigger, symptoms, severity, protocol used</div>
-  </div>`;
+ // REACTION
+ html+=`<div class="sec"><div class="sec-line"></div>Reaction episode<div class="sec-line"></div></div>`;
+ html+=`<div class="flow-card" onclick="openFlow('reaction')">
+ <div class="fc-top"><div class="fc-title">Log a reaction</div><div class="fc-pts">on-demand </div></div>
+ <div class="fc-sub">Trigger, symptoms, severity, protocol used</div>
+ </div>`;
 
-  document.getElementById('pg-log').innerHTML=html;
+ document.getElementById('pg-log').innerHTML=html;
 }
 
 function promptDrink(name,type,defaultOz){
-  const ozStr=prompt(`How many oz of ${name}?`, defaultOz);
-  if(ozStr===null)return;
-  const oz=parseFloat(ozStr)||defaultOz;
-  const cfg=getCfg();const s=cfg.scales;
-  let pts=0;
-  if(type==='still')pts=Math.round((oz/16)*s.oz_per_16*10)/10;
-  else if(type==='nuun')pts=Math.round((s.nuun_bonus+(oz/16)*s.oz_per_16)*10)/10;
-  else if(type==='sparkling')pts=Math.round((oz/16)*s.sparkling_per_16*10)/10;
-  else if(type==='ginger')pts=2.5;
-  else if(type==='peppermint'||type==='chamomile')pts=2;
-  else if(type==='coffee_after')pts=0.5;
-  else if(type==='coffee_before')pts=-2;
-  const d=getStore();if(!d[today()])d[today()]={};
-  if(!d[today()].drinks)d[today()].drinks=[];
-  d[today()].drinks.push({name,type,oz,pts,time:nowTime()});
-  saveStore(d);
-  renderLog();
-  if(document.getElementById('pg-today').classList.contains('active'))renderToday();
+ const ozStr=prompt(`How many oz of ${name}?`, defaultOz);
+ if(ozStr===null)return;
+ const oz=parseFloat(ozStr)||defaultOz;
+ const cfg=getCfg();const s=cfg.scales;
+ let pts=0;
+ if(type==='still')pts=Math.round((oz/16)*s.oz_per_16*10)/10;
+ else if(type==='nuun')pts=Math.round((s.nuun_bonus+(oz/16)*s.oz_per_16)*10)/10;
+ else if(type==='sparkling')pts=Math.round((oz/16)*s.sparkling_per_16*10)/10;
+ else if(type==='ginger')pts=2.5;
+ else if(type==='peppermint'||type==='chamomile')pts=2;
+ else if(type==='coffee_after')pts=0.5;
+ else if(type==='coffee_before')pts=-2;
+ const d=getStore();if(!d[today()])d[today()]={};
+ if(!d[today()].drinks)d[today()].drinks=[];
+ d[today()].drinks.push({name,type,oz,pts,time:nowTime()});
+ saveStore(d);
+ renderLog();
+ if(document.getElementById('pg-today').classList.contains('active'))renderToday();
 }
 
 function addDrink(name,pts){
-  const d=getStore();
-  if(!d[today()])d[today()]={};
-  if(!d[today()].drinks)d[today()].drinks=[];
-  d[today()].drinks.push({name,pts,time:nowTime()});
-  saveStore(d);
-  renderLog();
-  if(document.getElementById('pg-today').classList.contains('active'))renderToday();
+ const d=getStore();
+ if(!d[today()])d[today()]={};
+ if(!d[today()].drinks)d[today()].drinks=[];
+ d[today()].drinks.push({name,pts,time:nowTime()});
+ saveStore(d);
+ renderLog();
+ if(document.getElementById('pg-today').classList.contains('active'))renderToday();
 }
 function removeDrink(idx){
-  const d=getStore();
-  if(d[today()]?.drinks)d[today()].drinks.splice(idx,1);
-  saveStore(d);renderLog();
+ const d=getStore();
+ if(d[today()]?.drinks)d[today()].drinks.splice(idx,1);
+ saveStore(d);renderLog();
 }
 function removeMeal(idx){
-  const food=getFoodEntries(today());
-  food.splice(idx,1);
-  saveFoodEntries(today(),food);
-  renderLog();
-  renderToday();
+ const food=getFoodEntries(today());
+ food.splice(idx,1);
+ saveFoodEntries(today(),food);
+ renderLog();
+ renderToday();
 }
 
-// ── CI SYSTEM ─────────────────────────────────────────────
+// CI SYSTEM 
 const CI_QS=[
-  {id:'hungry',    prompt:'Do I feel hungry?',              action:'Eat something with carbs and protein.'},
-  {id:'thirsty',   prompt:'Do I feel thirsty?',             action:'Get a drink.'},
-  {id:'tired',     prompt:'Do I feel tired?',               action:'Take off glasses and lay down to rest — at least 5 min.'},
-  {id:'anxious',   prompt:'Do I feel anxious?',             action:'Complete switching and downregulating practices.'},
-  {id:'overwhelmed',prompt:'Do I feel overwhelmed?',        action:'Complete settling practices.'},
-  {id:'nauseous',  prompt:'Do I feel nauseous?',            action:'Drink water, eat something, or take a ginger chew.'},
-  {id:'dizzy',     prompt:'Do I feel dizzy?',               action:'Take glasses off, rest eyes closed 5+ min, ginger chew.'},
-  {id:'restless',  prompt:'Do I feel restless?',            action:'Take a walk or stretch.'},
-  {id:'bathroom',  prompt:'Do I need the bathroom?',        action:'Go to the bathroom!'},
+ {id:'hungry', prompt:'Do I feel hungry?', action:'Eat something with carbs and protein.'},
+ {id:'thirsty', prompt:'Do I feel thirsty?', action:'Get a drink.'},
+ {id:'tired', prompt:'Do I feel tired?', action:'Take off glasses and lay down to rest at least 5 min.'},
+ {id:'anxious', prompt:'Do I feel anxious?', action:'Complete switching and downregulating practices.'},
+ {id:'overwhelmed',prompt:'Do I feel overwhelmed?', action:'Complete settling practices.'},
+ {id:'nauseous', prompt:'Do I feel nauseous?', action:'Drink water, eat something, or take a ginger chew.'},
+ {id:'dizzy', prompt:'Do I feel dizzy?', action:'Take glasses off, rest eyes closed 5+ min, ginger chew.'},
+ {id:'restless', prompt:'Do I feel restless?', action:'Take a walk or stretch.'},
+ {id:'bathroom', prompt:'Do I need the bathroom?', action:'Go to the bathroom!'},
 ];
 let ciAnswers={},ciPhase=1,ciActionsCompleted=[];
 
 function openCI(){
-  ciAnswers={};ciPhase=1;ciActionsCompleted=[];
-  renderCI();
-  document.getElementById('modal-bg').style.display='flex';
+ ciAnswers={};ciPhase=1;ciActionsCompleted=[];
+ renderCI();
+ document.getElementById('modal-bg').style.display='flex';
 }
 function renderCI(){
-  const answered=Object.keys(ciAnswers).length;
-  const canSave=answered===CI_QS.length;
-  let html=`<div class="modal-header">
-    <div><div class="modal-title">Hourly check-in ✦</div>
-    <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-top:3px">${ciPhase===1?'tap yes or no for each':'action suggestions for your yes answers'}</div></div>
-    <button class="modal-close" onclick="closeModal()">×</button>
-  </div>`;
-  if(ciPhase===1){
-    html+=`<div class="pts-preview">+${(2+answered*0.2).toFixed(1)} pts for this check-in (${answered}/${CI_QS.length} answered)</div>`;
-    CI_QS.forEach(q=>{
-      const a=ciAnswers[q.id];
-      html+=`<div class="ci-q">
-        <div class="ci-q-text">${q.prompt}</div>
-        <div class="ci-btns">
-          <button class="ci-btn ${a===true?'yes-sel':''}" onclick="ansCI('${q.id}',true)">YES</button>
-          <button class="ci-btn ${a===false?'no-sel':''}" onclick="ansCI('${q.id}',false)">NO</button>
-        </div>
-      </div>`;
-    });
-    html+=`<button class="next-btn" style="margin-top:.75rem;${!canSave?'opacity:.3;cursor:default':''}" onclick="${canSave?'saveCI()':''}">${canSave?'Save check-in':'Answer all questions to save'}</button>`;
-  } else {
-    const yeses=CI_QS.filter(q=>ciAnswers[q.id]===true);
-    html+=`<div style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-bottom:.75rem">${ciActionsCompleted.length}/${yeses.length} actions done</div>`;
-    yeses.forEach(q=>{
-      const done=ciActionsCompleted.includes(q.id);
-      html+=`<div class="ci-action ${done?'done-action':''}">
-        <div class="ci-action-text"><strong>${q.prompt.replace('Do I feel ','').replace('Do I need ','').replace('?','')}</strong>${q.action}</div>
-        <button class="ci-done-btn ${done?'done':''}" onclick="toggleCIAction('${q.id}')">${done?'Done ✓':'Mark done'}</button>
-      </div>`;
-    });
-    html+=`<div style="display:flex;gap:8px;margin-top:1rem">
-      <button class="next-btn" style="flex:1;background:var(--card);color:var(--text2);border:0.5px solid var(--border2)" onclick="ciPhase=1;renderCI()">Back</button>
-      <button class="next-btn" style="flex:2" onclick="finalizeCI()">Save (${ciActionsCompleted.length}/${yeses.length} done)</button>
-    </div>`;
-  }
-  document.getElementById('modal-inner').innerHTML=html;
+ const answered=Object.keys(ciAnswers).length;
+ const canSave=answered===CI_QS.length;
+ let html=`<div class="modal-header">
+ <div><div class="modal-title">Hourly check-in </div>
+ <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-top:3px">${ciPhase===1?'tap yes or no for each':'action suggestions for your yes answers'}</div></div>
+ <button class="modal-close" onclick="closeModal()">×</button>
+ </div>`;
+ if(ciPhase===1){
+ html+=`<div class="pts-preview">+${(2+answered*0.2).toFixed(1)} pts for this check-in (${answered}/${CI_QS.length} answered)</div>`;
+ CI_QS.forEach(q=>{
+ const a=ciAnswers[q.id];
+ html+=`<div class="ci-q">
+ <div class="ci-q-text">${q.prompt}</div>
+ <div class="ci-btns">
+ <button class="ci-btn ${a===true?'yes-sel':''}" onclick="ansCI('${q.id}',true)">YES</button>
+ <button class="ci-btn ${a===false?'no-sel':''}" onclick="ansCI('${q.id}',false)">NO</button>
+ </div>
+ </div>`;
+ });
+ html+=`<button class="next-btn" style="margin-top:.75rem;${!canSave?'opacity:.3;cursor:default':''}" onclick="${canSave?'saveCI()':''}">${canSave?'Save check-in':'Answer all questions to save'}</button>`;
+ } else {
+ const yeses=CI_QS.filter(q=>ciAnswers[q.id]===true);
+ html+=`<div style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-bottom:.75rem">${ciActionsCompleted.length}/${yeses.length} actions done</div>`;
+ yeses.forEach(q=>{
+ const done=ciActionsCompleted.includes(q.id);
+ html+=`<div class="ci-action ${done?'done-action':''}">
+ <div class="ci-action-text"><strong>${q.prompt.replace('Do I feel ','').replace('Do I need ','').replace('?','')}</strong>${q.action}</div>
+ <button class="ci-done-btn ${done?'done':''}" onclick="toggleCIAction('${q.id}')">${done?'Done ':'Mark done'}</button>
+ </div>`;
+ });
+ html+=`<div style="display:flex;gap:8px;margin-top:1rem">
+ <button class="next-btn" style="flex:1;background:var(--card);color:var(--text2);border:0.5px solid var(--border2)" onclick="ciPhase=1;renderCI()">Back</button>
+ <button class="next-btn" style="flex:2" onclick="finalizeCI()">Save (${ciActionsCompleted.length}/${yeses.length} done)</button>
+ </div>`;
+ }
+ document.getElementById('modal-inner').innerHTML=html;
 }
 function ansCI(id,val){ciAnswers[id]=val;renderCI();}
 function saveCI(){
-  const yeses=CI_QS.filter(q=>ciAnswers[q.id]===true);
-  if(yeses.length===0){finalizeCI();return;}
-  ciPhase=2;renderCI();
+ const yeses=CI_QS.filter(q=>ciAnswers[q.id]===true);
+ if(yeses.length===0){finalizeCI();return;}
+ ciPhase=2;renderCI();
 }
 function toggleCIAction(id){
-  const idx=ciActionsCompleted.indexOf(id);
-  if(idx>-1)ciActionsCompleted.splice(idx,1);else ciActionsCompleted.push(id);
-  renderCI();
+ const idx=ciActionsCompleted.indexOf(id);
+ if(idx>-1)ciActionsCompleted.splice(idx,1);else ciActionsCompleted.push(id);
+ renderCI();
 }
 function finalizeCI(){
-  const pts=parseFloat((2+Object.keys(ciAnswers).length*0.2).toFixed(1));
-  const reaction=['nauseous','dizzy','anxious','tired'].filter(s=>ciAnswers[s]===true).length>=3;
-  const entry={time:nowTime(),answers:{...ciAnswers},actionsCompleted:[...ciActionsCompleted],pts};
-  saveCIEntry(today(),entry);
-  const d=getStore();if(!d[today()])d[today()]={};
-  if(!d[today()].ciPts)d[today()].ciPts=0;
-  d[today()].ciPts+=pts;saveStore(d);
-  closeModal();updateFAB();
-  if(reaction)setTimeout(()=>alert('⚠️ Multiple symptoms detected — consider your reaction protocol: ginger chew, sit down, breathe slowly.'),300);
-  if(document.getElementById('pg-today').classList.contains('active'))renderToday();
+ const pts=parseFloat((2+Object.keys(ciAnswers).length*0.2).toFixed(1));
+ const reaction=['nauseous','dizzy','anxious','tired'].filter(s=>ciAnswers[s]===true).length>=3;
+ const entry={time:nowTime(),answers:{...ciAnswers},actionsCompleted:[...ciActionsCompleted],pts};
+ saveCIEntry(today(),entry);
+ const d=getStore();if(!d[today()])d[today()]={};
+ if(!d[today()].ciPts)d[today()].ciPts=0;
+ d[today()].ciPts+=pts;saveStore(d);
+ closeModal();updateFAB();
+ if(reaction)setTimeout(()=>alert(' Multiple symptoms detected consider your reaction protocol: ginger chew, sit down, breathe slowly.'),300);
+ if(document.getElementById('pg-today').classList.contains('active'))renderToday();
 }
 const LAST_FIRED='sc6_lf';
 function updateFAB(){
-  const entries=getCIEntries(today());
-  const last=entries.length?entries[entries.length-1].time:null;
-  const mins=last?((hour()*60+new Date().getMinutes())-(parseInt(last.split(':')[0])*60+parseInt(last.split(':')[1]))):999;
-  const fab=document.getElementById('ci-fab');
-  const dot=document.getElementById('fab-dot');
-  if(!fab)return;
-  if(mins>=60){fab.style.background='var(--red)';fab.innerHTML='<span class="fab-dot urgent"></span>Check in now';dot&&dot.classList.add('urgent');}
-  else if(mins>=45){fab.style.background='var(--amber)';fab.innerHTML='<span class="fab-dot" style="background:var(--amber)"></span>Check in soon';}
-  else{fab.style.background='var(--pdim)';fab.innerHTML='<span class="fab-dot"></span>Check in';}
+ const entries=getCIEntries(today());
+ const last=entries.length?entries[entries.length-1].time:null;
+ const mins=last?((hour()*60+new Date().getMinutes())-(parseInt(last.split(':')[0])*60+parseInt(last.split(':')[1]))):999;
+ const fab=document.getElementById('ci-fab');
+ const dot=document.getElementById('fab-dot');
+ if(!fab)return;
+ if(mins>=60){fab.style.background='var(--red)';fab.innerHTML='<span class="fab-dot urgent"></span>Check in now';dot&&dot.classList.add('urgent');}
+ else if(mins>=45){fab.style.background='var(--amber)';fab.innerHTML='<span class="fab-dot" style="background:var(--amber)"></span>Check in soon';}
+ else{fab.style.background='var(--pdim)';fab.innerHTML='<span class="fab-dot"></span>Check in';}
 }
 function maybeFire(){
-  const now=new Date();const h=now.getHours();const m=now.getMinutes();
-  const sched=[{h:7,k:'morning'},{h:8,k:'ci'},{h:9,k:'ci'},{h:10,k:'ci'},{h:11,k:'ci'},{h:12,k:'midday'},{h:13,k:'ci'},{h:14,k:'ci'},{h:15,k:'ci'},{h:16,k:'ci'},{h:17,k:'ci'},{h:18,k:'ci'},{h:19,k:'ci'},{h:20,k:'ci'},{h:21,k:'ci'},{h:22,k:'evening'}];
-  const entry=sched.find(e=>e.h===h);
-  if(!entry||m>4)return;
-  const key=`${now.toDateString()}-${h}-${entry.k}`;
-  if(localStorage.getItem(LAST_FIRED)===key)return;
-  localStorage.setItem(LAST_FIRED,key);
-  if(Notification.permission==='granted')new Notification('Check in',{body:'How are you doing right now?',tag:'sc-ci'});
-  if(entry.k==='ci')openCI();
+ const now=new Date();const h=now.getHours();const m=now.getMinutes();
+ const sched=[{h:7,k:'morning'},{h:8,k:'ci'},{h:9,k:'ci'},{h:10,k:'ci'},{h:11,k:'ci'},{h:12,k:'midday'},{h:13,k:'ci'},{h:14,k:'ci'},{h:15,k:'ci'},{h:16,k:'ci'},{h:17,k:'ci'},{h:18,k:'ci'},{h:19,k:'ci'},{h:20,k:'ci'},{h:21,k:'ci'},{h:22,k:'evening'}];
+ const entry=sched.find(e=>e.h===h);
+ if(!entry||m>4)return;
+ const key=`${now.toDateString()}-${h}-${entry.k}`;
+ if(localStorage.getItem(LAST_FIRED)===key)return;
+ localStorage.setItem(LAST_FIRED,key);
+ if(Notification.permission==='granted')new Notification('Check in',{body:'How are you doing right now?',tag:'sc-ci'});
+ if(entry.k==='ci')openCI();
 }
 setInterval(maybeFire,60000);setInterval(updateFAB,60000);maybeFire();
 
-// ── HISTORY ───────────────────────────────────────────────
+// HISTORY 
 function renderHistory(){
-  const store=getStore();const food=getFood();const ci=getCI();
-  const dates=[...new Set([...Object.keys(store),...Object.keys(food),...Object.keys(ci)])].sort((a,b)=>b.localeCompare(a));
-  if(dates.length===0){
-    document.getElementById('pg-history').innerHTML='<div style="text-align:center;padding:3rem;font-family:var(--mono);font-size:12px;color:var(--text3)">No history yet. Start logging!</div>';
-    return;
-  }
-  const scores={};dates.forEach(d=>scores[d]=calcScore(d));
-  const vals=Object.values(scores);
-  const avg=Math.round(vals.reduce((a,b)=>a+Math.max(0,b),0)/vals.length);
-  const best=Math.max(...vals);
-  const streak=calcStreak([...dates].reverse());
-  const last7=[...dates].slice(0,7).reverse();
+ const store=getStore();const food=getFood();const ci=getCI();
+ const dates=[...new Set([...Object.keys(store),...Object.keys(food),...Object.keys(ci)])].sort((a,b)=>b.localeCompare(a));
+ if(dates.length===0){
+ document.getElementById('pg-history').innerHTML='<div style="text-align:center;padding:3rem;font-family:var(--mono);font-size:12px;color:var(--text3)">No history yet. Start logging!</div>';
+ return;
+ }
+ const scores={};dates.forEach(d=>scores[d]=calcScore(d));
+ const vals=Object.values(scores);
+ const avg=Math.round(vals.reduce((a,b)=>a+Math.max(0,b),0)/vals.length);
+ const best=Math.max(...vals);
+ const streak=calcStreak([...dates].reverse());
+ const last7=[...dates].slice(0,7).reverse();
 
-  let html=`<div class="stat-grid">
-    <div class="stat-card"><div class="stat-num" style="color:var(--amber)">${streak}</div><div class="stat-lbl">day streak</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--teal)">${avg}</div><div class="stat-lbl">avg score</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--green)">${best}</div><div class="stat-lbl">best day</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--purple)">${dates.length}</div><div class="stat-lbl">days logged</div></div>
-  </div>`;
+ let html=`<div class="stat-grid">
+ <div class="stat-card"><div class="stat-num" style="color:var(--amber)">${streak}</div><div class="stat-lbl">day streak</div></div>
+ <div class="stat-card"><div class="stat-num" style="color:var(--teal)">${avg}</div><div class="stat-lbl">avg score</div></div>
+ <div class="stat-card"><div class="stat-num" style="color:var(--green)">${best}</div><div class="stat-lbl">best day</div></div>
+ <div class="stat-card"><div class="stat-num" style="color:var(--purple)">${dates.length}</div><div class="stat-lbl">days logged</div></div>
+ </div>`;
 
-  // week chart
-  html+=`<div class="chart-wrap"><div class="wbars">`;
-  last7.forEach(d=>{
-    const s=scores[d]||0;
-    const h=Math.max(3,Math.round((Math.max(0,s)/100)*64));
-    const day=new Date(d+'T12:00:00').toLocaleDateString([],{weekday:'short'});
-    html+=`<div class="wbar-col"><div class="wbar" style="height:${h}px;background:${scoreColor(s)}"></div><div class="wbar-lbl">${day}</div></div>`;
-  });
-  html+=`</div></div>`;
+ // week chart
+ html+=`<div class="chart-wrap"><div class="wbars">`;
+ last7.forEach(d=>{
+ const s=scores[d]||0;
+ const h=Math.max(3,Math.round((Math.max(0,s)/100)*64));
+ const day=new Date(d+'T12:00:00').toLocaleDateString([],{weekday:'short'});
+ html+=`<div class="wbar-col"><div class="wbar" style="height:${h}px;background:${scoreColor(s)}"></div><div class="wbar-lbl">${day}</div></div>`;
+ });
+ html+=`</div></div>`;
 
-  // calendar
-  const now=new Date();const y=now.getFullYear();const mo=now.getMonth();
-  const first=new Date(y,mo,1).getDay();const daysInMo=new Date(y,mo+1,0).getDate();
-  html+=`<div style="font-size:13px;font-weight:500;margin-bottom:.5rem">${now.toLocaleDateString([],{month:'long',year:'numeric'})}</div>`;
-  html+=`<div class="cal-grid">`;
-  ['S','M','T','W','T','F','S'].forEach(d=>html+=`<div class="cal-dow">${d}</div>`);
-  for(let i=0;i<first;i++)html+=`<div class="cal-day"></div>`;
-  for(let d=1;d<=daysInMo;d++){
-    const ds=`${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isT=ds===today();
-    const s=scores[ds];
-    let bg=isT?'var(--pdim)':'var(--border)';let tc=isT?'#fff':'var(--text3)';
-    if(s!==undefined){bg=scoreColor(s);tc='var(--bg)';}
-    html+=`<div class="cal-day" style="background:${bg};color:${tc}">${d}</div>`;
-  }
-  html+=`</div>`;
+ // calendar
+ const now=new Date();const y=now.getFullYear();const mo=now.getMonth();
+ const first=new Date(y,mo,1).getDay();const daysInMo=new Date(y,mo+1,0).getDate();
+ html+=`<div style="font-size:13px;font-weight:500;margin-bottom:.5rem">${now.toLocaleDateString([],{month:'long',year:'numeric'})}</div>`;
+ html+=`<div class="cal-grid">`;
+ ['S','M','T','W','T','F','S'].forEach(d=>html+=`<div class="cal-dow">${d}</div>`);
+ for(let i=0;i<first;i++)html+=`<div class="cal-day"></div>`;
+ for(let d=1;d<=daysInMo;d++){
+ const ds=`${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+ const isT=ds===today();
+ const s=scores[ds];
+ let bg=isT?'var(--pdim)':'var(--border)';let tc=isT?'#fff':'var(--text3)';
+ if(s!==undefined){bg=scoreColor(s);tc='var(--bg)';}
+ html+=`<div class="cal-day" style="background:${bg};color:${tc}">${d}</div>`;
+ }
+ html+=`</div>`;
 
-  // enzyme flags this week
-  const allFlags=last7.flatMap(d=>store[d]?.enzymeFlags||[]);
-  if(allFlags.length){
-    html+=`<div class="sec"><span class="sec-dot" style="background:var(--amber)"></span>Enzyme pattern (last 7 days)</div>`;
-    html+=`<div class="flag-summary"><div class="flag-title">🔔 Missed enzyme opportunities</div>`;
-    const unique=[...new Set(allFlags)];
-    unique.forEach(f=>html+=`<div class="flag-item">${f}</div>`);
-    html+=`</div>`;
-  }
+ // enzyme flags this week
+ const allFlags=last7.flatMap(d=>store[d]?.enzymeFlags||[]);
+ if(allFlags.length){
+ html+=`<div class="sec"><div class="sec-line"></div>Enzyme pattern (last 7 days)<div class="sec-line"></div></div>`;
+ html+=`<div class="flag-summary"><div class="flag-title"> Missed enzyme opportunities</div>`;
+ const unique=[...new Set(allFlags)];
+ unique.forEach(f=>html+=`<div class="flag-item">${f}</div>`);
+ html+=`</div>`;
+ }
 
-  // recent
-  html+=`<div class="sec"><span class="sec-dot" style="background:var(--purple)"></span>Recent days</div>`;
-  dates.slice(0,14).forEach(d=>{
-    const s=scores[d];
-    const lbl=d===today()?'Today':new Date(d+'T12:00:00').toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});
-    html+=`<div style="background:var(--card);border:0.5px solid var(--border);border-radius:8px;padding:9px 12px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center">
-      <div style="font-size:13px;color:var(--text2)">${lbl}</div>
-      <div style="font-family:var(--mono);font-size:12px;color:${scoreColor(s)}">${s}</div>
-    </div>`;
-  });
-  document.getElementById('pg-history').innerHTML=html;
+ // recent
+ html+=`<div class="sec"><div class="sec-line"></div>Recent days<div class="sec-line"></div></div>`;
+ dates.slice(0,14).forEach(d=>{
+ const s=scores[d];
+ const lbl=d===today()?'Today':new Date(d+'T12:00:00').toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});
+ html+=`<div style="background:var(--card);border:0.5px solid var(--border);border-radius:8px;padding:9px 12px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center">
+ <div style="font-size:13px;color:var(--text2)">${lbl}</div>
+ <div style="font-family:var(--mono);font-size:12px;color:${scoreColor(s)}">${s}</div>
+ </div>`;
+ });
+ document.getElementById('pg-history').innerHTML=html;
 }
 function calcStreak(sorted){
-  let n=0;const t=new Date(today());
-  for(let i=0;i<sorted.length;i++){const e=new Date(t);e.setDate(t.getDate()-i);if(sorted[i]===e.toISOString().slice(0,10))n++;else break;}
-  return n;
+ let n=0;const t=new Date(today());
+ for(let i=0;i<sorted.length;i++){const e=new Date(t);e.setDate(t.getDate()-i);if(sorted[i]===e.toISOString().slice(0,10))n++;else break;}
+ return n;
 }
 
-// ── BADGES ────────────────────────────────────────────────
+// BADGES 
 const BADGE_DEFS=[
-  {id:'first',icon:'🌱',name:'First Step',desc:'Log your first day'},
-  {id:'s80',icon:'⭐',name:'Great Day',desc:'Score 80+ in a day'},
-  {id:'s90',icon:'🌟',name:'Excellent Day',desc:'Score 90+ in a day'},
-  {id:'s100',icon:'💎',name:'Perfect Day',desc:'Hit 100 — flawless'},
-  {id:'str3',icon:'🔥',name:'3 Day Streak',desc:'3 days in a row'},
-  {id:'str7',icon:'🏆',name:'Week Warrior',desc:'7 days in a row'},
-  {id:'str30',icon:'👑',name:'Month Strong',desc:'30 days in a row'},
-  {id:'meds7',icon:'💊',name:'Med Perfect Week',desc:'All meds 7 days'},
-  {id:'walk7',icon:'🚶',name:'Walker',desc:'Walked after meals 7 days'},
-  {id:'sleep9_3',icon:'🌙',name:'Sleep Queen',desc:'9+ hours 3 nights in a row'},
-  {id:'ns7',icon:'🧠',name:'NS Flow Week',desc:'Full NS flow 7 days'},
-  {id:'clean',icon:'🌿',name:'Clean Day',desc:'No missed enzymes + low histamine'},
-  {id:'comeback',icon:'💪',name:'Comeback Kid',desc:'70+ after a sub-40 day'},
-  {id:'ci_5',icon:'👁',name:'Body Aware',desc:'5 check-ins in one day'},
-  {id:'enzyme_week',icon:'⚗️',name:'Enzyme Week',desc:'No missed enzyme flags for 7 days'},
+ {id:'first',icon:'',name:'First Step',desc:'Log your first day'},
+ {id:'s80',icon:'',name:'Great Day',desc:'Score 80+ in a day'},
+ {id:'s90',icon:'',name:'Excellent Day',desc:'Score 90+ in a day'},
+ {id:'s100',icon:'',name:'Perfect Day',desc:'Hit 100 flawless'},
+ {id:'str3',icon:'',name:'3 Day Streak',desc:'3 days in a row'},
+ {id:'str7',icon:'',name:'Week Warrior',desc:'7 days in a row'},
+ {id:'str30',icon:'',name:'Month Strong',desc:'30 days in a row'},
+ {id:'meds7',icon:'',name:'Med Perfect Week',desc:'All meds 7 days'},
+ {id:'walk7',icon:'',name:'Walker',desc:'Walked after meals 7 days'},
+ {id:'sleep9_3',icon:'',name:'Sleep Queen',desc:'9+ hours 3 nights in a row'},
+ {id:'ns7',icon:'',name:'NS Flow Week',desc:'Full NS flow 7 days'},
+ {id:'clean',icon:'',name:'Clean Day',desc:'No missed enzymes + low histamine'},
+ {id:'comeback',icon:'',name:'Comeback Kid',desc:'70+ after a sub-40 day'},
+ {id:'ci_5',icon:'',name:'Body Aware',desc:'5 check-ins in one day'},
+ {id:'enzyme_week',icon:'',name:'Enzyme Week',desc:'No missed enzyme flags for 7 days'},
 ];
 
 function checkBadges(){
-  const store=getStore();const food=getFood();const ci=getCI();
-  const earned=getBadges();
-  const dates=Object.keys(store).sort();
-  function earn(id){if(!earned.includes(id))earned.push(id);}
-  if(dates.length>0)earn('first');
-  dates.forEach(d=>{
-    const s=calcScore(d);
-    if(s>=80)earn('s80');if(s>=90)earn('s90');if(s>=100)earn('s100');
-    if((ci[d]||[]).length>=5)earn('ci_5');
-  });
-  const streak=calcStreak([...dates].reverse());
-  if(streak>=3)earn('str3');if(streak>=7)earn('str7');if(streak>=30)earn('str30');
-  const last7=dates.slice(-7);
-  const meds=['prop_am','prop_mid','prop_pm','prozac','mag'];
-  if(last7.length>=7&&last7.every(d=>meds.every(m=>store[d]?.checked?.[m])))earn('meds7');
-  const sleepScores=dates.filter(d=>getFlowData(d).sleep?.rawAnswers?.hours?.startsWith('9+'));
-  for(let i=0;i<=sleepScores.length-3;i++){if(sleepScores[i+1]&&sleepScores[i+2])earn('sleep9_3');}
-  const nsKeys=['ns_listen','ns_shake','ns_rhythm','ns_box','ns_hug'];
-  if(last7.length>=7&&last7.every(d=>nsKeys.every(k=>store[d]?.checked?.[k])))earn('ns7');
-  if(last7.length>=7&&last7.every(d=>!(store[d]?.enzymeFlags?.length>0)))earn('enzyme_week');
-  const sortedScores=dates.map(d=>({d,s:calcScore(d)}));
-  for(let i=1;i<sortedScores.length;i++){if(sortedScores[i-1].s<40&&sortedScores[i].s>=70){earn('comeback');break;}}
-  saveBadges(earned);
+ const store=getStore();const food=getFood();const ci=getCI();
+ const earned=getBadges();
+ const dates=Object.keys(store).sort();
+ function earn(id){if(!earned.includes(id))earned.push(id);}
+ if(dates.length>0)earn('first');
+ dates.forEach(d=>{
+ const s=calcScore(d);
+ if(s>=80)earn('s80');if(s>=90)earn('s90');if(s>=100)earn('s100');
+ if((ci[d]||[]).length>=5)earn('ci_5');
+ });
+ const streak=calcStreak([...dates].reverse());
+ if(streak>=3)earn('str3');if(streak>=7)earn('str7');if(streak>=30)earn('str30');
+ const last7=dates.slice(-7);
+ const meds=['prop_am','prop_mid','prop_pm','prozac','mag'];
+ if(last7.length>=7&&last7.every(d=>meds.every(m=>store[d]?.checked?.[m])))earn('meds7');
+ const sleepScores=dates.filter(d=>getFlowData(d).sleep?.rawAnswers?.hours?.startsWith('9+'));
+ for(let i=0;i<=sleepScores.length-3;i++){if(sleepScores[i+1]&&sleepScores[i+2])earn('sleep9_3');}
+ const nsKeys=['ns_listen','ns_shake','ns_rhythm','ns_box','ns_hug'];
+ if(last7.length>=7&&last7.every(d=>nsKeys.every(k=>store[d]?.checked?.[k])))earn('ns7');
+ if(last7.length>=7&&last7.every(d=>!(store[d]?.enzymeFlags?.length>0)))earn('enzyme_week');
+ const sortedScores=dates.map(d=>({d,s:calcScore(d)}));
+ for(let i=1;i<sortedScores.length;i++){if(sortedScores[i-1].s<40&&sortedScores[i].s>=70){earn('comeback');break;}}
+ saveBadges(earned);
 }
 const BB='sc6_badges';
 function getBadges(){try{return JSON.parse(localStorage.getItem(BB)||'[]')}catch(e){return[]}}
 function saveBadges(b){localStorage.setItem(BB,JSON.stringify(b));}
 function renderBadges(){
-  checkBadges();
-  const earned=getBadges();
-  let html=`<div style="font-size:18px;font-weight:500;margin-bottom:.25rem">Badges</div>
-  <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:1.25rem">${earned.length} of ${BADGE_DEFS.length} earned</div>
-  <div class="badge-grid">`;
-  BADGE_DEFS.forEach(b=>{
-    html+=`<div class="badge${earned.includes(b.id)?' earned':''}">
-      <div class="badge-icon">${b.icon}</div>
-      <div><div class="badge-name">${b.name}</div><div class="badge-desc">${b.desc}</div></div>
-    </div>`;
-  });
-  html+=`</div>`;
-  document.getElementById('pg-badges').innerHTML=html;
+ checkBadges();
+ const earned=getBadges();
+ let html=`<div style="font-size:18px;font-weight:500;margin-bottom:.25rem">Badges</div>
+ <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:1.25rem">${earned.length} of ${BADGE_DEFS.length} earned</div>
+ <div class="badge-grid">`;
+ BADGE_DEFS.forEach(b=>{
+ html+=`<div class="badge${earned.includes(b.id)?' earned':''}">
+ <div class="badge-icon">${b.icon}</div>
+ <div><div class="badge-name">${b.name}</div><div class="badge-desc">${b.desc}</div></div>
+ </div>`;
+ });
+ html+=`</div>`;
+ document.getElementById('pg-badges').innerHTML=html;
 }
 
-// ── SETTINGS ──────────────────────────────────────────────
+// SETTINGS 
 function renderSettings(){
-  const cfg=getCfg();
-  const allGroups=[
-    {label:'Last night tasks', items:Object.entries(cfg.tasks).filter(([,t])=>t.sec==='lastnight')},
-    {label:'Medications', items:Object.entries(cfg.tasks).filter(([,t])=>t.sec==='meds')},
-    {label:'Self care', items:Object.entries(cfg.tasks).filter(([,t])=>t.sec==='self')},
-    {label:'Social & wellbeing', items:Object.entries(cfg.tasks).filter(([,t])=>t.sec==='social')},
-    {label:'Nervous system', items:Object.entries(cfg.ns)},
-    {label:'Hobbies', items:Object.entries(cfg.hobbies)},
-    {label:'Movement', items:Object.entries(cfg.move)},
-  ];
-  const scaleItems=Object.entries(cfg.scales);
+ const cfg=getCfg();
+ const allGroups=[
+ {label:'Last night tasks', items:Object.entries(cfg.tasks).filter(([,t])=>t.sec==='lastnight')},
+ {label:'Medications', items:Object.entries(cfg.tasks).filter(([,t])=>t.sec==='meds')},
+ {label:'Self care', items:Object.entries(cfg.tasks).filter(([,t])=>t.sec==='self')},
+ {label:'Social & wellbeing', items:Object.entries(cfg.tasks).filter(([,t])=>t.sec==='social')},
+ {label:'Nervous system', items:Object.entries(cfg.ns)},
+ {label:'Hobbies', items:Object.entries(cfg.hobbies)},
+ {label:'Movement', items:Object.entries(cfg.move)},
+ ];
+ const scaleItems=Object.entries(cfg.scales);
 
-  let html=`<div style="font-size:18px;font-weight:500;margin-bottom:.25rem">Settings</div>
-  <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:1.25rem">Edit task names, point values, and active status</div>`;
+ let html=`<div style="font-size:18px;font-weight:500;margin-bottom:.25rem">Settings</div>
+ <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:1.25rem">Edit task names, point values, and active status</div>`;
 
-  allGroups.forEach(g=>{
-    html+=`<div class="settings-sec">${g.label}</div>`;
-    g.items.forEach(([id,t])=>{
-      const sign=t.pts>=0?'+':'';
-      html+=`<div class="setting-row">
-        <button class="s-toggle ${t.active?'on':''}" onclick="toggleActive('${id}')"></button>
-        <div class="setting-name" style="${!t.active?'opacity:.4':''}">
-          <input type="text" value="${t.name}" onchange="updateTaskName('${id}',this.value)" style="background:transparent;border:none;font-size:13px;color:var(--text2);font-family:var(--sans);width:100%;outline:none;padding:0"/>
-        </div>
-        <div class="setting-pts-wrap">
-          <button class="s-btn" onclick="adjustTask('${id}',-0.5)">−</button>
-          <div class="s-val ${t.pts>=0?'pos':'neg'}" id="sv-${id}">${sign}${t.pts}</div>
-          <button class="s-btn" onclick="adjustTask('${id}',0.5)">+</button>
-        </div>
-      </div>`;
-    });
-  });
+ allGroups.forEach(g=>{
+ html+=`<div class="settings-sec">${g.label}</div>`;
+ g.items.forEach(([id,t])=>{
+ const sign=t.pts>=0?'+':'';
+ html+=`<div class="setting-row">
+ <button class="s-toggle ${t.active?'on':''}" onclick="toggleActive('${id}')"></button>
+ <div class="setting-name" style="${!t.active?'opacity:.4':''}">
+ <input type="text" value="${t.name}" onchange="updateTaskName('${id}',this.value)" style="background:transparent;border:none;font-size:13px;color:var(--text2);font-family:var(--sans);width:100%;outline:none;padding:0"/>
+ </div>
+ <div class="setting-pts-wrap">
+ <button class="s-btn" onclick="adjustTask('${id}',-0.5)">−</button>
+ <div class="s-val ${t.pts>=0?'pos':'neg'}" id="sv-${id}">${sign}${t.pts}</div>
+ <button class="s-btn" onclick="adjustTask('${id}',0.5)">+</button>
+ </div>
+ </div>`;
+ });
+ });
 
-  html+=`<div class="settings-sec">Point scales (flows)</div>`;
-  const scaleLabels={
-    sleep_9plus:'Sleep 9+ hours',sleep_89:'Sleep 8-9 hrs',sleep_78:'Sleep 7-8 hrs',sleep_67:'Sleep 6-7 hrs',sleep_under6:'Sleep under 6 hrs',
-    meal_base:'Base meal points',meal_fresh_protein:'Fresh protein bonus',walk_after_meal:'Walk after meal',
-    dao_offset_high_hist:'High histamine with DAO (offset)',oxbile_offset_gallbladder:'Gallbladder trigger with ox bile (offset)',
-    gluten_no_dao:'Gluten without DAO',gluten_with_dao:'Gluten with DAO',
-    high_hist_no_dao:'High histamine without DAO',high_hist_with_dao:'High histamine with DAO',
-    gallbladder_no_ox:'Gallbladder trigger without ox bile',gallbladder_with_ox:'Gallbladder trigger with ox bile',
-    alcohol:'Alcohol',t1_walk:'Tier 1 outdoor walk',exercise_base:'Exercise base points',
-    weed_helped_sleep:'Weed — helped sleep',weed_neutral:'Weed — neutral',weed_disrupted:'Weed — disrupted sleep',
-    water_still:'Still water (per glass)',water_nuun:'NUUN',water_ginger_tea:'Ginger tea',water_peppermint:'Peppermint tea',water_chamomile:'Chamomile tea',water_sparkling:'Sparkling water',water_coffee_after:'Coffee (after food)',water_coffee_before:'Coffee (before food)',
-    ci_base:'Check-in base points',ci_per_q:'Check-in per question',
-  };
-  scaleItems.forEach(([id,val])=>{
-    if(!scaleLabels[id])return;
-    const sign=val>=0?'+':'';
-    html+=`<div class="setting-row">
-      <div class="setting-name">${scaleLabels[id]||id}</div>
-      <div class="setting-pts-wrap">
-        <button class="s-btn" onclick="adjustScale('${id}',-0.5)">−</button>
-        <div class="s-val ${val>=0?'pos':'neg'}" id="ss-${id}">${sign}${val}</div>
-        <button class="s-btn" onclick="adjustScale('${id}',0.5)">+</button>
-      </div>
-    </div>`;
-  });
+ html+=`<div class="settings-sec">Point scales (flows)</div>`;
+ const scaleLabels={
+ sleep_9plus:'Sleep 9+ hours',sleep_89:'Sleep 8-9 hrs',sleep_78:'Sleep 7-8 hrs',sleep_67:'Sleep 6-7 hrs',sleep_under6:'Sleep under 6 hrs',
+ meal_base:'Base meal points',meal_fresh_protein:'Fresh protein bonus',walk_after_meal:'Walk after meal',
+ dao_offset_high_hist:'High histamine with DAO (offset)',oxbile_offset_gallbladder:'Gallbladder trigger with ox bile (offset)',
+ gluten_no_dao:'Gluten without DAO',gluten_with_dao:'Gluten with DAO',
+ high_hist_no_dao:'High histamine without DAO',high_hist_with_dao:'High histamine with DAO',
+ gallbladder_no_ox:'Gallbladder trigger without ox bile',gallbladder_with_ox:'Gallbladder trigger with ox bile',
+ alcohol:'Alcohol',t1_walk:'Tier 1 outdoor walk',exercise_base:'Exercise base points',
+ weed_helped_sleep:'Weed helped sleep',weed_neutral:'Weed neutral',weed_disrupted:'Weed disrupted sleep',
+ water_still:'Still water (per glass)',water_nuun:'NUUN',water_ginger_tea:'Ginger tea',water_peppermint:'Peppermint tea',water_chamomile:'Chamomile tea',water_sparkling:'Sparkling water',water_coffee_after:'Coffee (after food)',water_coffee_before:'Coffee (before food)',
+ ci_base:'Check-in base points',ci_per_q:'Check-in per question',
+ };
+ scaleItems.forEach(([id,val])=>{
+ if(!scaleLabels[id])return;
+ const sign=val>=0?'+':'';
+ html+=`<div class="setting-row">
+ <div class="setting-name">${scaleLabels[id]||id}</div>
+ <div class="setting-pts-wrap">
+ <button class="s-btn" onclick="adjustScale('${id}',-0.5)">−</button>
+ <div class="s-val ${val>=0?'pos':'neg'}" id="ss-${id}">${sign}${val}</div>
+ <button class="s-btn" onclick="adjustScale('${id}',0.5)">+</button>
+ </div>
+ </div>`;
+ });
 
-  html+=`<div style="margin-top:1.5rem;display:flex;gap:8px">
-    <button onclick="resetCfg()" style="flex:1;padding:11px;background:var(--rbg);border:0.5px solid rgba(244,130,106,.3);border-radius:8px;color:var(--red);font-family:var(--mono);font-size:11px;cursor:pointer">Reset to defaults</button>
-    <button onclick="exportCfg()" style="flex:1;padding:11px;background:var(--pbg);border:0.5px solid rgba(196,184,248,.3);border-radius:8px;color:var(--purple);font-family:var(--mono);font-size:11px;cursor:pointer">Export config</button>
+ html+=`<div style="margin-top:1.5rem;display:flex;gap:8px">
+ <button onclick="resetCfg()" style="flex:1;padding:11px;background:rgba(180,70,60,.06);border:0.5px solid rgba(244,130,106,.3);border-radius:8px;color:var(--red);font-family:var(--mono);font-size:11px;cursor:pointer">Reset to defaults</button>
+ <button onclick="exportCfg()" style="flex:1;padding:11px;background:rgba(122,108,186,.08);border:0.5px solid rgba(196,184,248,.3);border-radius:8px;color:var(--purple);font-family:var(--mono);font-size:11px;cursor:pointer">Export config</button>
+ </div>`;
+
+ 
+  html+=`<div style="margin-top:.75rem">
+    <button onclick="signOut()" style="width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:8px;color:var(--text3);font-family:var(--mono);font-size:11px;cursor:pointer">Sign out</button>
   </div>`;
-
   document.getElementById('pg-settings').innerHTML=html;
 }
 
 function toggleActive(id){
-  const cfg=getCfg();
-  const all={...cfg.tasks,...cfg.ns,...cfg.hobbies,...cfg.move};
-  if(cfg.tasks[id])cfg.tasks[id].active=!cfg.tasks[id].active;
-  else if(cfg.ns[id])cfg.ns[id].active=!cfg.ns[id].active;
-  else if(cfg.hobbies[id])cfg.hobbies[id].active=!cfg.hobbies[id].active;
-  else if(cfg.move[id])cfg.move[id].active=!cfg.move[id].active;
-  saveCfg(cfg);renderSettings();
+ const cfg=getCfg();
+ const all={...cfg.tasks,...cfg.ns,...cfg.hobbies,...cfg.move};
+ if(cfg.tasks[id])cfg.tasks[id].active=!cfg.tasks[id].active;
+ else if(cfg.ns[id])cfg.ns[id].active=!cfg.ns[id].active;
+ else if(cfg.hobbies[id])cfg.hobbies[id].active=!cfg.hobbies[id].active;
+ else if(cfg.move[id])cfg.move[id].active=!cfg.move[id].active;
+ saveCfg(cfg);renderSettings();
 }
 function adjustTask(id,delta){
-  const cfg=getCfg();
-  const all=[cfg.tasks,cfg.ns,cfg.hobbies,cfg.move];
-  all.forEach(g=>{if(g[id])g[id].pts=Math.round((g[id].pts+delta)*10)/10;});
-  saveCfg(cfg);
-  const el=document.getElementById('sv-'+id);
-  if(el){const v=all.find(g=>g[id])?.[id]?.pts||0;el.textContent=(v>=0?'+':'')+v;}
+ const cfg=getCfg();
+ const all=[cfg.tasks,cfg.ns,cfg.hobbies,cfg.move];
+ all.forEach(g=>{if(g[id])g[id].pts=Math.round((g[id].pts+delta)*10)/10;});
+ saveCfg(cfg);
+ const el=document.getElementById('sv-'+id);
+ if(el){const v=all.find(g=>g[id])?.[id]?.pts||0;el.textContent=(v>=0?'+':'')+v;}
 }
 function adjustScale(id,delta){
-  const cfg=getCfg();
-  cfg.scales[id]=Math.round((cfg.scales[id]+delta)*10)/10;
-  saveCfg(cfg);
-  const el=document.getElementById('ss-'+id);
-  const v=cfg.scales[id];
-  if(el)el.textContent=(v>=0?'+':'')+v;
+ const cfg=getCfg();
+ cfg.scales[id]=Math.round((cfg.scales[id]+delta)*10)/10;
+ saveCfg(cfg);
+ const el=document.getElementById('ss-'+id);
+ const v=cfg.scales[id];
+ if(el)el.textContent=(v>=0?'+':'')+v;
 }
 function updateTaskName(id,val){
-  const cfg=getCfg();
-  [cfg.tasks,cfg.ns,cfg.hobbies,cfg.move].forEach(g=>{if(g[id])g[id].name=val;});
-  saveCfg(cfg);
+ const cfg=getCfg();
+ [cfg.tasks,cfg.ns,cfg.hobbies,cfg.move].forEach(g=>{if(g[id])g[id].name=val;});
+ saveCfg(cfg);
 }
 function resetCfg(){
-  if(!confirm('Reset all settings to defaults?'))return;
-  localStorage.removeItem(CFG);renderSettings();renderToday();
+ if(!confirm('Reset all settings to defaults?'))return;
+ localStorage.removeItem(CFG);renderSettings();renderToday();
 }
 function exportCfg(){
-  const blob=new Blob([JSON.stringify(getCfg(),null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='score_config.json';a.click();
+ const blob=new Blob([JSON.stringify(getCfg(),null,2)],{type:'application/json'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='score_config.json';a.click();
 }
 
-// ── NAV ───────────────────────────────────────────────────
+// NAV 
 function goPage(id){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('pg-'+id).classList.add('active');
-  document.querySelectorAll('.nav-btn')[['today','log','history','badges','settings'].indexOf(id)].classList.add('active');
-  window.scrollTo(0,0);
-  if(id==='today')renderToday();
-  else if(id==='log')renderLog();
-  else if(id==='history')renderHistory();
-  else if(id==='badges')renderBadges();
-  else if(id==='settings')renderSettings();
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+ document.getElementById('pg-'+id).classList.add('active');
+ document.querySelectorAll('.nav-btn')[['today','log','history','badges','settings','patterns'].indexOf(id)].classList.add('active');
+ window.scrollTo(0,0);
+ if(id==='today')renderToday();
+ else if(id==='log')renderLog();
+ else if(id==='history')renderHistory();
+ else if(id==='badges')renderBadges();
+ else if(id==='settings')renderSettings();
 }
-renderToday();
+// ── PATTERNS PAGE ─────────────────────────────────────────
+async function renderPatterns() {
+  const page = document.getElementById('pg-patterns');
+  page.innerHTML = `<div class="page-title">Patterns</div>
+    <div class="page-sub" style="margin-bottom:1.25rem">Loading your data...</div>
+    <div id="patterns-content"><div style="text-align:center;padding:3rem;font-family:var(--mono);font-size:12px;color:var(--text3)">Analysing...</div></div>`;
+
+  if (!_userId) {
+    document.getElementById('patterns-content').innerHTML =
+      '<div style="text-align:center;padding:2rem;font-family:var(--mono);font-size:12px;color:var(--text3)">Sign in to see patterns.</div>';
+    return;
+  }
+
+  const p = await loadPatterns();
+  const el = document.getElementById('patterns-content');
+  if (!p) { el.innerHTML = '<div style="font-family:var(--mono);font-size:12px;color:var(--text3);padding:1rem">Could not load pattern data.</div>'; return; }
+  if (p.insufficientData) { el.innerHTML = '<div style="font-family:var(--mono);font-size:12px;color:var(--text3);padding:1rem">Keep logging — patterns appear after 5+ days of data.</div>'; return; }
+
+  let html = '';
+
+  // Trend
+  if (p.trend) {
+    const tColor = p.trend.delta >= 0 ? 'var(--leaf)' : '#b84640';
+    const tSign = p.trend.delta >= 0 ? '+' : '';
+    html += `<div class="stat-card" style="margin-bottom:.75rem">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem">7-day trend</div>
+      <div style="display:flex;align-items:baseline;gap:12px">
+        <div style="font-family:var(--serif);font-size:32px;font-weight:600;color:var(--text)">${p.trend.current}</div>
+        <div style="font-family:var(--mono);font-size:14px;color:${tColor}">${tSign}${p.trend.delta} vs prev week</div>
+      </div>
+    </div>`;
+  }
+
+  // Day of week
+  if (p.byDayOfWeek?.length) {
+    html += `<div class="sec"><div class="sec-line"></div>Score by day of week<div class="sec-line"></div></div>`;
+    html += `<div class="chart-wrap">
+      <div style="display:flex;gap:6px;align-items:flex-end;height:72px;margin-bottom:5px">`;
+    p.byDayOfWeek.forEach(d => {
+      const h = d.avg ? Math.max(4, Math.round((d.avg/100)*68)) : 4;
+      const c = d.avg ? scoreColor(d.avg) : 'var(--cream3)';
+      html += `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+        <div style="width:100%;border-radius:4px 4px 0 0;height:${h}px;background:${c}"></div>
+        <div style="font-size:9px;font-family:var(--mono);color:var(--text3)">${d.day}</div>
+      </div>`;
+    });
+    html += `</div>`;
+    if (p.bestDay?.avg && p.worstDay?.avg) {
+      html += `<div style="display:flex;gap:1rem;margin-top:.5rem">
+        <div style="font-size:12px;color:var(--text2)">Best: <span style="color:var(--leaf);font-weight:500">${p.bestDay.day} (${p.bestDay.avg})</span></div>
+        <div style="font-size:12px;color:var(--text2)">Lowest: <span style="color:#b84640;font-weight:500">${p.worstDay.day} (${p.worstDay.avg})</span></div>
+      </div>`;
+    }
+    html += `</div>`;
+  }
+
+  // Sleep impact
+  if (p.sleepImpact?.length) {
+    html += `<div class="sec"><div class="sec-line"></div>Sleep vs score<div class="sec-line"></div></div>`;
+    html += `<div style="display:flex;flex-direction:column;gap:6px">`;
+    p.sleepImpact.forEach(s => {
+      const pct = Math.round((s.avg/100)*100);
+      html += `<div style="background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:10px 12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          <div style="font-size:13px;color:var(--text2)">${s.hours}h sleep</div>
+          <div style="font-family:var(--mono);font-size:12px;color:${scoreColor(s.avg)}">${s.avg} avg</div>
+        </div>
+        <div style="height:3px;background:var(--cream3);border-radius:99px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${scoreColor(s.avg)};border-radius:99px"></div>
+        </div>
+        <div style="font-size:10px;font-family:var(--mono);color:var(--text3);margin-top:3px">${s.n} nights</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Top symptoms
+  if (p.topSymptoms?.length) {
+    html += `<div class="sec"><div class="sec-line"></div>Most reported symptoms<div class="sec-line"></div></div>`;
+    html += `<div style="display:flex;flex-direction:column;gap:5px">`;
+    p.topSymptoms.forEach(s => {
+      const peakHour = s.peakHour ? (parseInt(s.peakHour) < 12 ? s.peakHour+'am' : (parseInt(s.peakHour)-12)+'pm') : null;
+      html += `<div style="background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:9px 12px;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:13px;color:var(--text2);text-transform:capitalize">${s.label}</div>
+        <div style="text-align:right">
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text)">${s.count}x</div>
+          ${peakHour ? `<div style="font-size:10px;font-family:var(--mono);color:var(--text3)">peaks ${peakHour}</div>` : ''}
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Enzyme compliance
+  if (p.enzymeCompliance) {
+    const ec = p.enzymeCompliance;
+    html += `<div class="sec"><div class="sec-line"></div>Enzyme discipline<div class="sec-line"></div></div>`;
+    html += `<div class="stat-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+        <div style="font-size:13px;color:var(--text2)">${ec.cleanDays} of ${ec.totalDays} days — no missed enzymes</div>
+        <div style="font-family:var(--mono);font-size:14px;color:${ec.rate>=80?'var(--leaf)':'var(--gold)'}">${ec.rate}%</div>
+      </div>
+      <div style="height:4px;background:var(--cream3);border-radius:99px;overflow:hidden">
+        <div style="height:100%;width:${ec.rate}%;background:${ec.rate>=80?'var(--leaf)':'var(--gold)'};border-radius:99px"></div>
+      </div>
+    </div>`;
+  }
+
+  // Reaction triggers
+  if (p.reactionDays > 0) {
+    html += `<div class="sec"><div class="sec-line"></div>Reactions<div class="sec-line"></div></div>`;
+    html += `<div class="stat-card">
+      <div style="font-size:13px;color:var(--text2)">${p.reactionDays} reaction episode${p.reactionDays!==1?'s':''} logged</div>
+      ${p.topTrigger ? `<div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:4px">Most common trigger: ${p.topTrigger[0].replace(/_/g,' ')} (${p.topTrigger[1]}x)</div>` : ''}
+    </div>`;
+  }
+
+  el.innerHTML = html;
+  // Update page subtitle
+  page.querySelector('.page-sub').textContent = 'Based on your last ' + (p.byDayOfWeek?.length || '') + ' logged days';
+}
+
+// ── SUPABASE BACKEND ──────────────────────────────────────
+const SUPA_URL = 'https://jdxtlxpvimjvcfrmeeap.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkeHRseHB2aW1qdmNmcm1lZWFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MjI3MjMsImV4cCI6MjA5NDE5ODcyM30.bM2UrDjohZMAPubrLQWFIr39pkh0vYlhz1KQPmAzDsI';
+
+// Auth state
+let _session = null;
+let _userId = null;
+let _syncQueue = [];
+let _syncTimer = null;
+
+// ── AUTH ──────────────────────────────────────────────────
+async function supaFetch(path, opts={}) {
+  const headers = {
+    'apikey': SUPA_KEY,
+    'Content-Type': 'application/json',
+    ...opts.headers
+  };
+  if (_session) headers['Authorization'] = 'Bearer ' + _session.access_token;
+  const res = await fetch(SUPA_URL + path, { ...opts, headers });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || err.error_description || res.status);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function sendMagicLink(email) {
+  const res = await fetch(SUPA_URL + '/auth/v1/otp', {
+    method: 'POST',
+    headers: { 'apikey': SUPA_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, create_user: true })
+  });
+  if (!res.ok) throw new Error('Could not send magic link');
+  return true;
+}
+
+async function getSession() {
+  // Check URL for magic link token
+  const hash = window.location.hash;
+  if (hash.includes('access_token')) {
+    const params = new URLSearchParams(hash.slice(1));
+    const access_token = params.get('access_token');
+    const refresh_token = params.get('refresh_token');
+    if (access_token) {
+      _session = { access_token, refresh_token };
+      // Get user
+      const user = await supaFetch('/auth/v1/user');
+      _userId = user.id;
+      localStorage.setItem('sc_session', JSON.stringify(_session));
+      localStorage.setItem('sc_user_id', _userId);
+      window.history.replaceState(null, '', window.location.pathname);
+      return true;
+    }
+  }
+  // Check stored session
+  const stored = localStorage.getItem('sc_session');
+  const storedUid = localStorage.getItem('sc_user_id');
+  if (stored && storedUid) {
+    try {
+      _session = JSON.parse(stored);
+      _userId = storedUid;
+      // Verify session still valid
+      const user = await supaFetch('/auth/v1/user');
+      _userId = user.id;
+      return true;
+    } catch(e) {
+      // Session expired - refresh
+      try {
+        const refreshed = await fetch(SUPA_URL + '/auth/v1/token?grant_type=refresh_token', {
+          method: 'POST',
+          headers: { 'apikey': SUPA_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh_token: _session.refresh_token })
+        });
+        if (refreshed.ok) {
+          const data = await refreshed.json();
+          _session = { access_token: data.access_token, refresh_token: data.refresh_token };
+          _userId = data.user.id;
+          localStorage.setItem('sc_session', JSON.stringify(_session));
+          localStorage.setItem('sc_user_id', _userId);
+          return true;
+        }
+      } catch(e2) {}
+      localStorage.removeItem('sc_session');
+      localStorage.removeItem('sc_user_id');
+      _session = null; _userId = null;
+    }
+  }
+  return false;
+}
+
+function signOut() {
+  localStorage.removeItem('sc_session');
+  localStorage.removeItem('sc_user_id');
+  _session = null; _userId = null;
+  showAuthScreen();
+}
+
+// ── SYNC ──────────────────────────────────────────────────
+async function syncDayToSupabase(date) {
+  if (!_userId) return;
+  const checked = getChecked(date);
+  const flows = getFlowData(date);
+  const store = getStore()[date] || {};
+  const drinks = store.drinks || [];
+  const enzymeFlags = store.enzymeFlags || [];
+  const score = calcScore(date);
+
+  try {
+    await supaFetch('/rest/v1/daily_scores', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({
+        user_id: _userId,
+        date,
+        score,
+        checked_tasks: checked,
+        flows,
+        drinks,
+        enzyme_flags: enzymeFlags,
+        ci_pts: store.ciPts || 0,
+        updated_at: new Date().toISOString()
+      })
+    });
+  } catch(e) {
+    console.warn('Sync failed:', e.message);
+  }
+}
+
+async function syncFoodEntry(date, entry) {
+  if (!_userId) return;
+  try {
+    await supaFetch('/rest/v1/food_entries', {
+      method: 'POST',
+      body: JSON.stringify({
+        user_id: _userId,
+        date,
+        name: entry.name,
+        pts: entry.pts,
+        meal_type: entry.type || 'meal',
+        flags: entry.flags || [],
+        raw_answers: entry.rawAnswers || {}
+      })
+    });
+  } catch(e) {
+    console.warn('Food sync failed:', e.message);
+  }
+}
+
+async function syncCheckin(date, entry) {
+  if (!_userId) return;
+  try {
+    await supaFetch('/rest/v1/checkins', {
+      method: 'POST',
+      body: JSON.stringify({
+        user_id: _userId,
+        date,
+        time: entry.time,
+        answers: entry.answers,
+        actions_completed: entry.actionsCompleted || [],
+        pts: entry.pts,
+        reaction_alert: !!entry.reactionAlert
+      })
+    });
+  } catch(e) {
+    console.warn('Checkin sync failed:', e.message);
+  }
+}
+
+// Debounced day sync - batches rapid changes
+function scheduleDaySync(date) {
+  if (_syncTimer) clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(() => syncDayToSupabase(date), 1500);
+}
+
+// ── LOAD FROM SUPABASE ────────────────────────────────────
+async function loadFromSupabase() {
+  if (!_userId) return;
+  try {
+    // Load last 30 days of scores
+    const scores = await supaFetch(
+      '/rest/v1/daily_scores?user_id=eq.' + _userId +
+      '&order=date.desc&limit=30',
+      { headers: { 'Range': '0-29' } }
+    );
+    if (scores && scores.length) {
+      const store = getStore();
+      scores.forEach(row => {
+        store[row.date] = {
+          checked: row.checked_tasks || {},
+          flows: row.flows || {},
+          drinks: row.drinks || [],
+          enzymeFlags: row.enzyme_flags || [],
+          ciPts: row.ci_pts || 0
+        };
+      });
+      saveStore(store);
+    }
+
+    // Load food entries for last 30 days
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 30);
+    const foods = await supaFetch(
+      '/rest/v1/food_entries?user_id=eq.' + _userId +
+      '&logged_at=gte.' + cutoff.toISOString() +
+      '&order=logged_at.desc'
+    );
+    if (foods && foods.length) {
+      const foodStore = getFood();
+      foods.forEach(row => {
+        if (!foodStore[row.date]) foodStore[row.date] = [];
+        // Only add if not already present
+        const exists = foodStore[row.date].some(e => 
+          e.name === row.name && e.time === row.logged_at?.slice(11,16)
+        );
+        if (!exists) {
+          foodStore[row.date].push({
+            name: row.name,
+            pts: row.pts,
+            type: row.meal_type,
+            flags: row.flags || [],
+            rawAnswers: row.raw_answers || {},
+            time: row.logged_at?.slice(11,16)
+          });
+        }
+      });
+      saveFood(foodStore);
+    }
+
+    // Load checkins
+    const cis = await supaFetch(
+      '/rest/v1/checkins?user_id=eq.' + _userId +
+      '&logged_at=gte.' + cutoff.toISOString() +
+      '&order=logged_at.desc'
+    );
+    if (cis && cis.length) {
+      const ciStore = getCI();
+      cis.forEach(row => {
+        if (!ciStore[row.date]) ciStore[row.date] = [];
+        const exists = ciStore[row.date].some(e => e.time === row.time);
+        if (!exists) {
+          ciStore[row.date].push({
+            time: row.time,
+            answers: row.answers,
+            actionsCompleted: row.actions_completed || [],
+            pts: row.pts
+          });
+        }
+      });
+      saveCI(ciStore);
+    }
+  } catch(e) {
+    console.warn('Load from Supabase failed:', e.message);
+  }
+}
+
+// ── PATTERN RECOGNITION ───────────────────────────────────
+async function loadPatterns() {
+  if (!_userId) return null;
+  try {
+    // Last 60 days of data
+    const scores = await supaFetch(
+      '/rest/v1/daily_scores?user_id=eq.' + _userId +
+      '&order=date.desc&limit=60'
+    );
+    const foods = await supaFetch(
+      '/rest/v1/food_entries?user_id=eq.' + _userId +
+      '&order=logged_at.desc&limit=500'
+    );
+    const cis = await supaFetch(
+      '/rest/v1/checkins?user_id=eq.' + _userId +
+      '&order=logged_at.desc&limit=1000'
+    );
+
+    if (!scores || scores.length < 5) return { insufficientData: true };
+
+    const patterns = {};
+
+    // 1. Average score by day of week
+    const byDow = {0:[],1:[],2:[],3:[],4:[],5:[],6:[]};
+    scores.forEach(r => {
+      const dow = new Date(r.date + 'T12:00:00').getDay();
+      byDow[dow].push(r.score);
+    });
+    const dowLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    patterns.byDayOfWeek = Object.entries(byDow)
+      .map(([d,arr]) => ({ day: dowLabels[d], avg: arr.length ? Math.round(arr.reduce((a,b)=>a+b,0)/arr.length) : null, n: arr.length }))
+      .filter(d => d.n >= 2);
+    patterns.bestDay = patterns.byDayOfWeek.reduce((a,b) => (b.avg||0)>(a.avg||0)?b:a, {avg:0});
+    patterns.worstDay = patterns.byDayOfWeek.reduce((a,b) => (b.avg||100)<(a.avg||100)?b:a, {avg:100});
+
+    // 2. Sleep correlation
+    const sleepData = scores.filter(r => r.flows?.sleep?.rawAnswers?.hours).map(r => ({
+      hours: r.flows.sleep.rawAnswers.hours,
+      score: r.score
+    }));
+    if (sleepData.length >= 5) {
+      const sleepGroups = {};
+      sleepData.forEach(d => {
+        const key = d.hours.split(' ')[0];
+        if (!sleepGroups[key]) sleepGroups[key] = [];
+        sleepGroups[key].push(d.score);
+      });
+      patterns.sleepImpact = Object.entries(sleepGroups).map(([h,arr]) => ({
+        hours: h, avg: Math.round(arr.reduce((a,b)=>a+b,0)/arr.length), n: arr.length
+      })).filter(d => d.n >= 2).sort((a,b) => b.avg-a.avg);
+    }
+
+    // 3. Most common checkin symptoms
+    if (cis && cis.length) {
+      const symCount = {};
+      const symByHour = {};
+      cis.forEach(ci => {
+        const h = parseInt(ci.time?.split(':')[0] || '0');
+        Object.entries(ci.answers || {}).forEach(([sym, val]) => {
+          if (val === true) {
+            symCount[sym] = (symCount[sym]||0) + 1;
+            if (!symByHour[sym]) symByHour[sym] = {};
+            symByHour[sym][h] = (symByHour[sym][h]||0) + 1;
+          }
+        });
+      });
+      patterns.topSymptoms = Object.entries(symCount)
+        .sort((a,b) => b[1]-a[1]).slice(0,5)
+        .map(([id, count]) => ({
+          id,
+          count,
+          label: id.replace('_',' '),
+          peakHour: Object.entries(symByHour[id]||{}).sort((a,b)=>b[1]-a[1])[0]?.[0]
+        }));
+    }
+
+    // 4. Enzyme flag pattern
+    const flagDays = scores.filter(r => r.enzyme_flags?.length > 0).length;
+    patterns.enzymeCompliance = {
+      totalDays: scores.length,
+      flagDays,
+      cleanDays: scores.length - flagDays,
+      rate: Math.round(((scores.length - flagDays) / scores.length) * 100)
+    };
+
+    // 5. Score trend (last 7 vs previous 7)
+    const last7 = scores.slice(0,7).map(r => r.score);
+    const prev7 = scores.slice(7,14).map(r => r.score);
+    if (last7.length >= 4 && prev7.length >= 4) {
+      const avg7 = Math.round(last7.reduce((a,b)=>a+b,0)/last7.length);
+      const avgPrev = Math.round(prev7.reduce((a,b)=>a+b,0)/prev7.length);
+      patterns.trend = { current: avg7, previous: avgPrev, delta: avg7 - avgPrev };
+    }
+
+    // 6. Food triggers — days with reaction entries
+    if (foods) {
+      const reactionDays = [...new Set(
+        foods.filter(f => f.meal_type === 'reaction').map(f => f.date)
+      )];
+      patterns.reactionDays = reactionDays.length;
+      // Most common trigger from reaction raw_answers
+      const triggerCount = {};
+      foods.filter(f => f.meal_type === 'reaction').forEach(f => {
+        const t = f.raw_answers?.trigger;
+        if (t) triggerCount[t] = (triggerCount[t]||0) + 1;
+      });
+      patterns.topTrigger = Object.entries(triggerCount).sort((a,b)=>b[1]-a[1])[0];
+    }
+
+    return patterns;
+  } catch(e) {
+    console.warn('Pattern load failed:', e.message);
+    return null;
+  }
+}
+
+// ── AUTH UI ────────────────────────────────────────────────
+function showAuthScreen() {
+  const aw = document.getElementById('app-wrap');
+  const as = document.getElementById('auth-screen');
+  if(aw) aw.style.display = 'none';
+  if(as) as.style.display = 'flex';
+}
+function showApp() {
+  const aw = document.getElementById('app-wrap');
+  const as = document.getElementById('auth-screen');
+  if(aw) aw.style.display = 'block';
+  if(as) as.style.display = 'none';
+}
+
+async function handleMagicLinkSubmit() {
+  const email = document.getElementById('auth-email').value.trim();
+  if (!email) return;
+  const btn = document.getElementById('auth-btn');
+  const msg = document.getElementById('auth-msg');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  try {
+    await sendMagicLink(email);
+    msg.textContent = 'Check your email for a sign-in link.';
+    msg.style.color = 'var(--leaf)';
+    btn.textContent = 'Link sent';
+  } catch(e) {
+    msg.textContent = 'Error: ' + e.message;
+    msg.style.color = '#b84640';
+    btn.disabled = false;
+    btn.textContent = 'Send link';
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────
+async function initApp() {
+  try {
+    const loggedIn = await getSession();
+    if (loggedIn) {
+      showApp();
+      try { await loadFromSupabase(); } catch(e) { console.warn('Load failed:', e); }
+      renderToday();
+      patchSaveFunctions();
+    } else {
+      showAuthScreen();
+    }
+  } catch(e) {
+    console.error('initApp error:', e);
+    showAuthScreen();
+  }
+}
+
+function patchSaveFunctions() {
+  const _origSaveChecked = saveChecked;
+  window.saveChecked = function(date, c) {
+    _origSaveChecked(date, c);
+    scheduleDaySync(date);
+  };
+  const _origSaveFlowData = saveFlowData;
+  window.saveFlowData = function(date, f) {
+    _origSaveFlowData(date, f);
+    scheduleDaySync(date);
+  };
+  const _origSaveFoodEntries = saveFoodEntries;
+  window.saveFoodEntries = function(date, entries) {
+    _origSaveFoodEntries(date, entries);
+    scheduleDaySync(date);
+    // Sync latest entry
+    const latest = entries[entries.length-1];
+    if (latest) syncFoodEntry(date, latest);
+  };
+  const _origSaveCIEntry = saveCIEntry;
+  window.saveCIEntry = function(date, entry) {
+    _origSaveCIEntry(date, entry);
+    syncCheckin(date, entry);
+    scheduleDaySync(date);
+  };
+}
+
+initApp();
 </script>
+</div>
 </body>
 </html>
